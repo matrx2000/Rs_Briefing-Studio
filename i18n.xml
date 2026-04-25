@@ -43,6 +43,30 @@
   <string key="ui.printpdf">
     <en>Print / PDF</en><de>Drucken / PDF</de><it>Stampa / PDF</it><hr>Ispis / PDF</hr>
   </string>
+  <string key="ui.exportmd">
+    <en>Export .md</en><de>.md exportieren</de><it>Esporta .md</it><hr>Izvezi .md</hr>
+  </string>
+  <string key="ui.exportmode">
+    <en>Export mode</en><de>Exportmodus</de><it>Modalità di esportazione</it><hr>Način izvoza</hr>
+  </string>
+  <string key="ui.mode.print">
+    <en>Print</en><de>Druck</de><it>Stampa</it><hr>Ispis</hr>
+  </string>
+  <string key="ui.mode.markdown">
+    <en>Markdown</en><de>Markdown</de><it>Markdown</it><hr>Markdown</hr>
+  </string>
+  <string key="ui.md.hint">
+    <en>Wiki-flavoured Markdown · paste into a wiki page that supports macros.</en>
+    <de>Wiki-Markdown · in eine Wiki-Seite mit Makro-Unterstützung einfügen.</de>
+    <it>Markdown per wiki · incolla in una pagina wiki che supporta le macro.</it>
+    <hr>Markdown za wiki · zalijepi u wiki stranicu koja podržava makronaredbe.</hr>
+  </string>
+  <string key="ui.md.stripImages">
+    <en>Strip embedded images</en><de>Eingebettete Bilder entfernen</de><it>Rimuovi immagini incorporate</it><hr>Ukloni ugrađene slike</hr>
+  </string>
+  <string key="ui.md.copy">
+    <en>Copy</en><de>Kopieren</de><it>Copia</it><hr>Kopiraj</hr>
+  </string>
   <string key="ui.template">
     <en>Template</en><de>Vorlage</de><it>Modello</it><hr>Predložak</hr>
   </string>

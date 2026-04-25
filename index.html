@@ -111,8 +111,11 @@
 <div id="aboutModal" class="about-backdrop" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="about-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <button class="about-close" onclick="document.getElementById('aboutModal').classList.remove('show')" aria-label="Close">×</button>
-    <h2 id="aboutTitle">About R's Briefing Studio</h2>
+    <h2 id="aboutTitle">About R's Briefing Studio <span style="font-size: 12px; font-weight: 500; color: var(--ink-soft); letter-spacing: 0.04em; padding: 2px 8px; border: 1px solid var(--hair); border-radius: 999px; vertical-align: middle; margin-left: 6px;">v1.1.0</span></h2>
     <p>R's Briefing Studio turns proposals into beautifully designed, two-page briefings. The output is built to be read in 90 seconds (page 1) with full context available on demand (page 2).</p>
+
+    <h3>What's new in v1.1.0</h3>
+    <p><strong>Markdown export mode.</strong> Both editors now have a <em>Print / Markdown</em> toggle in the chrome. In Markdown mode, the preview pane swaps from the A4 sheets to a rendered wiki-style view, and the primary button becomes <strong>Export .md</strong>. The output is a single <code>.md</code> file using the standard wiki macro set: info / note / warning panels, expand/collapse blocks, table of contents, status badges, and tables for two-column layouts (pros vs. cons, metric vs. visual, cost &amp; value, trade-offs, risks). Drop it into any wiki page that supports those macros.</p>
 
     <h3>Why it exists</h3>
     <p><strong>This app is not here to add another document to your pile.</strong> It exists to make the way you communicate ideas, issues, and opportunities <em>clearer</em> — by formalizing a format that breaks each one into small, digestible chunks. The result is a single shared artefact you and your teammates can sync on in minutes, without ambiguity, instead of trading long Word docs or sitting through forty-slide decks.</p>
@@ -123,7 +126,7 @@
     <p><strong>Engineering Reporting</strong> — for technical reviewers. Proposal, effort, what changes, cost &amp; value, trade-offs, risks, open questions, the ask.</p>
 
     <h3>How it works</h3>
-    <p>Fill the structured form on the left. The right pane updates live. Export the result as a PDF (A4 or A3 portrait), or save the project as a JSON file (image included as base64) to keep working on it later.</p>
+    <p>Fill the structured form on the left. The right pane updates live. Export the result as a PDF (A4 or A3 portrait), as wiki-flavoured Markdown, or save the project as a JSON file (image included as base64) to keep working on it later.</p>
 
     <h3 data-i18n="about.overflowTitle">If text overflows, that&rsquo;s a feature</h3>
     <p data-i18n="about.overflowBody">The app never truncates or auto-shrinks. Spillover is the app telling you the idea isn&rsquo;t tight enough yet — cut adjectives, pick the one number that matters, and edit until everything fits on two pages.</p>

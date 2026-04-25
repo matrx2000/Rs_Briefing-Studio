@@ -6,6 +6,26 @@ A small offline web app that turns proposals into beautifully designed, two-page
 
 ---
 
+## What's new — v1.1.0
+
+**Markdown export mode.** Both editors now ship with a *Print / Markdown* toggle in the chrome.
+
+- **Print mode** (default) — unchanged. The right pane shows the two A4/A3 pages and the primary button prints to PDF.
+- **Markdown mode** — the right pane swaps to a rendered wiki-style preview, and the primary button becomes **Export .md**.
+
+The exported `.md` file is wiki-flavoured Markdown built around the standard macro set most company wikis support:
+
+- **Info / note / warning panels** for the bottom line, the ask, and high-severity risks
+- **Expand / collapse** wraps the page-2 context section
+- **Table of contents** macro at the top
+- **Inline status badges** for confidentiality, decision deadlines, evidence (M / E / G), risk severity, cost-vs-value
+- **Tables** for every two-column layout — pros vs. cons, metric vs. visual, cost &amp; value, trade-offs, dependencies, alternatives, stakeholders, timeline (with `[████░░░░░░] 40%` ASCII progress bars)
+- **Task-list checkboxes** for engineering open questions
+
+Markdown mode also offers a *Strip embedded images* toggle for when base64 image data would exceed your wiki's paste limits, and a *Copy* button alongside *Export .md*.
+
+---
+
 ## Why this exists
 
 **This app is not here to add another document to your pile.** It is the opposite of that. The point is to *replace* sprawling Word docs and forty-slide decks with one clear, two-page packet of digestible chunks — a shared canvas you and your teammates can sync on quickly, without ambiguity.
@@ -88,6 +108,14 @@ For best PDF fidelity:
 - Choose **Save as PDF** in the print dialog.
 - Under *More settings*, enable **Background graphics** (so the colored tile accents render).
 - Margins: **None** (the layout already includes its own margins).
+
+### Export to Markdown (wiki-flavoured)
+
+Switch the **Print / Markdown** toggle in the chrome to *Markdown*. The right pane swaps to a rendered preview that shows panels, expand blocks, status badges, tables, and the table of contents the way a wiki would render them. Click **Export .md** to download the file, or **Copy** to put the markdown on your clipboard.
+
+The output uses fenced macro blocks (e.g. ` ```panel:info `, ` ```expand `, ` ```toc `) plus inline `!status:color:text!` tokens. Most major company wikis recognise these macros; on viewers that don't, the content still renders as standard Markdown inside a code fence — nothing is lost, it just falls back to plain.
+
+If your wiki rejects long base64 image data on paste, tick **Strip embedded images** before exporting and re-upload the image manually after the page is created.
 
 ### What's in localStorage
 

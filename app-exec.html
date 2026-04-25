@@ -256,6 +256,72 @@
   .modal-card .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
   .modal-warn { background: rgba(180,83,9,0.08); color: var(--accent-amber); border: 1px solid rgba(180,83,9,0.25); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
 
+  /* Markdown / wiki preview */
+  .md-preview-stage { padding: 24px 36px 60px; max-width: 980px; margin: 0 auto; color: var(--ink); }
+  .md-preview-stage .md-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; padding: 10px 14px; background: #fff; border: 1px solid var(--hair); border-radius: 12px; }
+  .md-preview-stage .md-toolbar .md-toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .md-preview-stage .md-toolbar .md-hint { font-size: 11px; color: var(--ink-soft); }
+  .md-preview-stage .md-toolbar label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink); cursor: pointer; }
+  .md-preview-stage .md-rendered { background: #fff; border: 1px solid var(--hair); border-radius: 12px; padding: 28px 32px; font-size: 13.5px; line-height: 1.55; }
+  .md-preview-stage .md-rendered h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .md-preview-stage .md-rendered h2 { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--hair); }
+  .md-preview-stage .md-rendered h3 { font-size: 15px; font-weight: 600; margin: 18px 0 6px; }
+  .md-preview-stage .md-rendered h4 { font-size: 13.5px; font-weight: 600; margin: 14px 0 4px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.08em; }
+  .md-preview-stage .md-rendered p { margin: 0 0 10px; }
+  .md-preview-stage .md-rendered ul, .md-preview-stage .md-rendered ol { margin: 0 0 12px; padding-left: 22px; }
+  .md-preview-stage .md-rendered li { margin: 2px 0; }
+  .md-preview-stage .md-rendered li > input[type="checkbox"] { margin-right: 6px; }
+  .md-preview-stage .md-rendered table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 13px; }
+  .md-preview-stage .md-rendered th, .md-preview-stage .md-rendered td { border: 1px solid var(--hair); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .md-preview-stage .md-rendered th { background: var(--paper-tint); font-weight: 600; }
+  .md-preview-stage .md-rendered code { background: var(--paper-tint); padding: 1px 5px; border-radius: 4px; font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 12.5px; }
+  .md-preview-stage .md-rendered pre { background: var(--paper-tint); padding: 10px 12px; border-radius: 8px; overflow-x: auto; font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 12px; margin: 0 0 12px; }
+  .md-preview-stage .md-rendered blockquote { border-left: 3px solid var(--hair); padding: 4px 12px; color: var(--ink-soft); margin: 0 0 12px; font-style: italic; }
+  .md-preview-stage .md-rendered hr { border: none; border-top: 1px solid var(--hair); margin: 18px 0; }
+  .md-preview-stage .md-rendered a { color: var(--mode-accent); text-decoration: underline; text-underline-offset: 2px; }
+  .md-preview-stage .md-rendered img { max-width: 100%; border-radius: 8px; }
+  /* Wiki macro renders — info / note / warning / success / tip panels */
+  .md-panel { border-radius: 10px; padding: 12px 14px 12px 44px; margin: 0 0 14px; position: relative; line-height: 1.5; }
+  .md-panel::before { position: absolute; left: 14px; top: 12px; width: 20px; height: 20px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: #fff; }
+  .md-panel.info { background: #eaf2ff; border: 1px solid #b9d3ff; color: #0b3b8c; }
+  .md-panel.info::before { content: 'i'; background: #1d4ed8; }
+  .md-panel.note { background: #f3eaff; border: 1px solid #d6bdfa; color: #4a1d96; }
+  .md-panel.note::before { content: '✎'; background: #6d28d9; font-size: 11px; }
+  .md-panel.warning { background: #fff4e5; border: 1px solid #fcd9a8; color: #7a3d00; }
+  .md-panel.warning::before { content: '!'; background: #b45309; }
+  .md-panel.success, .md-panel.tip { background: #e7f7ee; border: 1px solid #b6e3c5; color: #065f2b; }
+  .md-panel.success::before, .md-panel.tip::before { content: '✓'; background: #16a34a; }
+  .md-panel.error { background: #fdecec; border: 1px solid #f6c0c0; color: #8a1414; }
+  .md-panel.error::before { content: '!'; background: #dc2626; }
+  .md-panel-title { font-weight: 600; margin-bottom: 4px; }
+  .md-panel p:last-child, .md-panel ul:last-child { margin-bottom: 0; }
+  /* Status badges (inline pills) */
+  .md-status { display: inline-flex; align-items: center; padding: 1px 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 4px; vertical-align: middle; margin: 0 2px; }
+  .md-status.grey  { background: #e5e5e7; color: #3a3a3e; }
+  .md-status.blue  { background: #dbeafe; color: #1e40af; }
+  .md-status.green { background: #dcfce7; color: #14532d; }
+  .md-status.red   { background: #fee2e2; color: #991b1b; }
+  .md-status.yellow{ background: #fef3c7; color: #854d0e; }
+  .md-status.purple{ background: #ede9fe; color: #5b21b6; }
+  /* Expand / collapse */
+  .md-expand { border: 1px solid var(--hair); border-radius: 10px; margin: 0 0 14px; background: #fff; }
+  .md-expand > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; list-style: none; display: flex; align-items: center; gap: 8px; }
+  .md-expand > summary::-webkit-details-marker { display: none; }
+  .md-expand > summary::before { content: '▶'; font-size: 10px; color: var(--ink-soft); transition: transform .15s; }
+  .md-expand[open] > summary::before { transform: rotate(90deg); }
+  .md-expand-body { padding: 4px 16px 12px; border-top: 1px solid var(--hair); }
+  /* TOC macro render */
+  .md-toc { background: var(--paper-tint); border: 1px solid var(--hair); border-radius: 10px; padding: 10px 14px; margin: 0 0 14px; }
+  .md-toc-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); font-weight: 600; margin-bottom: 4px; }
+  .md-toc ul { margin: 0; padding-left: 20px; }
+  /* Layout columns */
+  .md-columns { display: grid; gap: 14px; margin: 0 0 14px; }
+  .md-columns.cols-2 { grid-template-columns: 1fr 1fr; }
+  .md-columns.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .md-column { min-width: 0; }
+  /* Metadata table */
+  .md-rendered table.md-meta th { width: 32%; }
+
   /* Form scrollbar nicety */
   .form-pane::-webkit-scrollbar { width: 8px; }
   .form-pane::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
@@ -340,7 +406,11 @@
       <button class="btn btn-ghost !py-1 !px-3" @click="editorMode = editorMode === 'dark' ? 'light' : 'dark'" :title="`Editor: ${editorMode}`">
         <span x-text="editorMode === 'dark' ? (window.I18N ? window.I18N.t('ui.darkmode') : '☾ Dark') : (window.I18N ? window.I18N.t('ui.lightmode') : '☀ Light')"></span>
       </button>
-      <div class="toggle-pill ml-2" title="Paper size">
+      <div class="toggle-pill ml-2" :title="window.I18N ? window.I18N.t('ui.exportmode') : 'Export mode'">
+        <button class="toggle-btn" :class="exportMode==='print' ? 'active' : ''" @click="exportMode='print'" data-i18n="ui.mode.print">Print</button>
+        <button class="toggle-btn" :class="exportMode==='markdown' ? 'active' : ''" @click="exportMode='markdown'" data-i18n="ui.mode.markdown">Markdown</button>
+      </div>
+      <div class="toggle-pill ml-2" title="Paper size" x-show="exportMode==='print'">
         <button class="toggle-btn" :class="paperSize==='A4' ? 'active' : ''" @click="paperSize='A4'">A4</button>
         <button class="toggle-btn" :class="paperSize==='A3' ? 'active' : ''" @click="paperSize='A3'">A3</button>
       </div>
@@ -350,7 +420,8 @@
         <span data-i18n="ui.loadproject">Load Project</span>
         <input type="file" accept="application/json" class="hidden" @change="importJson($event)">
       </label>
-      <button class="btn btn-primary ml-1" @click="window.print()" data-i18n="ui.printpdf">Print / PDF</button>
+      <button class="btn btn-primary ml-1" x-show="exportMode==='print'" @click="window.print()" data-i18n="ui.printpdf">Print / PDF</button>
+      <button class="btn btn-primary ml-1" x-show="exportMode==='markdown'" @click="exportMarkdown()" data-i18n="ui.exportmd">Export .md</button>
     </div>
   </div>
 </div>
@@ -578,7 +649,7 @@
   <div class="splitter" @mousedown="startResize($event)" title="Drag to resize"></div>
 
   <main class="preview-pane flex-1 min-w-0 overflow-auto">
-    <div class="preview-stage">
+    <div class="preview-stage" x-show="exportMode==='print'">
 
       <!-- PAGE 1 -->
       <div class="preview-frame" :style="`transform: scale(${zoom})`">
@@ -813,6 +884,21 @@
       </div>
 
     </div>
+
+    <!-- Markdown preview -->
+    <div class="md-preview-stage" x-show="exportMode==='markdown'" x-cloak>
+      <div class="md-toolbar">
+        <div class="md-toolbar-left">
+          <span class="md-hint" data-i18n="ui.md.hint">Wiki-flavoured Markdown · paste into a wiki page that supports macros.</span>
+        </div>
+        <div class="md-toolbar-left">
+          <label><input type="checkbox" x-model="mdStripImages"> <span data-i18n="ui.md.stripImages">Strip embedded images</span></label>
+          <button class="btn btn-ghost" @click="copyMarkdown()" data-i18n="ui.md.copy">Copy</button>
+        </div>
+      </div>
+      <div class="md-rendered" x-html="renderedMarkdown"></div>
+    </div>
+
   </main>
 
 </div>
@@ -837,6 +923,9 @@ function briefingApp() {
     templateId: 'bento-light',
     editorMode: 'dark',
     paperSize: 'A3',
+    exportMode: 'print',
+    mdStripImages: false,
+    renderedMarkdown: '',
     uiScale: 100,
     page: 1,
     zoom: 0.78,
@@ -875,6 +964,8 @@ function briefingApp() {
       if (em === 'light' || em === 'dark') this.editorMode = em;
       const ps = localStorage.getItem('briefing-paper-size');
       if (ps === 'A4' || ps === 'A3') this.paperSize = ps;
+      const xm = localStorage.getItem('briefing-export-mode');
+      if (xm === 'print' || xm === 'markdown') this.exportMode = xm;
       const us = parseInt(localStorage.getItem('briefing-ui-scale'), 10);
       if (!isNaN(us) && us >= 80 && us <= 200) this.uiScale = us;
       const fw = parseInt(localStorage.getItem('briefing-form-width'), 10);
@@ -888,6 +979,10 @@ function briefingApp() {
       this.$watch('editorMode', v => localStorage.setItem('briefing-editor-mode', v));
       this.$watch('paperSize', v => { localStorage.setItem('briefing-paper-size', v); this.applyPageSize(); this.fitZoom(); });
       this.$watch('uiScale', v => { localStorage.setItem('briefing-ui-scale', v); this.applyUiScale(); });
+      this.$watch('exportMode', v => { localStorage.setItem('briefing-export-mode', v); this.refreshMarkdown(); });
+      this.$watch('mdStripImages', () => this.refreshMarkdown());
+      this.$watch('data', () => this.refreshMarkdown(), { deep: true });
+      this.refreshMarkdown();
       this.initClearButtons();
       const initLangPicker = () => {
         const sel = document.getElementById('lang-picker');
@@ -1093,8 +1188,354 @@ function briefingApp() {
       };
       r.readAsDataURL(f);
       e.target.value = '';
+    },
+
+    refreshMarkdown() {
+      try {
+        const md = this.buildMarkdown();
+        this.renderedMarkdown = renderWikiMarkdown(md);
+      } catch (e) { this.renderedMarkdown = '<p style="color:#b45309">Could not render preview: ' + (e && e.message || e) + '</p>'; }
+    },
+
+    buildMarkdown() {
+      const d = this.data;
+      const esc = mdEscape;
+      const lines = [];
+      const titleLine = (d.meta.subtitle ? esc(d.meta.subtitle) + ' ' : '') + esc(d.meta.title || 'Briefing');
+      lines.push('# ' + titleLine.trim());
+      const badges = [];
+      if (d.meta.confidential) badges.push(statusInline('red', 'Confidential'));
+      if (d.meta.decisionBy) badges.push(statusInline('yellow', 'Decision by ' + this.formatDate(d.meta.decisionBy)));
+      badges.push(statusInline('grey', 'Read · ' + this.page1ReadTime() + ' sec'));
+      if (badges.length) lines.push(badges.join(' '));
+      lines.push('');
+      lines.push('| | |');
+      lines.push('|---|---|');
+      lines.push('| **Audience** | ' + esc(d.meta.audience || '—') + ' |');
+      lines.push('| **Prepared by** | ' + esc(d.meta.authorName || '—') + ' |');
+      if (d.meta.companyName) lines.push('| **Company** | ' + esc(d.meta.companyName) + ' |');
+      lines.push('| **Date** | ' + esc(this.formatDate(d.meta.date)) + ' |');
+      if (d.meta.decisionBy) lines.push('| **Decision by** | ' + esc(this.formatDate(d.meta.decisionBy)) + ' |');
+      lines.push('');
+      lines.push('```toc');
+      lines.push('Contents');
+      lines.push('```');
+      lines.push('');
+      lines.push('```panel:info');
+      lines.push('title: ' + (d.bluf.eyebrow || 'The bottom line'));
+      lines.push('');
+      lines.push('**' + esc(d.bluf.headline || '') + '**');
+      if (d.bluf.supporting) { lines.push(''); lines.push(esc(d.bluf.supporting)); }
+      lines.push('```');
+      lines.push('');
+      lines.push('## ' + (d.metric.label || 'Headline metric'));
+      lines.push('');
+      const metricBig = '**' + esc(String(d.metric.value || '') + (d.metric.unit ? ' ' + d.metric.unit : '')) + '**';
+      let metricImgCell;
+      if (d.metric.image && !this.mdStripImages) metricImgCell = '![' + esc(d.metric.label || 'metric image') + '](' + d.metric.image + ')';
+      else if (d.metric.image) metricImgCell = '_(image stripped — re-upload via the wiki page editor)_';
+      else metricImgCell = '_(no image)_';
+      lines.push('| Metric | Visual |');
+      lines.push('|---|---|');
+      lines.push('| ' + metricBig + '<br>' + esc(d.metric.caption || '') + ' | ' + metricImgCell + ' |');
+      lines.push('');
+      if (d.commentary && (d.commentary.p1 || d.commentary.p2)) {
+        lines.push('## ' + esc(d.commentary.heading || 'Commentary'));
+        if (d.commentary.p1) { lines.push(''); lines.push(esc(d.commentary.p1)); }
+        if (d.commentary.p2) { lines.push(''); lines.push(esc(d.commentary.p2)); }
+        lines.push('');
+      }
+      lines.push('## The crucial details — 5 Ws + H');
+      lines.push('');
+      lines.push('| | |');
+      lines.push('|---|---|');
+      const wmap = { what: 'What', why: 'Why', who: 'Who', when: 'When', where: 'Where', how: 'How' };
+      Object.keys(wmap).forEach(k => {
+        lines.push('| **' + wmap[k] + '** | ' + esc(d.fiveWsH[k] || '—') + ' |');
+      });
+      lines.push('');
+      lines.push('## Pros & cons');
+      lines.push('');
+      const prosArr = (d.pros || []).slice();
+      const consArr = (d.cons || []).slice();
+      const rowsN = Math.max(prosArr.length, consArr.length);
+      lines.push('| ' + statusInline('green', 'Pros') + ' upside | ' + statusInline('yellow', 'Cons') + ' risks |');
+      lines.push('|---|---|');
+      for (let r = 0; r < rowsN; r++) {
+        const p = prosArr[r] ? '✓ ' + esc(prosArr[r]) : '';
+        const c = consArr[r] ? '✗ ' + esc(consArr[r]) : '';
+        lines.push('| ' + p + ' | ' + c + ' |');
+      }
+      lines.push('');
+      lines.push('## Timeline');
+      lines.push('');
+      lines.push('| Phase | Title | Progress | Description |');
+      lines.push('|---|---|---|---|');
+      (d.timeline.phases || []).forEach(p => {
+        const bar = progressBar(p.progress || 0);
+        lines.push('| ' + esc(p.label || '') + ' | **' + esc(p.title || '') + '** | `' + bar + '` ' + (p.progress || 0) + '% | ' + esc(p.description || '') + ' |');
+      });
+      lines.push('');
+      lines.push('```panel:note');
+      lines.push('title: ' + (d.cta.eyebrow || 'The ask'));
+      lines.push('');
+      lines.push('**' + esc(d.cta.headline || '') + '**');
+      if (d.cta.buttonText) { lines.push(''); lines.push(statusInline('purple', d.cta.buttonText)); }
+      lines.push('```');
+      lines.push('');
+      lines.push('```expand');
+      lines.push('title: Context & background — page 2');
+      lines.push('');
+      const c = d.context;
+      lines.push('### Background & history');
+      lines.push(esc(c.background || ''));
+      lines.push('');
+      lines.push('### Problem statement');
+      lines.push(esc(c.problem || ''));
+      lines.push('');
+      lines.push('### Stakeholders');
+      lines.push('');
+      lines.push('| Name | Role |');
+      lines.push('|---|---|');
+      (c.stakeholders || []).forEach(s => lines.push('| **' + esc(s.name || '') + '** | ' + esc(s.role || '') + ' |'));
+      lines.push('');
+      lines.push('### Detailed considerations');
+      (c.considerations || []).forEach(s => lines.push('- ' + esc(s)));
+      lines.push('');
+      lines.push('### Alternatives considered');
+      lines.push('');
+      lines.push('| Option | Reason |');
+      lines.push('|---|---|');
+      (c.alternatives || []).forEach(a => lines.push('| **' + esc(a.option || '') + '** | ' + esc(a.reason || '') + ' |'));
+      lines.push('');
+      lines.push('### Risks & mitigations');
+      (c.risks || []).forEach(r => {
+        lines.push('');
+        lines.push('```panel:warning');
+        lines.push('title: ' + (r.risk || 'Risk'));
+        lines.push('');
+        lines.push(esc(r.mitigation || ''));
+        lines.push('```');
+      });
+      lines.push('');
+      lines.push('### Supporting data');
+      lines.push(esc(c.supportingData || ''));
+      lines.push('```');
+      lines.push('');
+      lines.push('---');
+      const footerBits = [
+        'Prepared by **' + esc(d.meta.authorName || '—') + '**',
+        'For **' + esc(d.meta.audience || '—') + '**'
+      ];
+      if (d.meta.companyName) footerBits.push(esc(d.meta.companyName));
+      footerBits.push('_One page. One decision. Ninety seconds._');
+      lines.push(footerBits.join(' · '));
+      return lines.join('\n');
+    },
+
+    exportMarkdown() {
+      const md = this.buildMarkdown();
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'exec-' + (this.data.meta.title || 'briefing').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.md';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+
+    copyMarkdown() {
+      const md = this.buildMarkdown();
+      const done = () => { this.saveStatus = 'Copied'; clearTimeout(this._t); this._t = setTimeout(() => this.saveStatus = '', 1200); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(md).then(done, () => { fallbackCopy(md); done(); });
+      } else { fallbackCopy(md); done(); }
     }
   };
+}
+
+function mdEscape(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+}
+
+function statusInline(color, text) {
+  return '`!status:' + color + ':' + String(text).replace(/`/g, '') + '!`';
+}
+
+function progressBar(pct) {
+  const p = Math.max(0, Math.min(100, parseInt(pct, 10) || 0));
+  const filled = Math.round(p / 10);
+  return '['.padEnd(0) + '█'.repeat(filled) + '░'.repeat(10 - filled) + ']';
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+}
+
+/**
+ * Minimal wiki-flavoured markdown renderer.
+ * Handles: headings, paragraphs, lists (incl. task lists), tables, hr,
+ * blockquotes, bold/italic/code/links, plus our macro fences:
+ *   ```panel:info|note|warning|success|tip|error
+ *   ```expand
+ *   ```toc
+ *   ```layout:cols-2|cols-3   with `--- column ---` separators
+ * and inline `!status:color:text!` badges.
+ */
+function renderWikiMarkdown(src) {
+  const escHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const lines = src.split(/\r?\n/);
+  let out = [];
+  let i = 0;
+  function inline(s) {
+    let t = escHtml(s);
+    t = t.replace(/&lt;br\s*\/?&gt;/gi, '<br>');
+    t = t.replace(/`!status:(grey|blue|green|red|yellow|purple):([^!`]*)!`/g, (_, c, txt) => '<span class="md-status ' + c + '">' + txt + '</span>');
+    t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => '<img alt="' + alt + '" src="' + src + '">');
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+    t = t.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+    return t;
+  }
+  function parseBlock(stop) {
+    const buf = [];
+    while (i < lines.length) {
+      if (stop && stop(lines[i], i)) break;
+      const line = lines[i];
+      if (/^```/.test(line)) {
+        const m = line.match(/^```([a-zA-Z0-9:_-]*)\s*$/);
+        const tag = m ? m[1] : '';
+        i++;
+        if (/^panel:(info|note|warning|success|tip|error)$/.test(tag)) {
+          const variant = tag.split(':')[1];
+          const inner = []; let title = '';
+          while (i < lines.length && !/^```\s*$/.test(lines[i])) {
+            const tm = lines[i].match(/^title:\s*(.*)$/);
+            if (tm && !title && inner.length === 0) { title = tm[1]; }
+            else { inner.push(lines[i]); }
+            i++;
+          }
+          if (i < lines.length) i++;
+          const innerHtml = renderWikiMarkdown(inner.join('\n').replace(/^\n+/, ''));
+          buf.push('<div class="md-panel ' + variant + '">' + (title ? '<div class="md-panel-title">' + escHtml(title) + '</div>' : '') + innerHtml + '</div>');
+          continue;
+        }
+        if (tag === 'expand') {
+          const inner = []; let title = 'Details';
+          while (i < lines.length && !/^```\s*$/.test(lines[i])) {
+            const tm = lines[i].match(/^title:\s*(.*)$/);
+            if (tm && inner.length === 0) { title = tm[1]; }
+            else { inner.push(lines[i]); }
+            i++;
+          }
+          if (i < lines.length) i++;
+          const innerHtml = renderWikiMarkdown(inner.join('\n').replace(/^\n+/, ''));
+          buf.push('<details class="md-expand"><summary>' + escHtml(title) + '</summary><div class="md-expand-body">' + innerHtml + '</div></details>');
+          continue;
+        }
+        if (tag === 'toc') {
+          let title = 'Contents';
+          while (i < lines.length && !/^```\s*$/.test(lines[i])) {
+            if (lines[i].trim()) title = lines[i].trim();
+            i++;
+          }
+          if (i < lines.length) i++;
+          const items = [];
+          lines.forEach(L => { const hm = L.match(/^(#{2,3})\s+(.*)$/); if (hm) items.push({ depth: hm[1].length, text: hm[2] }); });
+          const ul = items.map(it => '<li style="margin-left:' + ((it.depth - 2) * 14) + 'px">' + escHtml(it.text) + '</li>').join('');
+          buf.push('<div class="md-toc"><div class="md-toc-title">' + escHtml(title) + '</div><ul>' + ul + '</ul></div>');
+          continue;
+        }
+        if (/^layout:cols-(2|3)$/.test(tag)) {
+          const cols = parseInt(tag.split('-')[1], 10);
+          const segments = [[]];
+          while (i < lines.length && !/^```\s*$/.test(lines[i])) {
+            if (/^---\s*column\s*---\s*$/.test(lines[i])) { segments.push([]); }
+            else { segments[segments.length - 1].push(lines[i]); }
+            i++;
+          }
+          if (i < lines.length) i++;
+          const cells = segments.map(seg => '<div class="md-column">' + renderWikiMarkdown(seg.join('\n').replace(/^\n+/, '')) + '</div>').join('');
+          buf.push('<div class="md-columns cols-' + cols + '">' + cells + '</div>');
+          continue;
+        }
+        // Generic code fence
+        const code = [];
+        while (i < lines.length && !/^```\s*$/.test(lines[i])) { code.push(lines[i]); i++; }
+        if (i < lines.length) i++;
+        buf.push('<pre><code>' + escHtml(code.join('\n')) + '</code></pre>');
+        continue;
+      }
+      // Heading
+      const hm = line.match(/^(#{1,6})\s+(.*)$/);
+      if (hm) { buf.push('<h' + hm[1].length + '>' + inline(hm[2]) + '</h' + hm[1].length + '>'); i++; continue; }
+      // HR
+      if (/^---+\s*$/.test(line)) { buf.push('<hr>'); i++; continue; }
+      // Blockquote
+      if (/^>\s?/.test(line)) {
+        const bq = [];
+        while (i < lines.length && /^>\s?/.test(lines[i])) { bq.push(lines[i].replace(/^>\s?/, '')); i++; }
+        buf.push('<blockquote>' + inline(bq.join(' ')) + '</blockquote>');
+        continue;
+      }
+      // Table
+      if (/^\|.*\|\s*$/.test(line) && i + 1 < lines.length && /^\|[\s:|-]+\|\s*$/.test(lines[i + 1])) {
+        const headerCells = line.split('|').slice(1, -1).map(s => s.trim());
+        i += 2;
+        const rows = [];
+        while (i < lines.length && /^\|.*\|\s*$/.test(lines[i])) {
+          rows.push(lines[i].split('|').slice(1, -1).map(s => s.trim()));
+          i++;
+        }
+        const allEmpty = headerCells.every(c => !c);
+        let html = '<table' + (rows[0] && rows[0].length === 2 ? ' class="md-meta"' : '') + '>';
+        if (!allEmpty) html += '<thead><tr>' + headerCells.map(c => '<th>' + inline(c) + '</th>').join('') + '</tr></thead>';
+        html += '<tbody>' + rows.map(r => '<tr>' + r.map(c => '<td>' + inline(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+        buf.push(html);
+        continue;
+      }
+      // Lists
+      if (/^[-*]\s+/.test(line)) {
+        const items = [];
+        while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
+          const raw = lines[i].replace(/^[-*]\s+/, '');
+          const tm = raw.match(/^\[( |x|X)\]\s+(.*)$/);
+          if (tm) {
+            items.push('<li><input type="checkbox" disabled' + (tm[1].toLowerCase() === 'x' ? ' checked' : '') + '> ' + inline(tm[2]) + '</li>');
+          } else {
+            items.push('<li>' + inline(raw) + '</li>');
+          }
+          i++;
+        }
+        buf.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+      if (/^\d+\.\s+/.test(line)) {
+        const items = [];
+        while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+          items.push('<li>' + inline(lines[i].replace(/^\d+\.\s+/, '')) + '</li>');
+          i++;
+        }
+        buf.push('<ol>' + items.join('') + '</ol>');
+        continue;
+      }
+      // Blank
+      if (!line.trim()) { i++; continue; }
+      // Paragraph
+      const para = [line]; i++;
+      while (i < lines.length && lines[i].trim() && !/^(#{1,6}\s|[-*]\s|\d+\.\s|>\s|\|.*\|\s*$|---+\s*$|```)/.test(lines[i])) {
+        para.push(lines[i]); i++;
+      }
+      buf.push('<p>' + inline(para.join(' ')) + '</p>');
+    }
+    return buf.join('\n');
+  }
+  return parseBlock(null);
 }
 
 function sampleData() {
