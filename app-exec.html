@@ -158,6 +158,14 @@
   .metric-stack.horizontal .tile.metric { flex: 0 0 50%; }
   .metric-stack.horizontal .tile.metric-image { flex: 1 1 50%; min-height: 50mm; }
   .bento:has(> .metric-stack.horizontal) .tile.bluf { grid-column: span 6; }
+
+  /* Vertical + image: image moves out to a full-width tile below bluf+metric so it can be shown completely.
+     Height is driven by --img-h (set inline from data.metric.imageScale, in mm) so the user can shrink big images. */
+  .tile.metric-image-full { grid-column: span 12; height: var(--img-h, 95mm); min-height: 0; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
+  .tile.metric-image-full img { display: block; max-width: 100%; max-height: 100%; }
+  .tile.metric-image-full.fit-cover  img { width: 100%; height: 100%; object-fit: contain; }
+  .tile.metric-image-full.fit-width  img { width: 100%; height: auto; }
+  .tile.metric-image-full.fit-height img { width: auto; height: 100%; }
   .tile.commentary { grid-column: 1 / -1; }
   .tile.commentary .commentary-body { display: flex; flex-direction: column; gap: 2mm; }
   .tile.fivew { grid-column: 1 / -1; }
@@ -516,6 +524,13 @@
             <option value="height">Fit by height — full height, may show whitespace</option>
           </select>
         </div>
+        <div class="field-row col-span-2" x-show="data.metric.image && exportMode==='print' && data.metric.orientation !== 'horizontal'">
+          <label class="app-label flex justify-between items-center">
+            <span>Image height <span class="text-[var(--ink-soft)] font-normal">· vertical mode only</span></span>
+            <span class="text-[var(--ink-soft)] font-normal tnum"><span x-text="data.metric.imageScale || 95"></span> mm</span>
+          </label>
+          <input type="range" min="40" max="160" step="5" class="app-input !p-0" x-model.number="data.metric.imageScale">
+        </div>
         <p class="text-[10.5px] text-[var(--ink-soft)] col-span-2 mt-1" x-show="data.metric.image && exportMode==='markdown'" x-cloak>
           <em>Image position &amp; fit are PDF-layout settings — not applicable in Markdown mode.</em>
         </p>
@@ -688,7 +703,7 @@
               </article>
 
               <!-- 2. Metric -->
-              <div class="metric-stack" :class="[data.metric.image ? 'has-image' : '', data.metric.image && data.metric.orientation === 'horizontal' ? 'horizontal' : '']">
+              <div class="metric-stack" :class="[data.metric.image && data.metric.orientation === 'horizontal' ? 'has-image' : '', data.metric.image && data.metric.orientation === 'horizontal' ? 'horizontal' : '']">
                 <article class="tile metric tile-metric tinted">
                   <p class="eyebrow text-[var(--ink-soft)]" x-text="data.metric.label"></p>
                   <div>
@@ -698,10 +713,15 @@
                     <p class="text-[9pt] text-[var(--ink-soft)] mt-2" x-text="data.metric.caption"></p>
                   </div>
                 </article>
-                <article class="tile metric-image" :class="`fit-${data.metric.imageFit || 'cover'}`" x-show="data.metric.image">
+                <article class="tile metric-image" :class="`fit-${data.metric.imageFit || 'cover'}`" x-show="data.metric.image && data.metric.orientation === 'horizontal'">
                   <img :src="data.metric.image" alt="">
                 </article>
               </div>
+
+              <!-- Vertical mode: image rendered full-width below bluf+metric so it can be shown completely -->
+              <article class="tile metric-image-full" :class="`fit-${data.metric.imageFit || 'cover'}`" :style="`--img-h:${data.metric.imageScale || 95}mm`" x-show="data.metric.image && data.metric.orientation !== 'horizontal'">
+                <img :src="data.metric.image" alt="">
+              </article>
 
               <!-- 2b. Commentary -->
               <article class="tile commentary" x-show="data.commentary && (data.commentary.p1 || data.commentary.p2)">
@@ -1563,7 +1583,7 @@ function sampleData() {
     metric: {
       label: 'Payback', value: '11', unit: 'months', caption: 'Break-even on the €240k investment',
       image: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><rect width="400" height="260" fill="#fdf6e3"/><circle cx="200" cy="130" r="78" fill="#c08648"/><circle cx="200" cy="130" r="78" fill="none" stroke="#7a4d22" stroke-width="3"/><circle cx="170" cy="105" r="8" fill="#3a2410"/><circle cx="225" cy="118" r="6" fill="#3a2410"/><circle cx="190" cy="150" r="9" fill="#3a2410"/><circle cx="222" cy="158" r="5" fill="#3a2410"/><circle cx="155" cy="138" r="6" fill="#3a2410"/><circle cx="210" cy="92" r="5" fill="#3a2410"/><text x="200" y="232" font-family="Geist, sans-serif" font-size="22" font-weight="600" fill="#3a2410" text-anchor="middle" letter-spacing="2">COOKIE&#160;CO.</text><text x="200" y="248" font-family="Geist, sans-serif" font-size="9" fill="#7a4d22" text-anchor="middle" letter-spacing="3">EST. 2012</text></svg>`),
-      orientation: 'horizontal', imageFit: 'cover'
+      orientation: 'horizontal', imageFit: 'cover', imageScale: 95
     },
     commentary: {
       heading: 'Why now',

@@ -149,6 +149,14 @@
   .effort-stack.horizontal .tile.effort { flex: 0 0 50%; }
   .effort-stack.horizontal .tile.effort-image { flex: 1 1 50%; min-height: 50mm; }
   .bento:has(> .effort-stack.horizontal) .tile.proposal { grid-column: span 6; }
+
+  /* Vertical + image: image moves out to a full-width tile below proposal/effort.
+     Height is driven by --img-h (set inline from data.effort.imageScale, in mm) so the user can shrink big images. */
+  .tile.effort-image-full { grid-column: span 12; height: var(--img-h, 95mm); min-height: 0; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
+  .tile.effort-image-full img { display: block; max-width: 100%; max-height: 100%; }
+  .tile.effort-image-full.fit-cover  img { width: 100%; height: 100%; object-fit: contain; }
+  .tile.effort-image-full.fit-width  img { width: 100%; height: auto; }
+  .tile.effort-image-full.fit-height img { width: auto; height: 100%; }
   .tile.changes { grid-column: span 7; }
   .tile.costvalue { grid-column: span 5; border-left: 3mm solid var(--accent-green); }
   .tile.tradeoffs { grid-column: span 6; }
@@ -505,6 +513,13 @@
             <option value="height">Fit by height — full height</option>
           </select>
         </div>
+        <div class="field-row col-span-2" x-show="data.effort.image && exportMode==='print' && data.effort.orientation !== 'horizontal'">
+          <label class="app-label flex justify-between items-center">
+            <span>Image height <span class="text-[var(--ink-soft)] font-normal">· vertical mode only</span></span>
+            <span class="text-[var(--ink-soft)] font-normal tnum"><span x-text="data.effort.imageScale || 95"></span> mm</span>
+          </label>
+          <input type="range" min="40" max="160" step="5" class="app-input !p-0" x-model.number="data.effort.imageScale">
+        </div>
         <p class="text-[10.5px] text-[var(--ink-soft)] col-span-2 mt-1" x-show="data.effort.image && exportMode==='markdown'" x-cloak>
           <em>Image position &amp; fit are PDF-layout settings — not applicable in Markdown mode.</em>
         </p>
@@ -701,7 +716,7 @@
                 </div>
               </article>
 
-              <div class="effort-stack" :class="[data.effort.image ? 'has-image' : '', data.effort.image && data.effort.orientation === 'horizontal' ? 'horizontal' : '']">
+              <div class="effort-stack" :class="[data.effort.image && data.effort.orientation === 'horizontal' ? 'has-image' : '', data.effort.image && data.effort.orientation === 'horizontal' ? 'horizontal' : '']">
                 <article class="tile effort">
                   <div class="flex items-center justify-between">
                     <p class="eyebrow text-[var(--ink-soft)]">Effort</p>
@@ -714,10 +729,15 @@
                     <p class="text-[9pt] text-[var(--ink-soft)] mt-2" x-text="data.effort.caption"></p>
                   </div>
                 </article>
-                <article class="tile effort-image" :class="`fit-${data.effort.imageFit || 'cover'}`" x-show="data.effort.image">
+                <article class="tile effort-image" :class="`fit-${data.effort.imageFit || 'cover'}`" x-show="data.effort.image && data.effort.orientation === 'horizontal'">
                   <img :src="data.effort.image" alt="">
                 </article>
               </div>
+
+              <!-- Vertical mode: image rendered full-width below proposal+effort so it can be shown completely -->
+              <article class="tile effort-image-full" :class="`fit-${data.effort.imageFit || 'cover'}`" :style="`--img-h:${data.effort.imageScale || 95}mm`" x-show="data.effort.image && data.effort.orientation !== 'horizontal'">
+                <img :src="data.effort.image" alt="">
+              </article>
 
               <!-- Changes -->
               <article class="tile changes">
@@ -1575,7 +1595,7 @@ function sampleData() {
     effort: {
       value: '8', unit: 'weeks', caption: '1 controls eng + 0.5 ops eng', evidence: 'estimated',
       image: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><rect width="400" height="260" fill="#f5f5f7"/><polygon points="140,30 260,30 240,80 160,80" fill="#1d1d1f"/><rect x="160" y="80" width="80" height="40" fill="#1d1d1f"/><rect x="155" y="120" width="90" height="22" rx="3" fill="#3b82f6"/><text x="200" y="135" font-family="Geist, sans-serif" font-size="10" font-weight="600" fill="#fff" text-anchor="middle">DEPOSITOR</text><circle cx="180" cy="155" r="6" fill="#1d1d1f"/><circle cx="220" cy="155" r="6" fill="#1d1d1f"/><rect x="40" y="170" width="320" height="14" rx="2" fill="#a0a0a6"/><circle cx="60" cy="200" r="14" fill="#1d1d1f"/><circle cx="60" cy="200" r="6" fill="#a0a0a6"/><circle cx="340" cy="200" r="14" fill="#1d1d1f"/><circle cx="340" cy="200" r="6" fill="#a0a0a6"/><circle cx="120" cy="190" r="6" fill="#c08648"/><circle cx="160" cy="190" r="6" fill="#c08648"/><circle cx="200" cy="190" r="6" fill="#c08648"/><circle cx="240" cy="190" r="6" fill="#c08648"/><circle cx="280" cy="190" r="6" fill="#c08648"/><text x="200" y="240" font-family="Geist, sans-serif" font-size="11" font-weight="500" fill="#1d1d1f" text-anchor="middle" letter-spacing="1">LINE 2 / DEPOSITOR + CONVEYOR</text></svg>'),
-      orientation: 'vertical', imageFit: 'height'
+      orientation: 'vertical', imageFit: 'height', imageScale: 95
     },
     changes: {
       eyebrow: 'What changes',
