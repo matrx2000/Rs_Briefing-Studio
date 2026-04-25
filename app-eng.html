@@ -490,14 +490,14 @@
           <input type="file" accept="image/*" @change="readImage($event, 'effort')" class="app-input !p-1.5">
           <img x-show="data.effort.image" :src="data.effort.image" class="mt-1.5 max-h-28 w-full object-cover rounded border border-[var(--hair)]">
         </div>
-        <div class="field-row col-span-2" x-show="data.effort.image">
+        <div class="field-row col-span-2" x-show="data.effort.image && exportMode==='print'">
           <label class="app-label" data-i18n="field.imagePosition">Image position</label>
           <select class="app-input" x-model="data.effort.orientation">
             <option value="vertical">Vertical — image below effort</option>
             <option value="horizontal">Horizontal — image next to effort</option>
           </select>
         </div>
-        <div class="field-row col-span-2" x-show="data.effort.image">
+        <div class="field-row col-span-2" x-show="data.effort.image && exportMode==='print'">
           <label class="app-label" data-i18n="field.imageFit">Image fit</label>
           <select class="app-input" x-model="data.effort.imageFit">
             <option value="cover">Fill tile (may crop)</option>
@@ -505,6 +505,9 @@
             <option value="height">Fit by height — full height</option>
           </select>
         </div>
+        <p class="text-[10.5px] text-[var(--ink-soft)] col-span-2 mt-1" x-show="data.effort.image && exportMode==='markdown'" x-cloak>
+          <em>Image position &amp; fit are PDF-layout settings — not applicable in Markdown mode.</em>
+        </p>
       </div>
     </section>
 
