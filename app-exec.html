@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Executive Level Reporting — R's Briefing Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+<script src="i18n.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #1d1d1f;
+    --ink-soft: #6b6b70;
+    --hair: #e5e5e7;
+    --paper: #ffffff;
+    --paper-tint: #f5f5f7;
+    --accent-green: #16a34a;
+    --accent-amber: #b45309;
+    --accent-blue: #1d4ed8;
+    --mode-accent: #3b82f6;          /* Executive Level Reporting — bright blue, pops on dark */
+    --mode-accent-soft: rgba(59,130,246,0.18);
+  }
+  /* Mode accent stripe at top of chrome and sidebar tint */
+  .app-chrome { border-top: 3px solid var(--mode-accent) !important; }
+  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .mode-tag::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: var(--mode-accent); }
+  /* Resizable splitter between form pane and preview pane */
+  .splitter { width: 5px; background: var(--hair); cursor: col-resize; flex-shrink: 0; transition: background .15s; position: relative; }
+  .splitter::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2px; height: 36px; background: var(--ink-soft); border-radius: 1px; opacity: 0.4; }
+  .splitter:hover { background: var(--mode-accent); }
+  .splitter:hover::before { background: #fff; opacity: 1; }
+  body.editor-dark .splitter { background: #2a2a2e; }
+  body.editor-dark .splitter::before { background: #6b6b70; }
+
+  /* Switch-mode dropdown */
+  .switch-menu { position: relative; display: inline-block; }
+  .switch-trigger { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--hair); background: transparent; color: var(--ink-soft); font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .switch-trigger:hover { color: var(--ink); border-color: var(--ink); }
+  body.editor-dark .switch-trigger { border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .switch-trigger:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  .switch-trigger .caret { font-size: 9px; opacity: 0.7; transition: transform .15s; }
+  .switch-menu.open .switch-trigger .caret { transform: rotate(180deg); }
+  .switch-pop { position: absolute; top: calc(100% + 6px); left: 0; min-width: 220px; background: #fff; border: 1px solid var(--hair); border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(0,0,0,0.18); padding: 6px; z-index: 40; }
+  body.editor-dark .switch-pop { background: #1c1c20; border-color: #2a2a2e; box-shadow: 0 12px 32px -8px rgba(0,0,0,0.5); }
+  .switch-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 13px; transition: background .12s; cursor: pointer; }
+  .switch-item:hover { background: rgba(0,0,0,0.05); }
+  body.editor-dark .switch-item { color: #f5f5f7; }
+  body.editor-dark .switch-item:hover { background: rgba(255,255,255,0.06); }
+  .switch-item .swatch { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+  .switch-item .label { font-weight: 500; }
+  .switch-item .desc { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
+  .switch-item.current { background: var(--mode-accent-soft); }
+  .switch-item.current .label { color: var(--mode-accent); }
+
+  /* Theme-aware toggle pill */
+  .toggle-pill { background: rgba(0,0,0,0.06); border-radius: 999px; padding: 2px; display: inline-flex; gap: 0; }
+  body.editor-dark .toggle-pill { background: rgba(255,255,255,0.08); }
+  .toggle-pill .toggle-btn { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--ink-soft); transition: background .15s, color .15s; font-family: inherit; }
+  .toggle-pill .toggle-btn:hover:not(.active) { color: var(--ink); }
+  body.editor-dark .toggle-pill .toggle-btn { color: #a0a0a6; }
+  body.editor-dark .toggle-pill .toggle-btn:hover:not(.active) { color: #f5f5f7; }
+  .toggle-pill .toggle-btn.active { background: var(--mode-accent); color: #fff !important; }
+
+  /* UI scale stepper (form-pane top) */
+  .ui-scale-control { display: inline-flex; align-items: center; border: 1px solid var(--hair); border-radius: 999px; overflow: hidden; background: #fff; }
+  .ui-scale-control button { background: transparent; border: none; width: 24px; height: 22px; font-size: 14px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: background .15s, color .15s; padding: 0; line-height: 1; font-family: inherit; }
+  .ui-scale-control button:hover:not(:disabled) { background: var(--mode-accent-soft); color: var(--mode-accent); }
+  .ui-scale-control button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .ui-scale-control .value { min-width: 38px; text-align: center; font-size: 11px; color: var(--ink); font-feature-settings: "tnum"; padding: 0 2px; }
+  body.editor-dark .ui-scale-control { background: #232328; border-color: #34343a; }
+  body.editor-dark .ui-scale-control .value { color: #f5f5f7; }
+  body.editor-dark .ui-scale-control button { color: #a0a0a6; }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html, body { font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--ink); }
+  body { background: #f0f0f3; }
+  .serif { font-family: 'Geist', sans-serif; font-style: normal; font-weight: 400; }
+  .tnum { font-feature-settings: "tnum", "ss01"; letter-spacing: -0.05em; }
+  .italic, em, i { font-style: normal !important; }
+  .tpl-print-classic .a4, .tpl-print-classic h1, .tpl-print-classic h2, .tpl-print-classic h3 { font-family: 'Geist', sans-serif !important; }
+  .tight { letter-spacing: -0.035em; }
+  .eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; }
+
+  /* App chrome */
+  .app-input, .app-textarea {
+    width: 100%; background: #fff; border: 1px solid var(--hair); border-radius: 8px;
+    padding: 5px 9px; font-size: 12px; color: var(--ink); outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .app-input:focus, .app-textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(29,29,31,0.08); }
+  .app-textarea { resize: vertical; min-height: 44px; line-height: 1.4; }
+  .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; display: block; }
+  .field-row { margin-bottom: 7px; }
+  .form-section { padding: 10px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 8px; }
+  .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+  /* Hint / info popover */
+  [x-cloak] { display: none !important; }
+  .hint { position: relative; display: inline-flex; }
+  @keyframes hint-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--mode-accent-soft); transform: scale(1); }
+    50%      { box-shadow: 0 0 0 6px var(--mode-accent-soft), 0 0 10px 0 var(--mode-accent); transform: scale(1.18); }
+  }
+  .hint-btn { width: 16px; height: 16px; border-radius: 999px; border: 1px solid var(--mode-accent); background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 700; cursor: pointer; padding: 0; line-height: 1; display: inline-flex; align-items: center; justify-content: center; transition: transform .15s, box-shadow .15s; animation: hint-pulse 1.8s ease-in-out infinite; }
+  .hint-btn:hover, .hint-btn:focus { animation: none; transform: scale(1.15); box-shadow: 0 0 0 4px var(--mode-accent-soft); }
+  /* Subtler variant for inline term explanations (next to field labels) */
+  .term-hint .hint-btn { width: 12px; height: 12px; font-size: 8px; background: transparent; border-color: var(--hair); color: var(--ink-soft); animation: none; }
+  .term-hint .hint-btn:hover, .term-hint .hint-btn:focus { background: var(--mode-accent-soft); border-color: var(--mode-accent); color: var(--mode-accent); transform: none; box-shadow: none; }
+  body.editor-dark .term-hint .hint-btn { border-color: #34343a; color: #a0a0a6; }
+  .term-hint .hint-bubble { width: 240px; }
+  @media (prefers-reduced-motion: reduce) { .hint-btn { animation: none !important; } }
+  .hint-bubble { position: absolute; left: -4px; top: calc(100% + 8px); width: 280px; padding: 10px 12px; background: var(--ink); color: #f5f5f7; border-radius: 8px; font-size: 11px; line-height: 1.5; z-index: 30; box-shadow: 0 8px 24px -8px rgba(0,0,0,0.35); text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .hint-bubble::before { content: ''; position: absolute; top: -4px; left: 9px; width: 8px; height: 8px; background: var(--ink); transform: rotate(45deg); }
+  body.editor-dark .hint-btn { border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .hint-btn:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  body.editor-dark .hint-bubble { background: #f5f5f7; color: #1d1d1f; }
+  body.editor-dark .hint-bubble::before { background: #f5f5f7; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; transition: all .15s; cursor: pointer; border: 1px solid transparent; }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #000; }
+  .btn-ghost { background: #fff; color: var(--ink); border-color: var(--hair); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-ghost.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .icon-btn { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--hair); background: #fff; color: var(--ink-soft); cursor: pointer; transition: all .15s; }
+  .icon-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* Paper sheet — width/height set via body.paper-A4 / body.paper-A3 */
+  .a4 {
+    background: #fff; margin: 0 auto;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.25), 0 4px 16px -4px rgba(0,0,0,0.08);
+    overflow: hidden; position: relative; color: var(--ink);
+    page-break-after: always;
+  }
+  body.paper-A4 .a4 { width: 210mm; height: 297mm; }
+  body.paper-A3 .a4 { width: 297mm; height: 420mm; }
+  .a4:last-child { page-break-after: auto; }
+  .a4-inner { padding: 10mm 12mm; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+
+  /* Bento grid (page 1) — print-friendly default */
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: min-content; gap: 3mm; flex: 1; min-height: 0; align-content: start; }
+  .tile { border-radius: 5mm; padding: 4mm 5mm; background: var(--paper); border: 1px solid var(--hair); display: flex; flex-direction: column; gap: 2mm; min-height: 0; overflow: hidden; }
+  .tile.tinted { background: var(--paper-tint); border-color: transparent; }
+  .tile.bluf { grid-column: span 8; }
+  .tile.metric { grid-column: span 4; justify-content: center; }
+  /* Metric stack — image position can be vertical (below metric) or horizontal (next to metric) */
+  .metric-stack { grid-column: span 4; display: flex; flex-direction: column; gap: 3mm; min-width: 0; }
+  .metric-stack .tile.metric { grid-column: auto; flex: 0 0 auto; }
+  .metric-stack .tile.metric-image { flex: 1 1 auto; min-height: 65mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
+  .metric-stack .tile.metric-image img { display: block; max-width: 100%; max-height: 100%; }
+  .metric-stack .tile.metric-image.fit-cover img  { width: 100%; height: 100%; object-fit: cover; }
+  .metric-stack .tile.metric-image.fit-width img  { width: 100%; height: auto; }
+  .metric-stack .tile.metric-image.fit-height img { width: auto; height: 100%; }
+  .metric-stack:not(.has-image) .tile.metric { flex: 1 1 auto; }
+  /* Horizontal orientation: image sits next to metric — wider stack, bottom-line tile narrows */
+  .metric-stack.horizontal { grid-column: span 6; flex-direction: row; }
+  .metric-stack.horizontal .tile.metric { flex: 0 0 50%; }
+  .metric-stack.horizontal .tile.metric-image { flex: 1 1 50%; min-height: 50mm; }
+  .bento:has(> .metric-stack.horizontal) .tile.bluf { grid-column: span 6; }
+  .tile.commentary { grid-column: 1 / -1; }
+  .tile.commentary .commentary-body { display: flex; flex-direction: column; gap: 2mm; }
+  .tile.fivew { grid-column: 1 / -1; }
+  .tile.fivew dl.fivew-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2.5mm 5mm; }
+  .tile.fivew dl.fivew-grid > div { display: flex; flex-direction: column; padding-bottom: 0; border-bottom: none; }
+  .bento > .proscons { grid-column: 1 / -1 !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 3mm; padding: 0; background: transparent; border: none; }
+  .tile.timeline { grid-column: span 8; }
+  .tile.cta { grid-column: span 4; justify-content: center; }
+
+  .tile-pros, .tile-cons { border-radius: 5mm; padding: 4mm 5mm; background: var(--paper); border: 1px solid var(--hair); position: relative; overflow: hidden; }
+  .tile-pros { border-left: 3mm solid var(--accent-green); }
+  .tile-cons { border-left: 3mm solid var(--accent-amber); }
+  .tile.cta { border-left: 3mm solid var(--accent-blue); }
+
+  .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: 2px; }
+  .timeline-bar { height: 2px; background: linear-gradient(to right, var(--ink) var(--p,40%), var(--hair) var(--p,40%)); border-radius: 1px; }
+
+  /* Editorial page 2 */
+  .editorial { max-width: 240mm; margin: 0 auto; }
+  .editorial h2 { font-size: 18pt; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 2mm; }
+  .editorial h3 { font-size: 10pt; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); margin: 3mm 0 1mm; padding-top: 1.5mm; border-top: 1px solid var(--hair); }
+  .editorial h3:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .editorial p { font-size: 10pt; line-height: 1.4; color: var(--ink); margin-bottom: 1mm; }
+  .editorial .stake-row { display: grid; grid-template-columns: 60mm 1fr; gap: 4mm; padding: 1mm 0; border-bottom: 1px solid var(--hair); font-size: 9.5pt; line-height: 1.35; }
+  .editorial ul { font-size: 10pt; line-height: 1.4; padding-left: 5mm; margin: 0; }
+  .editorial ul li { list-style: disc; margin-bottom: 0.5mm; }
+
+  /* Editor theme — applies ONLY to the form pane / app chrome, never to the printed sheet */
+  body.editor-dark { background: #0d0d0f; color: #f5f5f7; }
+  body.editor-dark .app-chrome { background: rgba(20,20,22,0.9) !important; border-bottom-color: #2a2a2e !important; color: #f5f5f7; }
+  body.editor-dark .app-chrome a, body.editor-dark .app-chrome .text-\[var\(--ink-soft\)\] { color: #a0a0a6 !important; }
+  body.editor-dark .form-pane { background: #141417 !important; border-right-color: #2a2a2e !important; }
+  body.editor-dark .form-section { background: #1c1c20; border-color: #2a2a2e; }
+  body.editor-dark .form-section h3 { color: #a0a0a6; }
+  body.editor-dark .app-input, body.editor-dark .app-textarea, body.editor-dark .app-select { background: #232328; border-color: #34343a; color: #f5f5f7; }
+  body.editor-dark .app-input:focus, body.editor-dark .app-textarea:focus, body.editor-dark .app-select:focus { border-color: #f5f5f7; box-shadow: 0 0 0 3px rgba(245,245,247,0.08); }
+  body.editor-dark .app-label { color: #a0a0a6; }
+  body.editor-dark .btn-ghost { background: #232328; color: #f5f5f7; border-color: #34343a; }
+  body.editor-dark .btn-ghost:hover { border-color: #f5f5f7; }
+  body.editor-dark .btn-primary { background: #f5f5f7; color: #1d1d1f; }
+  body.editor-dark .btn-primary:hover { background: #fff; }
+  body.editor-dark .icon-btn { background: #232328; border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .icon-btn:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  body.editor-dark input[type="range"] { accent-color: #f5f5f7; }
+  /* The preview pane and printed A4 stay light always */
+  .preview-pane { background: #f0f0f3; }
+
+  /* Template: Apple Bento — Light (default, ink-friendly) */
+  .tpl-bento-light .a4 { background: #fff; }
+  .tpl-bento-light .tile-hero { background: var(--paper-tint); border-color: transparent; }
+  .tpl-bento-light .tile-metric { background: var(--paper-tint); border-color: transparent; }
+
+  /* Template: Print Classic — formal, serif-led */
+  .tpl-print-classic .a4 { background: #fff; font-family: 'Instrument Serif', Georgia, serif; }
+  .tpl-print-classic .tile { background: #fff; border: none; border-bottom: 1px solid var(--hair); border-radius: 0; padding: 5mm 4mm; }
+  .tpl-print-classic .tile-hero { background: #fff; border-color: transparent; border-bottom: 2px solid var(--ink); }
+  .tpl-print-classic .tile-metric { text-align: center; }
+  .tpl-print-classic .tile-pros, .tpl-print-classic .tile-cons { background: #fff; border: none; border-left: 1.5mm solid var(--accent-green); border-radius: 0; padding-left: 4mm; }
+  .tpl-print-classic .tile-cons { border-left-color: var(--accent-amber); }
+  .tpl-print-classic .tile.cta { border-left: 1.5mm solid var(--accent-blue); border-radius: 0; }
+  .tpl-print-classic .eyebrow { font-family: 'Geist', sans-serif; }
+  .tpl-print-classic h1, .tpl-print-classic h2, .tpl-print-classic h3 { font-weight: 400; }
+
+  /* Preview pane scaling */
+  .preview-stage { padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .preview-frame { transform-origin: top center; }
+
+  /* Field clear button */
+  .field-clear-wrap { position: relative; display: block; flex: 1 1 auto; min-width: 0; }
+  .field-clear-wrap > .app-input, .field-clear-wrap > .app-textarea { padding-right: 26px; }
+  .field-clear { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; padding: 0; border-radius: 999px; border: none; background: var(--hair); color: var(--ink-soft); font-size: 13px; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; transition: background .15s, color .15s; }
+  .field-clear:hover { background: var(--ink); color: #fff; }
+  .app-textarea ~ .field-clear { top: 6px; transform: none; }
+  body.editor-dark .field-clear { background: #34343a; color: #a0a0a6; }
+  body.editor-dark .field-clear:hover { background: #f5f5f7; color: #1d1d1f; }
+
+  /* UI scale — applied to the form pane only, not the printed sheet */
+  :root { --ui-scale: 1; }
+  .form-pane { font-size: calc(13px * var(--ui-scale)); }
+  .form-pane .app-input,
+  .form-pane .app-textarea,
+  .form-pane .app-select { font-size: calc(12px * var(--ui-scale)); }
+  .form-pane .app-label { font-size: calc(10.5px * var(--ui-scale)); }
+  .form-pane .form-section h3 { font-size: calc(10.5px * var(--ui-scale)); }
+  .form-pane .btn { font-size: calc(12px * var(--ui-scale)); }
+  .form-pane .text-xs, .form-pane .text-\[11px\] { font-size: calc(11px * var(--ui-scale)); }
+  .form-pane .hint-bubble { font-size: calc(11px * var(--ui-scale)); }
+
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal-card { background: #fff; color: var(--ink); border-radius: 16px; max-width: 480px; width: 100%; padding: 24px 26px; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.4); }
+  body.editor-dark .modal-card { background: #1c1c20; color: #f5f5f7; border: 1px solid #2a2a2e; }
+  .modal-card h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 10px; }
+  .modal-card p { font-size: 13px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 12px; }
+  body.editor-dark .modal-card p { color: #a0a0a6; }
+  .modal-card .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  .modal-warn { background: rgba(180,83,9,0.08); color: var(--accent-amber); border: 1px solid rgba(180,83,9,0.25); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
+
+  /* Form scrollbar nicety */
+  .form-pane::-webkit-scrollbar { width: 8px; }
+  .form-pane::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
+  .preview-pane::-webkit-scrollbar { width: 8px; }
+  .preview-pane::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
+
+  /* PRINT — strip the app chrome and force ink-light rendering */
+  @media print {
+    /* @page rule injected dynamically via #pageSizeRule based on selected paper size */
+    body { background: #fff !important; }
+    .app-chrome, .form-pane, .preview-toolbar { display: none !important; }
+    .preview-pane { overflow: visible !important; display: block !important; }
+    main.preview-pane { grid-column: 1 / -1 !important; }
+    .preview-stage { padding: 0 !important; gap: 0 !important; display: block !important; }
+    .preview-frame { display: block !important; transform: none !important; }
+    .a4 {
+      box-shadow: none !important; margin: 0 !important;
+      page-break-after: always; break-after: page;
+    }
+    body.paper-A4 .a4 { width: 210mm !important; height: 297mm !important; }
+    body.paper-A3 .a4 { width: 297mm !important; height: 420mm !important; }
+    .a4:last-child { page-break-after: auto; break-after: auto; }
+    /* Force every template to the ink-light rendering on paper */
+    .tpl-bento-dark .a4 { background: #fff !important; color: var(--ink) !important; }
+    .tpl-bento-dark .tile { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; }
+    .tpl-bento-dark .tile.tinted, .tpl-bento-dark .tile-hero { background: var(--paper-tint) !important; color: var(--ink) !important; border-color: transparent !important; }
+    .tpl-bento-dark .tile-metric { background: var(--paper-tint) !important; color: var(--ink) !important; border-color: transparent !important; }
+    .tpl-bento-dark .tile-pros { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-green) !important; }
+    .tpl-bento-dark .tile-cons { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-amber) !important; }
+    .tpl-bento-dark .tile.cta { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-blue) !important; }
+    .tpl-bento-dark .timeline-bar { background: linear-gradient(to right, var(--ink) var(--p,40%), var(--hair) var(--p,40%)) !important; }
+    .tpl-bento-dark .text-soft, .tpl-bento-dark [class*="white/"] { color: var(--ink-soft) !important; }
+    .tpl-bento-dark .editorial h3 { border-top-color: var(--hair) !important; color: var(--ink) !important; }
+    /* Tiny print: keep accent dots/rules — they are minimal ink, high signal */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<style id="pageSizeRule">@media print { @page { size: A3 portrait; margin: 0; } }</style>
+<body x-data="briefingApp()" x-init="init()" :class="`tpl-${templateId} paper-${paperSize} ${editorMode === 'dark' ? 'editor-dark' : ''}`">
+
+<!-- App chrome -->
+<div class="app-chrome sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-[var(--hair)]">
+  <div class="flex items-center justify-between px-4 py-2">
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="text-[15px] font-medium tight hover:opacity-80" title="Back to start"><span class="serif italic font-normal text-[var(--ink-soft)]">R's</span> Briefing <span class="serif italic font-normal text-[var(--ink-soft)]">Studio</span></a>
+      <span class="mode-tag" data-i18n="mode.executive">Executive Level Reporting</span>
+      <span class="switch-menu" :class="{'open': switchOpen}" x-data="{ switchOpen: false }" @click.outside="switchOpen = false">
+        <button type="button" class="switch-trigger" @click="switchOpen = !switchOpen">
+          <span data-i18n="ui.switch">Switch</span> <span class="caret">▼</span>
+        </button>
+        <div class="switch-pop" x-show="switchOpen" x-cloak>
+          <a class="switch-item current" href="app-exec.html">
+            <span class="swatch" style="background:#3b82f6"></span>
+            <span><span class="label" data-i18n="mode.executive">Executive Level Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
+          </a>
+          <a class="switch-item" href="app-eng.html">
+            <span class="swatch" style="background:#16a34a"></span>
+            <span><span class="label" data-i18n="mode.engineering">Engineering Reporting</span><div class="desc" data-i18n="switch.engineeringDesc">Technical depth for reviewers</div></span>
+          </a>
+          <a class="switch-item" href="index.html">
+            <span class="swatch" style="background:#a0a0a6"></span>
+            <span><span class="label" data-i18n="switch.home">Home</span><div class="desc" data-i18n="switch.homeDesc">Project picker / load existing</div></span>
+          </a>
+        </div>
+      </span>
+      <span class="text-xs text-[var(--ink-soft)]" x-text="saveStatus"></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <select class="app-input !w-auto !py-1.5" onchange="window.I18N && window.I18N.apply(this.value)" id="lang-picker" title="Language">
+        <option value="en">EN</option>
+        <option value="de">DE</option>
+        <option value="it">IT</option>
+        <option value="hr">HR</option>
+      </select>
+      <label class="app-label !mb-0 mr-1" data-i18n="ui.template">Template</label>
+      <select class="app-input !w-auto !py-1.5" x-model="templateId">
+        <template x-for="t in templates" :key="t.id">
+          <option :value="t.id" x-text="t.name"></option>
+        </template>
+      </select>
+      <button class="btn btn-ghost !py-1 !px-3" @click="editorMode = editorMode === 'dark' ? 'light' : 'dark'" :title="`Editor: ${editorMode}`">
+        <span x-text="editorMode === 'dark' ? (window.I18N ? window.I18N.t('ui.darkmode') : '☾ Dark') : (window.I18N ? window.I18N.t('ui.lightmode') : '☀ Light')"></span>
+      </button>
+      <div class="toggle-pill ml-2" title="Paper size">
+        <button class="toggle-btn" :class="paperSize==='A4' ? 'active' : ''" @click="paperSize='A4'">A4</button>
+        <button class="toggle-btn" :class="paperSize==='A3' ? 'active' : ''" @click="paperSize='A3'">A3</button>
+      </div>
+      <button class="btn btn-ghost ml-1" @click="showSampleModal = true" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
+      <button class="btn btn-ghost" @click="exportJson()" title="Save current briefing to a project file" data-i18n="ui.saveproject">Save Project</button>
+      <label class="btn btn-ghost cursor-pointer" title="Load a previously saved project file">
+        <span data-i18n="ui.loadproject">Load Project</span>
+        <input type="file" accept="application/json" class="hidden" @change="importJson($event)">
+      </label>
+      <button class="btn btn-primary ml-1" @click="window.print()" data-i18n="ui.printpdf">Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Two-pane workspace -->
+<div class="flex h-[calc(100vh-45px)]">
+
+  <!-- Form pane -->
+  <aside class="form-pane overflow-y-auto p-2.5 bg-[#fafafa]" :style="`width: ${formPaneWidth}px; flex-shrink: 0;`">
+
+    <div class="flex items-center justify-center gap-3 mb-3 px-2 py-1.5 rounded-lg" style="background: var(--mode-accent-soft);" title="Adjust form text size">
+      <span class="text-[12px] uppercase tracking-wider font-semibold flex items-center gap-1.5" style="color: var(--mode-accent);">
+        <span class="text-[15px] leading-none" style="font-weight:700;">Aa</span>
+        <span data-i18n="ui.textsize">Text size</span>
+      </span>
+      <div class="ui-scale-control">
+        <button type="button" @click="uiScale = Math.max(80, uiScale - 5)" :disabled="uiScale <= 80" aria-label="Decrease text size">−</button>
+        <span class="value" x-text="uiScale + '%'"></span>
+        <button type="button" @click="uiScale = Math.min(140, uiScale + 5)" :disabled="uiScale >= 140" aria-label="Increase text size">+</button>
+      </div>
+    </div>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.meta">Meta</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.meta.exec">Set the audience first — every other field is written for them. The decision-by date should be a real deadline; vague deadlines invite vague replies.</span></span></h3>
+      <div class="field-row"><label class="app-label" data-i18n="field.title">Title</label><input class="app-input" x-model="data.meta.title"></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.subtitle">Subtitle (italic serif accent)</label><input class="app-input" x-model="data.meta.subtitle"></div>
+      <div class="grid grid-cols-2 gap-x-2">
+        <div class="field-row"><label class="app-label" data-i18n="field.preparedby">Prepared by</label><input class="app-input" x-model="data.meta.authorName"></div>
+        <div class="field-row"><label class="app-label" data-i18n="field.audience">Audience</label><input class="app-input" x-model="data.meta.audience"></div>
+        <div class="field-row"><label class="app-label" data-i18n="field.date">Date</label><input type="date" class="app-input" x-model="data.meta.date"></div>
+        <div class="field-row"><label class="app-label" data-i18n="field.decisionby">Decision by</label><input type="date" class="app-input" x-model="data.meta.decisionBy"></div>
+        <div class="field-row col-span-2">
+          <label class="app-label"><span data-i18n="field.readtime">Read time</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.readtimeNote">· auto from content</span></label>
+          <div class="app-input !bg-[#fafafa] flex items-center justify-between">
+            <span x-text="`Page 1 · ${page1ReadTime()} sec`"></span>
+            <span class="text-[var(--ink-soft)]" x-text="`Page 2 · ~${page2ReadMinutes()} min`"></span>
+          </div>
+        </div>
+        <div class="field-row col-span-2"><label class="app-label"><span data-i18n="field.companyName">Company name</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.shownInFooter">· shown in footer</span></label><input class="app-input" x-model="data.meta.companyName" placeholder="e.g. Cookie Co."></div>
+        <div class="field-row col-span-2">
+          <label class="app-label flex items-center gap-2 cursor-pointer" style="margin-bottom: 0;">
+            <input type="checkbox" x-model="data.meta.confidential" style="accent-color: var(--mode-accent); width: 14px; height: 14px;">
+            <span><span data-i18n-html="field.confidential">Mark document <strong>Confidential</strong> in the footer</span> <span class="font-normal text-[var(--ink-soft)]" data-i18n="field.confidentialNote">· for NDA-covered material</span></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.bluf">Bottom line up front</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.bluf">The reader has 90 seconds. The headline must state the decision you want, with the headline number embedded. Supporting sentence (≤1150 chars) answers "why this, why now". If you can't fit it, the framing isn't sharp yet.</span></span></h3>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.bluf.eyebrow"></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.headline">Headline</label><textarea class="app-textarea" x-model="data.bluf.headline"></textarea></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.headlineEmphasis">Substring to italicize (in serif)</label><input class="app-input" x-model="data.bluf.headlineEmphasis" placeholder="e.g. €120k"></div>
+      <div class="field-row">
+        <label class="app-label flex justify-between items-center">
+          <span data-i18n="field.supporting">Supporting sentence</span>
+          <span class="tnum" :class="(data.bluf.supporting?.length || 0) >= 1150 ? 'text-[var(--accent-red,#b91c1c)] font-medium' : (data.bluf.supporting?.length || 0) >= 1000 ? 'text-[var(--accent-amber)]' : 'text-[var(--ink-soft)]'">
+            <span x-text="(data.bluf.supporting?.length || 0)"></span> / 1150
+          </span>
+        </label>
+        <textarea class="app-textarea" maxlength="1150" x-model="data.bluf.supporting"></textarea>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.metric">Headline metric</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.metric">ONE number that captures the "so what". Pick the metric that, if wrong, kills the proposal. Keep value short (it auto-scales but readability suffers past 6 chars).</span></span></h3>
+      <div class="grid grid-cols-2 gap-x-2">
+        <div class="field-row col-span-2"><label class="app-label" data-i18n="field.label">Label</label><input class="app-input" x-model="data.metric.label"></div>
+        <div class="field-row"><label class="app-label" data-i18n="field.value">Value</label><input class="app-input" x-model="data.metric.value"></div>
+        <div class="field-row"><label class="app-label">Unit (time: hours → days → weeks → months → quarters → years; or %, k€, M€)</label><input class="app-input" x-model="data.metric.unit"></div>
+        <div class="field-row col-span-2"><label class="app-label" data-i18n="field.caption">Caption</label><input class="app-input" x-model="data.metric.caption"></div>
+        <div class="field-row col-span-2">
+          <label class="app-label flex justify-between items-center">
+            <span>Image <span class="text-[var(--ink-soft)] font-normal">· optional, shown next to metric</span></span>
+            <button type="button" x-show="data.metric.image" @click="data.metric.image=null" class="text-[10px] text-[var(--accent-amber)] hover:underline">Remove</button>
+          </label>
+          <input type="file" accept="image/*" @change="readImage($event, 'metric')" class="app-input !p-1.5">
+          <img x-show="data.metric.image" :src="data.metric.image" class="mt-1.5 max-h-28 w-full object-cover rounded border border-[var(--hair)]">
+        </div>
+        <div class="field-row col-span-2" x-show="data.metric.image">
+          <label class="app-label" data-i18n="field.imagePosition">Image position</label>
+          <select class="app-input" x-model="data.metric.orientation">
+            <option value="vertical">Vertical — image below metric</option>
+            <option value="horizontal">Horizontal — image next to metric</option>
+          </select>
+        </div>
+        <div class="field-row col-span-2" x-show="data.metric.image">
+          <label class="app-label" data-i18n="field.imageFit">Image fit</label>
+          <select class="app-input" x-model="data.metric.imageFit">
+            <option value="cover">Fill tile (may crop)</option>
+            <option value="width">Fit by width — full width, scrolls vertically if tall</option>
+            <option value="height">Fit by height — full height, may show whitespace</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.commentary">Commentary</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.commentary">Optional 1–2 short paragraphs framing the decision. Use sparingly — page 1 is for skimming, not narrative. If the reader needs more than this, push detail to page 2.</span></span></h3>
+      <div class="field-row"><label class="app-label">Heading</label><input class="app-input" x-model="data.commentary.heading" placeholder="Commentary"></div>
+      <div class="field-row"><label class="app-label">Paragraph 1</label><textarea class="app-textarea" rows="4" x-model="data.commentary.p1"></textarea></div>
+      <div class="field-row"><label class="app-label">Paragraph 2 <span class="text-[var(--ink-soft)] font-normal">· optional</span></label><textarea class="app-textarea" rows="4" x-model="data.commentary.p2"></textarea></div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.fivewh">5 Ws + H</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.fivewh">Facts, not arguments. One short clause per cell. If a cell needs a full sentence, you're explaining — move that to page 2.</span></span></h3>
+      <div class="grid grid-cols-2 gap-x-2">
+        <template x-for="k in ['what','why','who','when','where','how']" :key="k">
+          <div class="field-row">
+            <label class="app-label" x-text="k.charAt(0).toUpperCase() + k.slice(1)"></label>
+            <input class="app-input" :value="data.fiveWsH[k]" @input="data.fiveWsH[k] = $event.target.value">
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.pros">Pros (2–4)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.pros">Rank by importance and stop at 4. Write each as an outcome the reader can verify ("Saves €40k/yr"), not a feature ("modern infrastructure").</span></span></h3>
+      <template x-for="(_, i) in data.pros" :key="i">
+        <div class="flex gap-1.5 mb-1.5">
+          <input class="app-input" :value="data.pros[i]" @input="data.pros[i] = $event.target.value">
+          <button class="icon-btn" @click="data.pros.splice(i,1)" :disabled="data.pros.length<=1">&times;</button>
+        </div>
+      </template>
+      <button class="btn btn-ghost" @click="data.pros.push('')" :disabled="data.pros.length>=4">+ Add pro</button>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.cons">Cons (2–4)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.cons">Name the real risks, not strawmen. The reader trusts your pros only as much as they trust your cons. Mitigations belong on page 2.</span></span></h3>
+      <template x-for="(_, i) in data.cons" :key="i">
+        <div class="flex gap-1.5 mb-1.5">
+          <input class="app-input" :value="data.cons[i]" @input="data.cons[i] = $event.target.value">
+          <button class="icon-btn" @click="data.cons.splice(i,1)" :disabled="data.cons.length<=1">&times;</button>
+        </div>
+      </template>
+      <button class="btn btn-ghost" @click="data.cons.push('')" :disabled="data.cons.length>=4">+ Add con</button>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.timeline">Timeline (4 phases)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.timeline">4 phases, one line each. Use real months or sprint names. The progress bar shows where you are right now — not where you plan to be.</span></span></h3>
+      <template x-for="(phase, i) in data.timeline.phases" :key="i">
+        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+          <div class="grid grid-cols-2 gap-1.5">
+            <input class="app-input" placeholder="Label" x-model="data.timeline.phases[i].label">
+            <input class="app-input" placeholder="Title" x-model="data.timeline.phases[i].title">
+          </div>
+          <input class="app-input mt-1.5" placeholder="Description" x-model="data.timeline.phases[i].description">
+          <div class="flex items-center gap-2 mt-1.5">
+            <span class="app-label !mb-0">Progress</span>
+            <input type="range" min="0" max="100" x-model.number="data.timeline.phases[i].progress" class="flex-1">
+            <span class="text-xs text-[var(--ink-soft)] w-10 text-right" x-text="data.timeline.phases[i].progress + '%'"></span>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.cta">The Ask / CTA</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.cta">ONE decision, ONE deadline. If you can't state the ask in a short sentence, you don't know what you're asking for. The button text is the deadline reminder.</span></span></h3>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.cta.eyebrow"></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.headline">Headline</label><input class="app-input" x-model="data.cta.headline"></div>
+      <div class="field-row"><label class="app-label">Italic serif emphasis</label><input class="app-input" x-model="data.cta.headlineEmphasis"></div>
+      <div class="field-row"><label class="app-label">Button text</label><input class="app-input" x-model="data.cta.buttonText"></div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.context">Page 2 — Context</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.context">Read time ~3–5 min. Depth on demand: only readers who need the full story open this. Keep prose tight; use bullets for considerations and risks, prose for background.</span></span></h3>
+      <div class="field-row"><label class="app-label">Background &amp; history</label><textarea class="app-textarea" rows="3" x-model="data.context.background"></textarea></div>
+      <div class="field-row"><label class="app-label">Problem statement</label><textarea class="app-textarea" rows="3" x-model="data.context.problem"></textarea></div>
+      <div class="field-row">
+        <label class="app-label">Stakeholders</label>
+        <template x-for="(s, i) in data.context.stakeholders" :key="i">
+          <div class="flex gap-1.5 mb-1.5">
+            <input class="app-input" placeholder="Name" x-model="data.context.stakeholders[i].name">
+            <input class="app-input" placeholder="Role" x-model="data.context.stakeholders[i].role">
+            <button class="icon-btn" @click="data.context.stakeholders.splice(i,1)">&times;</button>
+          </div>
+        </template>
+        <button class="btn btn-ghost" @click="data.context.stakeholders.push({name:'',role:''})">+ Add</button>
+      </div>
+      <div class="field-row">
+        <label class="app-label">Considerations</label>
+        <template x-for="(_, i) in data.context.considerations" :key="i">
+          <div class="flex gap-1.5 mb-1.5">
+            <input class="app-input" :value="data.context.considerations[i]" @input="data.context.considerations[i] = $event.target.value">
+            <button class="icon-btn" @click="data.context.considerations.splice(i,1)">&times;</button>
+          </div>
+        </template>
+        <button class="btn btn-ghost" @click="data.context.considerations.push('')">+ Add</button>
+      </div>
+      <div class="field-row">
+        <label class="app-label">Alternatives considered</label>
+        <template x-for="(a, i) in data.context.alternatives" :key="i">
+          <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+            <input class="app-input" placeholder="Option" x-model="data.context.alternatives[i].option">
+            <div class="flex gap-2">
+              <input class="app-input" placeholder="Reason set aside" x-model="data.context.alternatives[i].reason">
+              <button class="icon-btn" @click="data.context.alternatives.splice(i,1)">&times;</button>
+            </div>
+          </div>
+        </template>
+        <button class="btn btn-ghost" @click="data.context.alternatives.push({option:'',reason:''})">+ Add</button>
+      </div>
+      <div class="field-row">
+        <label class="app-label">Risks &amp; mitigations</label>
+        <template x-for="(r, i) in data.context.risks" :key="i">
+          <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+            <input class="app-input" placeholder="Risk" x-model="data.context.risks[i].risk">
+            <div class="flex gap-2">
+              <input class="app-input" placeholder="Mitigation" x-model="data.context.risks[i].mitigation">
+              <button class="icon-btn" @click="data.context.risks.splice(i,1)">&times;</button>
+            </div>
+          </div>
+        </template>
+        <button class="btn btn-ghost" @click="data.context.risks.push({risk:'',mitigation:''})">+ Add</button>
+      </div>
+      <div class="field-row"><label class="app-label">Supporting data</label><textarea class="app-textarea" rows="3" x-model="data.context.supportingData"></textarea></div>
+    </section>
+
+    <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-1">Saved automatically to this browser. Ink-friendly print is built in.</p>
+    <p class="text-[11px] text-[var(--ink-soft)] text-center mb-3">by <a href="mailto:rene.radojcic@hotmail.com" class="underline underline-offset-2 hover:text-[var(--ink)]">Rene Radojčić</a></p>
+  </aside>
+
+  <!-- Preview pane -->
+  <!-- Resizable splitter -->
+  <div class="splitter" @mousedown="startResize($event)" title="Drag to resize"></div>
+
+  <main class="preview-pane flex-1 min-w-0 overflow-auto">
+    <div class="preview-stage">
+
+      <!-- PAGE 1 -->
+      <div class="preview-frame" :style="`transform: scale(${zoom})`">
+        <article class="a4">
+          <div class="a4-inner">
+            <!-- Header -->
+            <header class="flex items-end justify-between pb-2 mb-3 border-b border-[var(--hair)]">
+              <div>
+                <p class="eyebrow text-[var(--ink-soft)] mb-2" x-text="`Executive briefing · ${formatDate(data.meta.date)}`"></p>
+                <h1 class="text-[28pt] tight font-medium leading-[1]">
+                  <span class="serif italic font-normal text-[var(--ink-soft)]" x-text="data.meta.subtitle"></span>
+                  <span x-text="' ' + data.meta.title"></span>
+                </h1>
+              </div>
+              <div class="text-right space-y-0.5">
+                <p class="text-[10pt] font-medium text-[var(--ink)]" x-text="`For ${data.meta.audience}`"></p>
+                <p class="text-[9pt] text-[var(--ink)]" x-text="`Prepared by ${data.meta.authorName}`"></p>
+                <p class="text-[8pt] text-[var(--ink-soft)] mt-1" x-text="`Read time · ${page1ReadTime()} sec`"></p>
+                <p class="text-[8pt] text-[var(--ink-soft)]" x-text="`Decision by ${formatDate(data.meta.decisionBy)}`"></p>
+              </div>
+            </header>
+
+            <!-- Bento -->
+            <section class="bento">
+
+              <!-- 1. Bottom line -->
+              <article class="tile bluf tile-hero tinted">
+                <p class="eyebrow text-[var(--ink-soft)]" x-text="data.bluf.eyebrow"></p>
+                <div>
+                  <h2 class="text-[20pt] tight font-medium leading-[1.05]" x-html="emphasize(data.bluf.headline, data.bluf.headlineEmphasis)"></h2>
+                  <p class="text-[10pt] text-[var(--ink-soft)] mt-3 leading-snug" x-text="data.bluf.supporting"></p>
+                </div>
+              </article>
+
+              <!-- 2. Metric -->
+              <div class="metric-stack" :class="[data.metric.image ? 'has-image' : '', data.metric.image && data.metric.orientation === 'horizontal' ? 'horizontal' : '']">
+                <article class="tile metric tile-metric tinted">
+                  <p class="eyebrow text-[var(--ink-soft)]" x-text="data.metric.label"></p>
+                  <div>
+                    <p class="font-medium tnum leading-none" :style="`font-size: ${metricFontSize()}pt`">
+                      <span x-text="data.metric.value"></span><span class="text-[var(--ink-soft)]" x-text="data.metric.unit"></span>
+                    </p>
+                    <p class="text-[9pt] text-[var(--ink-soft)] mt-2" x-text="data.metric.caption"></p>
+                  </div>
+                </article>
+                <article class="tile metric-image" :class="`fit-${data.metric.imageFit || 'cover'}`" x-show="data.metric.image">
+                  <img :src="data.metric.image" alt="">
+                </article>
+              </div>
+
+              <!-- 2b. Commentary -->
+              <article class="tile commentary" x-show="data.commentary && (data.commentary.p1 || data.commentary.p2)">
+                <p class="eyebrow text-[var(--ink-soft)]" x-text="data.commentary?.heading || 'Commentary'"></p>
+                <div class="commentary-body">
+                  <p class="text-[10pt] leading-snug" x-show="data.commentary?.p1" x-text="data.commentary?.p1"></p>
+                  <p class="text-[10pt] leading-snug" x-show="data.commentary?.p2" x-text="data.commentary?.p2"></p>
+                </div>
+              </article>
+
+              <!-- 3. 5 Ws + H -->
+              <article class="tile fivew">
+                <p class="eyebrow text-[var(--ink-soft)] mb-1">The crucial details · <span class="serif italic font-normal normal-case tracking-normal text-[var(--ink-soft)]">5 Ws + H</span></p>
+                <dl class="fivew-grid">
+                  <template x-for="(label, k) in {what:'What',why:'Why',who:'Who',when:'When',where:'Where',how:'How'}" :key="k">
+                    <div>
+                      <dt class="text-[8pt] text-[var(--ink-soft)] mb-1" x-text="label"></dt>
+                      <dd class="text-[10pt] leading-snug" x-text="data.fiveWsH[k]"></dd>
+                    </div>
+                  </template>
+                </dl>
+              </article>
+
+              <!-- 4. Pros + Cons -->
+              <div class="proscons">
+                <article class="tile-pros">
+                  <div class="flex items-center justify-between mb-2">
+                    <p class="eyebrow" style="color: var(--accent-green)">Pros</p>
+                    <span class="serif italic text-[var(--ink-soft)] text-[9pt]">upside</span>
+                  </div>
+                  <ul class="space-y-1 text-[9.5pt]">
+                    <template x-for="p in data.pros" :key="p">
+                      <li><span class="dot" style="background: var(--accent-green)"></span><span x-text="p"></span></li>
+                    </template>
+                  </ul>
+                </article>
+                <article class="tile-cons">
+                  <div class="flex items-center justify-between mb-2">
+                    <p class="eyebrow" style="color: var(--accent-amber)">Cons</p>
+                    <span class="serif italic text-[var(--ink-soft)] text-[9pt]">risks</span>
+                  </div>
+                  <ul class="space-y-1 text-[9.5pt]">
+                    <template x-for="c in data.cons" :key="c">
+                      <li><span class="dot" style="background: var(--accent-amber)"></span><span x-text="c"></span></li>
+                    </template>
+                  </ul>
+                </article>
+              </div>
+
+              <!-- 5. Timeline -->
+              <article class="tile timeline">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="eyebrow text-[var(--ink-soft)]">Timeline</p>
+                  <p class="text-[8pt] text-[var(--ink-soft)] serif italic" x-text="`${data.timeline.phases.length} phases`"></p>
+                </div>
+                <div class="grid grid-cols-4 gap-3">
+                  <template x-for="phase in data.timeline.phases" :key="phase.label">
+                    <div>
+                      <p class="text-[8pt] text-[var(--ink-soft)] mb-0.5" x-text="phase.label"></p>
+                      <p class="text-[14pt] font-medium tight mb-1.5" x-text="phase.title"></p>
+                      <div class="timeline-bar" :style="`--p:${phase.progress}%`"></div>
+                      <p class="text-[8pt] text-[var(--ink-soft)] mt-1.5 leading-snug" x-text="phase.description"></p>
+                    </div>
+                  </template>
+                </div>
+              </article>
+
+              <!-- 6. CTA -->
+              <article class="tile cta">
+                <p class="eyebrow text-[var(--ink-soft)]" x-text="data.cta.eyebrow"></p>
+                <div>
+                  <h3 class="text-[16pt] tight font-medium leading-tight" x-html="emphasize(data.cta.headline, data.cta.headlineEmphasis)"></h3>
+                  <div class="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] text-[var(--ink)] px-3 py-1.5 rounded-full text-[9pt] font-medium">
+                    <span x-text="data.cta.buttonText"></span>
+                    <span aria-hidden="true">→</span>
+                  </div>
+                </div>
+              </article>
+
+            </section>
+
+            <!-- Footer -->
+            <footer class="mt-2 pt-2 border-t border-[var(--hair)] flex items-center justify-between text-[8.5pt]">
+              <p>
+                <span class="text-[var(--ink-soft)]">Prepared by </span>
+                <span class="font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span>
+                <span class="text-[var(--ink-soft)]"> · for </span>
+                <span class="font-medium text-[var(--ink)]" x-text="data.meta.audience"></span>
+                <span class="text-[var(--ink-soft)]" x-show="data.meta.companyName"> · </span>
+                <span class="font-medium text-[var(--ink)]" x-show="data.meta.companyName" x-text="data.meta.companyName"></span>
+                <span class="text-[var(--ink-soft)]"> · appendix on page 2</span>
+              </p>
+              <p class="flex items-center gap-2">
+                <span x-show="data.meta.confidential" class="text-[8.5pt] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style="color: var(--accent-red); border: 1px solid var(--accent-red);">Confidential</span>
+                <span class="serif italic text-[var(--ink-soft)]">One page. One decision. Ninety seconds.</span>
+              </p>
+            </footer>
+          </div>
+        </article>
+      </div>
+
+      <!-- PAGE 2 -->
+      <div class="preview-frame" :style="`transform: scale(${zoom})`">
+        <article class="a4">
+          <div class="a4-inner">
+            <header class="flex items-end justify-between pb-2 mb-3 border-b border-[var(--hair)]">
+              <div>
+                <p class="eyebrow text-[var(--ink-soft)] mb-1">Context &amp; background</p>
+                <h1 class="text-[20pt] tight font-medium leading-[1]">
+                  <span class="serif italic font-normal text-[var(--ink-soft)]">Behind</span> <span x-text="data.meta.title"></span>
+                </h1>
+              </div>
+              <div class="text-right space-y-0.5">
+                <p class="text-[10pt] font-medium text-[var(--ink)]" x-text="`For ${data.meta.audience}`"></p>
+                <p class="text-[9pt] text-[var(--ink)]" x-text="`Prepared by ${data.meta.authorName}`"></p>
+                <p class="text-[8pt] text-[var(--ink-soft)] mt-1">Page 2 of 2</p>
+                <p class="text-[8pt] text-[var(--ink-soft)]" x-text="`Read time · ~${page2ReadMinutes()} min`"></p>
+              </div>
+            </header>
+
+            <div class="editorial flex-1 overflow-hidden">
+              <h3>Background &amp; history</h3>
+              <p x-text="data.context.background"></p>
+
+              <h3>Problem statement</h3>
+              <p x-text="data.context.problem"></p>
+
+              <h3>Stakeholders</h3>
+              <div>
+                <template x-for="s in data.context.stakeholders" :key="s.name">
+                  <div class="stake-row">
+                    <span x-text="s.name" class="font-medium"></span>
+                    <span x-text="s.role" class="text-[var(--ink-soft)]"></span>
+                  </div>
+                </template>
+              </div>
+
+              <h3>Detailed considerations</h3>
+              <ul>
+                <template x-for="c in data.context.considerations" :key="c"><li x-text="c"></li></template>
+              </ul>
+
+              <h3>Alternatives considered</h3>
+              <div>
+                <template x-for="a in data.context.alternatives" :key="a.option">
+                  <div class="stake-row">
+                    <span x-text="a.option" class="font-medium"></span>
+                    <span x-text="a.reason" class="text-[var(--ink-soft)]"></span>
+                  </div>
+                </template>
+              </div>
+
+              <h3>Risks &amp; mitigations</h3>
+              <div>
+                <template x-for="r in data.context.risks" :key="r.risk">
+                  <div class="stake-row">
+                    <span x-text="r.risk" class="font-medium"></span>
+                    <span x-text="r.mitigation" class="text-[var(--ink-soft)]"></span>
+                  </div>
+                </template>
+              </div>
+
+              <h3>Supporting data</h3>
+              <p x-text="data.context.supportingData"></p>
+            </div>
+
+            <footer class="mt-2 pt-2 border-t border-[var(--hair)] flex items-center justify-between text-[8.5pt]">
+              <p>
+                <span class="text-[var(--ink-soft)]">Prepared by </span>
+                <span class="font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span>
+                <span class="text-[var(--ink-soft)]" x-show="data.meta.companyName"> · </span>
+                <span class="font-medium text-[var(--ink)]" x-show="data.meta.companyName" x-text="data.meta.companyName"></span>
+                <span class="text-[var(--ink-soft)]"> · </span>
+                <span x-text="formatDate(data.meta.date)" class="text-[var(--ink-soft)]"></span>
+              </p>
+              <p class="flex items-center gap-2">
+                <span x-show="data.meta.confidential" class="text-[8.5pt] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style="color: var(--accent-red); border: 1px solid var(--accent-red);">Confidential</span>
+                <span class="serif italic text-[var(--ink-soft)]">For discussion · contact <span class="not-italic font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span></span>
+              </p>
+            </footer>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- Sample-text confirmation modal -->
+<div class="modal-backdrop" x-show="showSampleModal" x-cloak @keydown.escape.window="showSampleModal = false" @click.self="showSampleModal = false">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="sampleModalTitle">
+    <h2 id="sampleModalTitle" data-i18n="modal.sampleTitle">Load sample text?</h2>
+    <p data-i18n-html="modal.sampleWhat"><strong>What this does:</strong> fills every field with placeholder content.</p>
+    <p data-i18n-html="modal.sampleWhen"><strong>When it's useful:</strong> seeing the layout fully populated, checking how long text wraps, or starting fresh with a structured outline you can then edit.</p>
+    <div class="modal-warn" data-i18n-html="modal.sampleWarn"><strong>Heads up:</strong> this replaces every field with sample text and clears the uploaded image. Anything you haven't saved as a project file will be lost. To keep your current work, click Cancel and use <em>Save Project</em> first.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" @click="showSampleModal = false" data-i18n="modal.cancel">Cancel</button>
+      <button class="btn btn-primary" @click="loadSample()" data-i18n="modal.confirm">Replace with sample</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function briefingApp() {
+  return {
+    templateId: 'bento-light',
+    editorMode: 'dark',
+    paperSize: 'A3',
+    uiScale: 100,
+    page: 1,
+    zoom: 0.78,
+    saveStatus: '',
+    showSampleModal: false,
+    formPaneWidth: 420,
+    templates: [
+      { id: 'bento-light', name: 'Apple Bento' },
+      { id: 'print-classic', name: 'Print Classic' }
+    ],
+    data: sampleData(),
+
+    init() {
+      // Handoff from main.html: ?new=1 starts fresh with sample data; sessionStorage 'briefing-import' overrides
+      const params = new URLSearchParams(window.location.search);
+      const handoff = sessionStorage.getItem('briefing-import');
+      if (handoff) {
+        try { this.data = JSON.parse(handoff); } catch(e) {}
+        sessionStorage.removeItem('briefing-import');
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (params.get('new') === '1') {
+        this.data = sampleData();
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      const saved = localStorage.getItem('briefing-data');
+      const tpl = localStorage.getItem('briefing-template');
+      if (!handoff && params.get('new') !== '1' && saved) { try { this.data = JSON.parse(saved); } catch(e) {} }
+      if (!this.data.commentary) this.data.commentary = { heading: 'Commentary', p1: '', p2: '' };
+      if (this.data.metric && this.data.metric.image === undefined) this.data.metric.image = null;
+      if (this.data.meta && this.data.meta.companyName === undefined) this.data.meta.companyName = '';
+      if (this.data.meta && this.data.meta.confidential === undefined) this.data.meta.confidential = true;
+      if (this.data.metric && !this.data.metric.orientation) this.data.metric.orientation = 'vertical';
+      if (this.data.metric && !this.data.metric.imageFit) this.data.metric.imageFit = 'cover';
+      if (tpl && tpl !== 'bento-dark') this.templateId = tpl;
+      const em = localStorage.getItem('briefing-editor-mode');
+      if (em === 'light' || em === 'dark') this.editorMode = em;
+      const ps = localStorage.getItem('briefing-paper-size');
+      if (ps === 'A4' || ps === 'A3') this.paperSize = ps;
+      const us = parseInt(localStorage.getItem('briefing-ui-scale'), 10);
+      if (!isNaN(us) && us >= 80 && us <= 200) this.uiScale = us;
+      const fw = parseInt(localStorage.getItem('briefing-form-width'), 10);
+      if (!isNaN(fw) && fw >= 280 && fw <= 800) this.formPaneWidth = fw;
+      this.applyPageSize();
+      this.applyUiScale();
+      this.fitZoom();
+      window.addEventListener('resize', () => this.fitZoom());
+      this.$watch('data', () => this.persist(), { deep: true });
+      this.$watch('templateId', v => localStorage.setItem('briefing-template', v));
+      this.$watch('editorMode', v => localStorage.setItem('briefing-editor-mode', v));
+      this.$watch('paperSize', v => { localStorage.setItem('briefing-paper-size', v); this.applyPageSize(); this.fitZoom(); });
+      this.$watch('uiScale', v => { localStorage.setItem('briefing-ui-scale', v); this.applyUiScale(); });
+      this.initClearButtons();
+      const initLangPicker = () => {
+        const sel = document.getElementById('lang-picker');
+        if (sel && window.I18N) sel.value = window.I18N.current;
+      };
+      const reapplyI18n = () => { if (window.I18N) window.I18N.apply(window.I18N.current); };
+      setTimeout(() => { initLangPicker(); reapplyI18n(); }, 150);
+      setTimeout(reapplyI18n, 500);
+      window.addEventListener('i18n:changed', initLangPicker);
+    },
+
+    initClearButtons() {
+      const skip = new Set(['file', 'range', 'date', 'color', 'checkbox', 'radio']);
+      const layoutRe = /^(col-span-|row-span-|col-start-|col-end-|row-start-|row-end-|justify-self-|self-)/;
+      const wrap = (el) => {
+        if (el.dataset.clearBound) return;
+        if (el.tagName === 'SELECT') return;
+        if (skip.has(el.type)) return;
+        if (el.closest('.field-clear-wrap')) return;
+        el.dataset.clearBound = '1';
+        const w = document.createElement('div');
+        w.className = 'field-clear-wrap';
+        // Move grid/flex layout classes from the input to the wrapper so layout is preserved
+        Array.from(el.classList).filter(c => layoutRe.test(c)).forEach(c => {
+          w.classList.add(c);
+          el.classList.remove(c);
+        });
+        el.parentNode.insertBefore(w, el);
+        w.appendChild(el);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '×';
+        btn.className = 'field-clear';
+        btn.tabIndex = -1;
+        btn.title = 'Clear field';
+        btn.addEventListener('mousedown', e => e.preventDefault());
+        btn.addEventListener('click', () => {
+          el.value = '';
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          el.focus();
+        });
+        w.appendChild(btn);
+        const upd = () => { btn.style.display = el.value ? 'inline-flex' : 'none'; };
+        el.addEventListener('input', upd);
+        upd();
+      };
+      const scan = () => document.querySelectorAll('.app-input, .app-textarea').forEach(wrap);
+      setTimeout(scan, 0);
+      new MutationObserver(() => scan()).observe(document.body, { childList: true, subtree: true });
+    },
+
+    fitZoom() {
+      const pane = document.querySelector('.preview-pane');
+      if (!pane) return;
+      const w = pane.clientWidth - 36;
+      const paperWmm = this.paperSize === 'A4' ? 210 : 297;
+      this.zoom = Math.min(1, w / (paperWmm * 3.78));
+    },
+
+    applyPageSize() {
+      const el = document.getElementById('pageSizeRule');
+      if (el) el.textContent = `@media print { @page { size: ${this.paperSize} portrait; margin: 0; } }`;
+      document.body.classList.remove('paper-A3', 'paper-A4');
+      document.body.classList.add('paper-' + this.paperSize);
+    },
+
+    applyUiScale() {
+      document.documentElement.style.setProperty('--ui-scale', this.uiScale / 100);
+    },
+
+    startResize(ev) {
+      ev.preventDefault();
+      const startX = ev.clientX;
+      const startW = this.formPaneWidth;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      const onMove = e => {
+        this.formPaneWidth = Math.max(280, Math.min(800, startW + (e.clientX - startX)));
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        localStorage.setItem('briefing-form-width', this.formPaneWidth);
+        this.fitZoom();
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+
+    persist() {
+      localStorage.setItem('briefing-data', JSON.stringify(this.data));
+      this.saveStatus = 'Saved';
+      clearTimeout(this._t);
+      this._t = setTimeout(() => this.saveStatus = '', 1200);
+    },
+
+    emphasize(text, sub) {
+      if (!text) return '';
+      const safe = String(text).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      if (!sub) return safe;
+      const safeSub = String(sub).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      const re = new RegExp('(' + safeSub.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'i');
+      return safe.replace(re, '<span class="serif italic font-normal text-[var(--ink-soft)]">$1</span>');
+    },
+
+    wordCount(s) {
+      if (!s) return 0;
+      return String(s).trim().split(/\s+/).filter(Boolean).length;
+    },
+
+    metricFontSize() {
+      const val = String(this.data.metric.value || '');
+      const unit = String(this.data.metric.unit || '');
+      const len = val.length + unit.length;
+      if (len <= 3)  return 64;
+      if (len <= 4)  return 56;
+      if (len <= 5)  return 48;
+      if (len <= 6)  return 42;
+      if (len <= 8)  return 34;
+      if (len <= 10) return 28;
+      return 22;
+    },
+
+    page1Words() {
+      const d = this.data;
+      let parts = [
+        d.bluf.eyebrow, d.bluf.headline, d.bluf.supporting,
+        d.metric.label, d.metric.value, d.metric.unit, d.metric.caption,
+        d.commentary?.heading, d.commentary?.p1, d.commentary?.p2,
+        d.fiveWsH.what, d.fiveWsH.why, d.fiveWsH.who, d.fiveWsH.when, d.fiveWsH.where, d.fiveWsH.how,
+        ...d.pros, ...d.cons,
+        d.cta.eyebrow, d.cta.headline, d.cta.buttonText
+      ];
+      d.timeline.phases.forEach(p => parts.push(p.label, p.title, p.description));
+      return parts.reduce((sum, s) => sum + this.wordCount(s), 0);
+    },
+
+    page2Words() {
+      const c = this.data.context;
+      let n = this.wordCount(c.background) + this.wordCount(c.problem) + this.wordCount(c.supportingData);
+      c.stakeholders.forEach(s => n += this.wordCount(s.name) + this.wordCount(s.role));
+      c.considerations.forEach(s => n += this.wordCount(s));
+      c.alternatives.forEach(a => n += this.wordCount(a.option) + this.wordCount(a.reason));
+      c.risks.forEach(r => n += this.wordCount(r.risk) + this.wordCount(r.mitigation));
+      return n;
+    },
+
+    page1ReadTime() {
+      const wpm = 230;
+      const seconds = Math.round((this.page1Words() / wpm) * 60);
+      return Math.max(15, Math.round(seconds / 5) * 5);
+    },
+
+    page2ReadMinutes() {
+      const wpm = 220;
+      const minutes = this.page2Words() / wpm;
+      return Math.max(1, Math.round(minutes));
+    },
+
+    formatDate(iso) {
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      } catch(e) { return iso; }
+    },
+
+    loadSample() {
+      this.data = sampleData();
+      this.showSampleModal = false;
+    },
+
+    exportJson() {
+      const blob = new Blob([JSON.stringify(this.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'exec-' + (this.data.meta.title || 'briefing').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+
+    importJson(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try { this.data = JSON.parse(r.result); } catch(err) { alert('Invalid JSON'); }
+      };
+      r.readAsText(f);
+      e.target.value = '';
+    },
+
+    readImage(e, key) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        if (key === 'metric') this.data.metric.image = r.result;
+      };
+      r.readAsDataURL(f);
+      e.target.value = '';
+    }
+  };
+}
+
+function sampleData() {
+  return {
+    meta: {
+      title: 'Oven Line 3 Upgrade',
+      subtitle: 'Project',
+      authorName: 'Operations team',
+      date: '2026-04-25',
+      audience: 'the leadership team',
+      decisionBy: '2026-06-30',
+      readTimeSeconds: 90,
+      companyName: 'Cookie Co.',
+      confidential: true
+    },
+    bluf: {
+      eyebrow: 'The bottom line',
+      headline: 'Approve a €240k upgrade of Oven Line 3 to lift output by 35% before peak season.',
+      headlineEmphasis: '€240k',
+      supporting: 'Line 3 is the bottleneck in chocolate-chip and oat-raisin production. The new tunnel oven delivers 35% more bakes per hour, cuts gas use by 18%, and pays back in 11 months. Without it, we cannot honour the November DACH supermarket contracts.'
+    },
+    metric: {
+      label: 'Payback', value: '11', unit: 'months', caption: 'Break-even on the €240k investment',
+      image: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><rect width="400" height="260" fill="#fdf6e3"/><circle cx="200" cy="130" r="78" fill="#c08648"/><circle cx="200" cy="130" r="78" fill="none" stroke="#7a4d22" stroke-width="3"/><circle cx="170" cy="105" r="8" fill="#3a2410"/><circle cx="225" cy="118" r="6" fill="#3a2410"/><circle cx="190" cy="150" r="9" fill="#3a2410"/><circle cx="222" cy="158" r="5" fill="#3a2410"/><circle cx="155" cy="138" r="6" fill="#3a2410"/><circle cx="210" cy="92" r="5" fill="#3a2410"/><text x="200" y="232" font-family="Geist, sans-serif" font-size="22" font-weight="600" fill="#3a2410" text-anchor="middle" letter-spacing="2">COOKIE&#160;CO.</text><text x="200" y="248" font-family="Geist, sans-serif" font-size="9" fill="#7a4d22" text-anchor="middle" letter-spacing="3">EST. 2012</text></svg>`),
+      orientation: 'horizontal', imageFit: 'cover'
+    },
+    commentary: {
+      heading: 'Why now',
+      p1: 'Cookie demand for Q4 is already 22% above last year and three of our biggest retail accounts have signed firm orders for the November shelf reset. Line 3 is the constraint — it produces 38% of total volume but runs at 94% utilisation on day shifts and breaks down twice a week on average.',
+      p2: 'Replacing the 14-year-old conveyor oven with a modern tunnel oven is the cheapest way to lift capacity without adding a third shift. The vendor has a slot in their build queue for August; if we miss it, the next install window is February — too late for this year.'
+    },
+    fiveWsH: {
+      what: 'Replace the conveyor oven on Line 3 with a tunnel oven',
+      why: 'Q4 demand exceeds current capacity by 28%',
+      who: 'Operations · 2 engineers · 1 line lead',
+      when: 'Install Aug 2026 · ramp Sep 2026',
+      where: 'Bakery 1, Production Hall B',
+      how: 'Vendor-led install during 2-week scheduled shutdown'
+    },
+    pros: ['+35% bakes per hour on Line 3', '−18% gas consumption per kg of cookie', 'Honours signed Q4 DACH retail contracts', 'Removes a recurring breakdown root cause'],
+    cons: ['2-week production shutdown during install', '€240k capex hits Q3 cash flow', 'Operators need 5 days of retraining'],
+    timeline: {
+      phases: [
+        { label: 'Phase 01', title: 'June',      description: 'Vendor contract & deposit',          progress: 100 },
+        { label: 'Phase 02', title: 'August',    description: 'Decommission old oven, install new', progress: 50 },
+        { label: 'Phase 03', title: 'September', description: 'Trial bakes, recipe tuning, ramp',   progress: 20 },
+        { label: 'Phase 04', title: 'November',  description: 'Full Q4 production at new capacity', progress: 0 }
+      ]
+    },
+    cta: {
+      eyebrow: 'The ask',
+      headline: 'Approve €240k capex. Sign by 30 June.',
+      headlineEmphasis: 'Sign by 30 June.',
+      buttonText: 'Decision by 30 Jun'
+    },
+    context: {
+      background: 'The current Line 3 conveyor oven was installed in 2012 and has been the production bottleneck for the last three quarters. We have already optimised the recipe handover, the depositor speed, and the cooling tunnel — the oven itself is the remaining constraint. Maintenance hours on it have doubled year-over-year and a 2025 thermal audit flagged the heating elements as end-of-life.',
+      problem: 'We cannot bake enough chocolate-chip and oat-raisin cookies during Q4 to meet the demand we have already won. In November 2025 we missed 4 days of orders to two large supermarket chains and paid €31k in late-delivery penalties. The same accounts have ordered 28% more volume for November 2026 — meaning the same shortfall would now cost roughly €70k in penalties plus reputation damage at exactly the wrong moment.',
+      stakeholders: [
+        { name: 'CEO', role: 'Approves capex above €200k' },
+        { name: 'Head of Operations', role: 'Owns delivery & install' },
+        { name: 'Head of Finance', role: 'Cash-flow planning' },
+        { name: 'Plant safety officer', role: 'Sign-off on commissioning' },
+        { name: 'Procurement', role: 'Vendor contract & SLAs' }
+      ],
+      considerations: [
+        'Vendor build slot is held for us until 30 June — slot lost after that.',
+        'August shutdown overlaps with the planned annual maintenance week, so we lose only 1 extra production week instead of 2.',
+        'New oven uses the same gas connection and floor footprint — no facility-side modifications needed.',
+        'Insurance discount of ~€4k/yr applies once the old oven is decommissioned (it is on the carrier\'s watchlist).'
+      ],
+      alternatives: [
+        { option: 'Add a third shift on Line 3', reason: 'Solves capacity short-term but costs €180k/yr in overtime and burns out the team; does not fix breakdown frequency.' },
+        { option: 'Outsource Q4 overflow to a co-packer', reason: 'Co-packers quoted €0.42/cookie vs our €0.18 cost; eats the entire Q4 margin.' },
+        { option: 'Refurbish the existing oven', reason: 'Vendor estimate €90k for a refurb that buys 18 months. New oven cost-per-year is lower over a 10-year horizon.' }
+      ],
+      risks: [
+        { risk: 'Install overruns the 2-week shutdown window', mitigation: 'Contract includes a daily €4k late-delivery clause; co-packer on standby for 1-week overflow.' },
+        { risk: 'New oven needs recipe re-tuning beyond expected', mitigation: 'Two-week soft-launch with limited SKUs before retail orders ramp; food technologist embedded for first 30 days.' },
+        { risk: 'Q3 cash flow tightens', mitigation: 'Vendor accepts 30% deposit / 50% on commissioning / 20% on acceptance — spreads the hit across two quarters.' }
+      ],
+      supportingData: 'Production logs Q1 2026: Line 3 averaged 1,420 kg/h, target 1,920 kg/h. Breakdown register: 9 unplanned stops in March alone, mean 2.4h each = 21.6 lost production hours = ~31,000 kg of cookies. Vendor reference visit (DE): identical oven running 4,200h/year with two scheduled service windows; no unplanned stops in Y1 or Y2.'
+    }
+  };
+}
+</script>
+
+</body>
+</html>

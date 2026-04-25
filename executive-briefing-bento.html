@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Executive Briefing — Project Atlas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000;
+    --tile-light: #f5f5f7;
+    --tile-dark: #1d1d1f;
+    --text-dim: rgba(245,245,247,0.5);
+  }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif; background: #000; }
+  .serif { font-family: 'Instrument Serif', serif; }
+  .tile { border-radius: 28px; padding: 32px; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+  @media (min-width: 768px) { .tile { padding: 40px; } }
+  .tile:hover { transform: translateY(-2px); }
+  .tnum { font-feature-settings: "tnum", "ss01"; letter-spacing: -0.05em; }
+  .tight { letter-spacing: -0.035em; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; }
+  .reveal { opacity: 0; transform: translateY(24px); animation: reveal .9s cubic-bezier(.22,1,.36,1) forwards; }
+  @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+  .r1 { animation-delay: .05s } .r2 { animation-delay: .12s } .r3 { animation-delay: .19s }
+  .r4 { animation-delay: .26s } .r5 { animation-delay: .33s } .r6 { animation-delay: .4s }
+  .r7 { animation-delay: .47s } .r8 { animation-delay: .54s }
+  .grad-pros { background: radial-gradient(circle at 20% 0%, #133d23 0%, #0a2614 60%, #061a0e 100%); }
+  .grad-cons { background: radial-gradient(circle at 80% 0%, #3d2113 0%, #26140a 60%, #1a0e06 100%); }
+  .grad-cta { background: radial-gradient(circle at 70% 30%, #1d3a5f 0%, #0f1f3a 60%, #050c1a 100%); }
+  .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; margin-right: 10px; vertical-align: middle; }
+  .timeline-bar { height: 2px; background: linear-gradient(to right, #000 var(--p,40%), rgba(0,0,0,0.12) var(--p,40%)); }
+</style>
+</head>
+<body class="text-white">
+
+<main class="max-w-[1280px] mx-auto px-5 md:px-10 py-10 md:py-16">
+
+  <!-- Page header -->
+  <header class="reveal r1 mb-10 md:mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+    <div>
+      <p class="eyebrow text-white/40 mb-4">Executive briefing &middot; Q3 2026</p>
+      <h1 class="text-5xl md:text-7xl font-medium tight">
+        <span class="serif italic font-normal text-white/70">Project</span> Atlas
+      </h1>
+    </div>
+    <div class="text-sm text-white/40 md:text-right space-y-1">
+      <p>For the leadership team</p>
+      <p>Read time &middot; 90 seconds</p>
+      <p>Decision needed by 15 July</p>
+    </div>
+  </header>
+
+  <!-- Bento grid -->
+  <section class="grid grid-cols-12 gap-3 md:gap-5">
+
+    <!-- 1. BLUF — hero tile -->
+    <article class="reveal r2 col-span-12 md:col-span-8 tile bg-[var(--tile-light)] text-[#1d1d1f] min-h-[280px] flex flex-col justify-between">
+      <p class="eyebrow text-black/40">The bottom line</p>
+      <div class="mt-8 md:mt-0">
+        <h2 class="text-3xl md:text-5xl font-medium tight leading-[1.05]">
+          Approve a <span class="serif italic font-normal">&euro;120k</span> pilot of unified analytics across EU markets.
+        </h2>
+        <p class="text-base md:text-lg text-black/55 mt-6 max-w-2xl">
+          Expected payback in nine months. Removes three legacy tools. Unblocks the Q4 retention initiative.
+        </p>
+      </div>
+    </article>
+
+    <!-- 2. Headline number -->
+    <article class="reveal r3 col-span-12 md:col-span-4 tile bg-[var(--tile-dark)] flex flex-col justify-between min-h-[280px]">
+      <p class="eyebrow text-white/40">Payback</p>
+      <div>
+        <p class="text-[88px] md:text-[120px] font-medium tnum leading-none">9<span class="text-white/30">mo</span></p>
+        <p class="text-sm text-white/50 mt-3">Break-even projection</p>
+      </div>
+    </article>
+
+    <!-- 3. The 5 Ws + H -->
+    <article class="reveal r4 col-span-12 md:col-span-7 tile bg-[var(--tile-dark)]">
+      <p class="eyebrow text-white/40 mb-8">The crucial details &middot; <span class="serif italic font-normal normal-case tracking-normal text-white/60">5 Ws + H</span></p>
+      <dl class="grid grid-cols-2 gap-x-8 gap-y-5">
+        <div class="border-b border-white/10 pb-4">
+          <dt class="text-xs text-white/40 mb-2">What</dt>
+          <dd class="text-base">Unified analytics platform pilot</dd>
+        </div>
+        <div class="border-b border-white/10 pb-4">
+          <dt class="text-xs text-white/40 mb-2">Why</dt>
+          <dd class="text-base">Tool sprawl costs &euro;40k/yr</dd>
+        </div>
+        <div class="border-b border-white/10 pb-4">
+          <dt class="text-xs text-white/40 mb-2">Who</dt>
+          <dd class="text-base">Data team &middot; 3 FTE</dd>
+        </div>
+        <div class="border-b border-white/10 pb-4">
+          <dt class="text-xs text-white/40 mb-2">When</dt>
+          <dd class="text-base">Aug &rarr; Dec 2026</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-white/40 mb-2">Where</dt>
+          <dd class="text-base">DE, FR, NL markets</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-white/40 mb-2">How</dt>
+          <dd class="text-base">Phased rollout via vendor X</dd>
+        </div>
+      </dl>
+    </article>
+
+    <!-- 4. Pros + Cons stacked -->
+    <div class="col-span-12 md:col-span-5 grid gap-3 md:gap-5">
+      <article class="reveal r5 tile grad-pros text-[#9bd9b3]">
+        <div class="flex items-center justify-between mb-5">
+          <p class="eyebrow">Pros</p>
+          <span class="serif italic text-white/40 text-sm">upside</span>
+        </div>
+        <ul class="space-y-3 text-sm">
+          <li><span class="dot bg-[#5cd58a]"></span><span class="text-white/85">&euro;40k/yr SaaS savings</span></li>
+          <li><span class="dot bg-[#5cd58a]"></span><span class="text-white/85">Single source of truth</span></li>
+          <li><span class="dot bg-[#5cd58a]"></span><span class="text-white/85">Unblocks Q4 retention work</span></li>
+        </ul>
+      </article>
+      <article class="reveal r6 tile grad-cons text-[#e8b89a]">
+        <div class="flex items-center justify-between mb-5">
+          <p class="eyebrow">Cons</p>
+          <span class="serif italic text-white/40 text-sm">risks</span>
+        </div>
+        <ul class="space-y-3 text-sm">
+          <li><span class="dot bg-[#e08055]"></span><span class="text-white/85">6-week migration risk</span></li>
+          <li><span class="dot bg-[#e08055]"></span><span class="text-white/85">Team retraining effort</span></li>
+          <li><span class="dot bg-[#e08055]"></span><span class="text-white/85">Vendor lock-in concerns</span></li>
+        </ul>
+      </article>
+    </div>
+
+    <!-- 5. Timeline -->
+    <article class="reveal r7 col-span-12 md:col-span-8 tile bg-[var(--tile-light)] text-[#1d1d1f]">
+      <div class="flex items-center justify-between mb-8">
+        <p class="eyebrow text-black/40">Timeline</p>
+        <p class="text-xs text-black/40 serif italic">5 months &middot; 4 phases</p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <div>
+          <p class="text-xs text-black/40 mb-1">Phase 01</p>
+          <p class="text-2xl font-medium tight mb-2">August</p>
+          <div class="timeline-bar" style="--p:100%"></div>
+          <p class="text-xs text-black/55 mt-3">Vendor selection &amp; contracts</p>
+        </div>
+        <div>
+          <p class="text-xs text-black/40 mb-1">Phase 02</p>
+          <p class="text-2xl font-medium tight mb-2">September</p>
+          <div class="timeline-bar" style="--p:60%"></div>
+          <p class="text-xs text-black/55 mt-3">Pilot in DE market</p>
+        </div>
+        <div>
+          <p class="text-xs text-black/40 mb-1">Phase 03</p>
+          <p class="text-2xl font-medium tight mb-2">October</p>
+          <div class="timeline-bar" style="--p:30%"></div>
+          <p class="text-xs text-black/55 mt-3">Roll out to FR &amp; NL</p>
+        </div>
+        <div>
+          <p class="text-xs text-black/40 mb-1">Phase 04</p>
+          <p class="text-2xl font-medium tight mb-2">December</p>
+          <div class="timeline-bar" style="--p:10%"></div>
+          <p class="text-xs text-black/55 mt-3">Review &amp; expand decision</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- 6. The Ask / Recommendation CTA -->
+    <article class="reveal r8 col-span-12 md:col-span-4 tile grad-cta flex flex-col justify-between min-h-[260px]">
+      <p class="eyebrow text-white/50">The ask</p>
+      <div>
+        <h3 class="text-3xl md:text-4xl font-medium tight leading-tight">
+          Approve pilot. <span class="serif italic font-normal text-white/70">Start August.</span>
+        </h3>
+        <button class="mt-6 inline-flex items-center gap-2 bg-white text-black px-5 py-3 rounded-full text-sm font-medium hover:bg-white/90 transition">
+          Decision by 15 Jul
+          <span aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- Footer -->
+  <footer class="reveal r8 mt-12 md:mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs text-white/40">
+    <p>Prepared by Strategy &middot; Appendix and full data on request</p>
+    <p class="serif italic text-white/50">One page. One decision. Ninety seconds.</p>
+  </footer>
+
+</main>
+
+</body>
+</html>

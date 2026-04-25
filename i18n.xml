@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  R's Briefing Studio — UI translation table.
+
+  How to add or change a translation:
+    1. Find the <string key="..."> entry you want.
+    2. Update the language tag inside it: <en/>, <de/>, <it/>, <hr/>.
+    3. To add a new language, add a new tag (e.g. <fr>...</fr>) inside every <string>
+       AND extend i18n.js → I18N.languages and I18N.languageNames.
+    4. To add a new UI string, add a new <string key="some.unique.key"> with all four
+       (or more) language children, then mark the corresponding HTML element with
+       data-i18n="some.unique.key".
+
+  Language codes:  en = English  ·  de = Deutsch  ·  it = Italiano  ·  hr = Hrvatski
+-->
+<translations>
+
+  <!-- Chrome buttons / labels -->
+  <string key="ui.switch">
+    <en>Switch</en><de>Wechseln</de><it>Cambia</it><hr>Promijeni</hr>
+  </string>
+  <string key="ui.darkmode">
+    <en>☾ Dark</en><de>☾ Dunkel</de><it>☾ Scuro</it><hr>☾ Tamno</hr>
+  </string>
+  <string key="ui.lightmode">
+    <en>☀ Light</en><de>☀ Hell</de><it>☀ Chiaro</it><hr>☀ Svijetlo</hr>
+  </string>
+  <string key="ui.textsize">
+    <en>Text size</en><de>Textgröße</de><it>Dimensione testo</it><hr>Veličina teksta</hr>
+  </string>
+  <string key="ui.papersize">
+    <en>Paper size</en><de>Papierformat</de><it>Formato carta</it><hr>Format papira</hr>
+  </string>
+  <string key="ui.sampletext">
+    <en>Sample text</en><de>Beispieltext</de><it>Testo di esempio</it><hr>Primjer teksta</hr>
+  </string>
+  <string key="ui.saveproject">
+    <en>Save Project</en><de>Projekt speichern</de><it>Salva progetto</it><hr>Spremi projekt</hr>
+  </string>
+  <string key="ui.loadproject">
+    <en>Load Project</en><de>Projekt laden</de><it>Carica progetto</it><hr>Učitaj projekt</hr>
+  </string>
+  <string key="ui.printpdf">
+    <en>Print / PDF</en><de>Drucken / PDF</de><it>Stampa / PDF</it><hr>Ispis / PDF</hr>
+  </string>
+  <string key="ui.template">
+    <en>Template</en><de>Vorlage</de><it>Modello</it><hr>Predložak</hr>
+  </string>
+  <string key="ui.about">
+    <en>About</en><de>Über</de><it>Informazioni</it><hr>O aplikaciji</hr>
+  </string>
+  <string key="ui.language">
+    <en>Language</en><de>Sprache</de><it>Lingua</it><hr>Jezik</hr>
+  </string>
+
+  <!-- Mode tags -->
+  <string key="mode.executive">
+    <en>Executive Level Reporting</en>
+    <de>Berichterstattung Führungsebene</de>
+    <it>Reportistica direzionale</it>
+    <hr>Izvještavanje izvršne razine</hr>
+  </string>
+  <string key="mode.engineering">
+    <en>Engineering Reporting</en>
+    <de>Technische Berichterstattung</de>
+    <it>Reportistica ingegneristica</it>
+    <hr>Inženjersko izvještavanje</hr>
+  </string>
+
+  <!-- Switch dropdown -->
+  <string key="switch.executiveDesc">
+    <en>Decision-focused for leadership</en>
+    <de>Entscheidungsorientiert für Führungskräfte</de>
+    <it>Orientato alle decisioni per la leadership</it>
+    <hr>Usmjereno na odluke za vodstvo</hr>
+  </string>
+  <string key="switch.engineeringDesc">
+    <en>Technical depth for reviewers</en>
+    <de>Technische Tiefe für Prüfer</de>
+    <it>Approfondimento tecnico per i revisori</it>
+    <hr>Tehnička dubina za recenzente</hr>
+  </string>
+  <string key="switch.home">
+    <en>Home</en><de>Start</de><it>Home</it><hr>Početna</hr>
+  </string>
+  <string key="switch.homeDesc">
+    <en>Project picker / load existing</en>
+    <de>Projektauswahl / vorhandenes laden</de>
+    <it>Selettore progetto / carica esistente</it>
+    <hr>Odabir projekta / učitaj postojeći</hr>
+  </string>
+
+  <!-- Form section headings — Executive -->
+  <string key="section.meta">
+    <en>Meta</en><de>Meta</de><it>Meta</it><hr>Meta</hr>
+  </string>
+  <string key="section.bluf">
+    <en>Bottom line up front</en>
+    <de>Kernaussage zuerst</de>
+    <it>Conclusione in apertura</it>
+    <hr>Glavna poruka odmah</hr>
+  </string>
+  <string key="section.metric">
+    <en>Headline metric</en>
+    <de>Schlagzahl</de>
+    <it>Metrica chiave</it>
+    <hr>Glavna metrika</hr>
+  </string>
+  <string key="section.commentary">
+    <en>Commentary</en><de>Kommentar</de><it>Commento</it><hr>Komentar</hr>
+  </string>
+  <string key="section.fivewh">
+    <en>5 Ws + H</en><de>5 Ws + H</de><it>5 W + H</it><hr>5 P + K</hr>
+  </string>
+  <string key="section.pros">
+    <en>Pros (2–4)</en><de>Pro (2–4)</de><it>Pro (2–4)</it><hr>Za (2–4)</hr>
+  </string>
+  <string key="section.cons">
+    <en>Cons (2–4)</en><de>Kontra (2–4)</de><it>Contro (2–4)</it><hr>Protiv (2–4)</hr>
+  </string>
+  <string key="section.timeline">
+    <en>Timeline (4 phases)</en>
+    <de>Zeitplan (4 Phasen)</de>
+    <it>Cronologia (4 fasi)</it>
+    <hr>Vremenska linija (4 faze)</hr>
+  </string>
+  <string key="section.cta">
+    <en>The Ask / CTA</en>
+    <de>Die Bitte / CTA</de>
+    <it>La richiesta / CTA</it>
+    <hr>Zahtjev / CTA</hr>
+  </string>
+  <string key="section.context">
+    <en>Page 2 — Context</en>
+    <de>Seite 2 — Kontext</de>
+    <it>Pagina 2 — Contesto</it>
+    <hr>Stranica 2 — Kontekst</hr>
+  </string>
+
+  <!-- Form section headings — Engineering -->
+  <string key="section.proposal">
+    <en>Technical proposal</en>
+    <de>Technischer Vorschlag</de>
+    <it>Proposta tecnica</it>
+    <hr>Tehnički prijedlog</hr>
+  </string>
+  <string key="section.effort">
+    <en>Effort</en><de>Aufwand</de><it>Sforzo</it><hr>Trud</hr>
+  </string>
+  <string key="section.changes">
+    <en>What changes</en>
+    <de>Was sich ändert</de>
+    <it>Cosa cambia</it>
+    <hr>Što se mijenja</hr>
+  </string>
+  <string key="section.costvalue">
+    <en>Cost &amp; value</en>
+    <de>Kosten &amp; Wert</de>
+    <it>Costo e valore</it>
+    <hr>Trošak i vrijednost</hr>
+  </string>
+  <string key="section.tradeoffs">
+    <en>Trade-offs</en>
+    <de>Abwägungen</de>
+    <it>Compromessi</it>
+    <hr>Kompromisi</hr>
+  </string>
+  <string key="section.risks">
+    <en>Risks</en><de>Risiken</de><it>Rischi</it><hr>Rizici</hr>
+  </string>
+  <string key="section.questions">
+    <en>Open questions</en>
+    <de>Offene Fragen</de>
+    <it>Domande aperte</it>
+    <hr>Otvorena pitanja</hr>
+  </string>
+  <string key="section.decision">
+    <en>The ask / decision</en>
+    <de>Anliegen / Entscheidung</de>
+    <it>Richiesta / decisione</it>
+    <hr>Zahtjev / odluka</hr>
+  </string>
+  <string key="section.engcontext">
+    <en>Page 2 — Technical context</en>
+    <de>Seite 2 — Technischer Kontext</de>
+    <it>Pagina 2 — Contesto tecnico</it>
+    <hr>Stranica 2 — Tehnički kontekst</hr>
+  </string>
+
+  <!-- Sample-text confirmation modal -->
+  <string key="modal.sampleTitle">
+    <en>Load sample text?</en>
+    <de>Beispieltext laden?</de>
+    <it>Caricare il testo di esempio?</it>
+    <hr>Učitati primjer teksta?</hr>
+  </string>
+  <string key="modal.cancel">
+    <en>Cancel</en><de>Abbrechen</de><it>Annulla</it><hr>Odustani</hr>
+  </string>
+  <string key="modal.confirm">
+    <en>Replace with sample</en>
+    <de>Mit Beispiel ersetzen</de>
+    <it>Sostituisci con esempio</it>
+    <hr>Zamijeni primjerom</hr>
+  </string>
+
+  <!-- Index landing page -->
+  <string key="index.hero">
+    <en>One page. One decision. Ninety seconds.</en>
+    <de>Eine Seite. Eine Entscheidung. Neunzig Sekunden.</de>
+    <it>Una pagina. Una decisione. Novanta secondi.</it>
+    <hr>Jedna stranica. Jedna odluka. Devedeset sekundi.</hr>
+  </string>
+  <string key="index.eyebrow">
+    <en>Start a briefing</en>
+    <de>Briefing starten</de>
+    <it>Inizia un briefing</it>
+    <hr>Pokreni izvještaj</hr>
+  </string>
+  <string key="index.lede">
+    <en>Choose the briefing type that matches your audience. Each project can be saved to a file and reopened later. Your work also auto-saves to this browser.</en>
+    <de>Wählen Sie den Briefing-Typ, der zu Ihrem Publikum passt. Jedes Projekt kann in einer Datei gespeichert und später wieder geöffnet werden. Ihre Arbeit wird zudem automatisch in diesem Browser gespeichert.</de>
+    <it>Scegli il tipo di briefing più adatto al tuo pubblico. Ogni progetto può essere salvato in un file e riaperto in seguito. Il lavoro viene anche salvato automaticamente in questo browser.</it>
+    <hr>Odaberi vrstu izvještaja koja odgovara tvojoj publici. Svaki projekt može se spremiti u datoteku i kasnije ponovno otvoriti. Tvoj rad također se automatski sprema u ovaj preglednik.</hr>
+  </string>
+  <string key="index.cardExecTitle">
+    <en>New Executive Level Report</en>
+    <de>Neuer Bericht auf Führungsebene</de>
+    <it>Nuovo report direzionale</it>
+    <hr>Novi izvještaj izvršne razine</hr>
+  </string>
+  <string key="index.cardEngTitle">
+    <en>New Engineering Report</en>
+    <de>Neuer technischer Bericht</de>
+    <it>Nuovo report ingegneristico</it>
+    <hr>Novi inženjerski izvještaj</hr>
+  </string>
+  <string key="index.cardOpenTitle">
+    <en>Open existing project</en>
+    <de>Vorhandenes Projekt öffnen</de>
+    <it>Apri progetto esistente</it>
+    <hr>Otvori postojeći projekt</hr>
+  </string>
+  <string key="index.start">
+    <en>Start →</en><de>Starten →</de><it>Inizia →</it><hr>Započni →</hr>
+  </string>
+  <string key="index.choose">
+    <en>Choose file →</en>
+    <de>Datei wählen →</de>
+    <it>Scegli file →</it>
+    <hr>Odaberi datoteku →</hr>
+  </string>
+  <string key="index.overflowTip">
+    <en>If your text spills past the page edge, that’s not a bug — it’s the format pushing you to be more precise so everything fits on two pages.</en>
+    <de>Wenn Ihr Text über den Seitenrand hinausragt, ist das kein Fehler — es ist das Format, das Sie zu präziseren Formulierungen zwingt, damit alles auf zwei Seiten passt.</de>
+    <it>Se il testo esce dai margini della pagina, non è un bug — è il formato che ti spinge a essere più preciso affinché tutto entri in due pagine.</it>
+    <hr>Ako tekst izlazi izvan rubova stranice, to nije bug — to je format koji vas tjera na precizniju komunikaciju kako bi sve stalo na dvije stranice.</hr>
+  </string>
+  <string key="about.overflowTitle">
+    <en>If text overflows, that’s a feature</en>
+    <de>Wenn Text überläuft, ist das Absicht</de>
+    <it>Se il testo deborda, è una funzionalità</it>
+    <hr>Ako tekst prelazi okvire, to je značajka</hr>
+  </string>
+  <string key="about.overflowBody">
+    <en>The app never truncates or auto-shrinks. Spillover is the app telling you the idea isn’t tight enough yet — cut adjectives, pick the one number that matters, and edit until everything fits on two pages.</en>
+    <de>Die App kürzt oder skaliert nichts automatisch. Überlauf ist das Signal, dass die Idee noch nicht knapp genug ist — Adjektive streichen, die eine entscheidende Zahl auswählen und kürzen, bis alles auf zwei Seiten passt.</de>
+    <it>L’app non taglia né riduce automaticamente. Lo straripamento ti dice che l’idea non è ancora abbastanza concisa — taglia gli aggettivi, scegli l’unico numero che conta e riscrivi finché tutto entra in due pagine.</it>
+    <hr>Aplikacija ništa ne reže niti automatski smanjuje. Prelijevanje vam govori da ideja još nije dovoljno sažeta — izbacite pridjeve, odaberite jedan broj koji je važan i uređujte dok sve ne stane na dvije stranice.</hr>
+  </string>
+
+</translations>

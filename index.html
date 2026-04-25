@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>R's Briefing Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="i18n.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #f5f5f7;
+    --ink-soft: #a0a0a6;
+    --hair: #2a2a2e;
+    --bg: #0d0d0f;
+    --card: #1c1c20;
+    --card-hover: #232328;
+    --accent-blue: #4d8fff;
+    --accent-green: #4ade80;
+  }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; box-sizing: border-box; }
+  html, body { font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--ink); background: var(--bg); margin: 0; min-height: 100vh; }
+  .tight { letter-spacing: -0.035em; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; color: var(--ink-soft); }
+
+  .page { min-height: 100vh; display: flex; flex-direction: column; }
+  .container { max-width: 1080px; margin: 0 auto; padding: 48px 32px; width: 100%; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+  header.brand { padding: 24px 32px; border-bottom: 1px solid var(--hair); display: flex; align-items: center; justify-content: space-between; }
+  .brand-mark { font-size: 15px; font-weight: 500; }
+  .brand-mark span { color: var(--ink-soft); font-weight: 400; }
+  .nav-btn { background: transparent; color: var(--ink-soft); border: 1px solid var(--hair); padding: 6px 14px; border-radius: 999px; font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .nav-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+  .about-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .about-backdrop.show { display: flex; }
+  .about-card { background: var(--card); border: 1px solid var(--hair); color: var(--ink); border-radius: 18px; max-width: 560px; width: 100%; padding: 28px 30px; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.5); }
+  .about-card h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 14px; }
+  .about-card h3 { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; margin: 18px 0 8px; }
+  .about-card p { font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 10px; }
+  .about-card a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+  .about-card .author { display: flex; gap: 14px; align-items: flex-start; padding: 14px; background: rgba(245,245,247,0.04); border: 1px solid var(--hair); border-radius: 12px; margin-top: 6px; }
+  .about-card .author .avatar { width: 44px; height: 44px; border-radius: 999px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-green)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .about-card .author .meta { font-size: 13px; color: var(--ink); }
+  .about-card .author .meta .name { font-weight: 500; }
+  .about-card .author .meta .role { color: var(--ink-soft); font-size: 12px; margin-top: 2px; }
+  .about-close { float: right; background: transparent; border: 1px solid var(--hair); color: var(--ink-soft); width: 28px; height: 28px; border-radius: 999px; font-size: 16px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .about-close:hover { color: var(--ink); border-color: var(--ink); }
+
+  h1.hero { font-size: 56px; font-weight: 500; line-height: 1.05; letter-spacing: -0.035em; margin: 0 0 16px; }
+  p.lede { font-size: 17px; line-height: 1.5; color: var(--ink-soft); max-width: 620px; margin: 0 0 48px; }
+
+  .grid-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 880px) { .grid-cards { grid-template-columns: 1fr; } }
+
+  .card {
+    position: relative; display: flex; flex-direction: column; gap: 12px;
+    padding: 28px; min-height: 220px;
+    background: var(--card); border: 1px solid var(--hair); border-radius: 18px;
+    color: inherit; text-decoration: none; cursor: pointer;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .card:hover { background: var(--card-hover); border-color: #3a3a40; transform: translateY(-2px); }
+  .card .icon { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; }
+  .card.clevel { border-top: 3px solid var(--accent-blue); }
+  .card.eng    { border-top: 3px solid var(--accent-green); }
+  .card.clevel .icon { background: rgba(77,143,255,0.15); color: var(--accent-blue); }
+  .card.eng .icon    { background: rgba(74,222,128,0.15); color: var(--accent-green); }
+  .card.open .icon   { background: rgba(245,245,247,0.08); color: var(--ink); }
+  .card h2 { font-size: 18px; font-weight: 500; margin: 0; letter-spacing: -0.02em; }
+  .card p  { font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 0; flex: 1; }
+  .card .arrow { font-size: 13px; color: var(--ink-soft); margin-top: 8px; }
+  .card:hover .arrow { color: var(--ink); }
+  .card input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+  .footnote { margin-top: 48px; font-size: 12px; color: var(--ink-soft); }
+  .footnote a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+
+  footer.bottom { padding: 20px 32px; border-top: 1px solid var(--hair); font-size: 12px; color: var(--ink-soft); display: flex; justify-content: space-between; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #3d2113; color: #f0d6c2; border: 1px solid #6b3e1d; padding: 10px 16px; border-radius: 10px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <div class="brand-mark"><em style="font-style: normal; color: var(--ink-soft); font-weight: 400;">R's</em> Briefing <span>Studio</span></div>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <select onchange="window.I18N && window.I18N.apply(this.value)" id="lang-picker" style="background: transparent; color: var(--ink-soft); border: 1px solid var(--hair); border-radius: 999px; padding: 5px 10px; font-size: 12px; font-family: inherit;" title="Language">
+      <option value="en">EN</option>
+      <option value="de">DE</option>
+      <option value="it">IT</option>
+      <option value="hr">HR</option>
+    </select>
+    <button class="nav-btn" onclick="document.getElementById('aboutModal').classList.add('show')" data-i18n="ui.about">About</button>
+    <span class="eyebrow">v1</span>
+  </div>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const sync = () => { const s = document.getElementById('lang-picker'); if (s && window.I18N) s.value = window.I18N.current; };
+      setTimeout(sync, 100);
+      window.addEventListener('i18n:changed', sync);
+    });
+  </script>
+</header>
+
+<!-- About modal -->
+<div id="aboutModal" class="about-backdrop" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="about-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <button class="about-close" onclick="document.getElementById('aboutModal').classList.remove('show')" aria-label="Close">×</button>
+    <h2 id="aboutTitle">About R's Briefing Studio</h2>
+    <p>R's Briefing Studio turns proposals into beautifully designed, two-page briefings. The output is built to be read in 90 seconds (page 1) with full context available on demand (page 2).</p>
+
+    <h3>Why it exists</h3>
+    <p><strong>This app is not here to add another document to your pile.</strong> It exists to make the way you communicate ideas, issues, and opportunities <em>clearer</em> — by formalizing a format that breaks each one into small, digestible chunks. The result is a single shared artefact you and your teammates can sync on in minutes, without ambiguity, instead of trading long Word docs or sitting through forty-slide decks.</p>
+    <p>Each field has a discipline behind it. Filling them in forces you to commit to the decision, the headline number, the trade-offs, and what you actually know vs. what you&rsquo;re guessing — so the people reading your briefing arrive at the same picture you have.</p>
+
+    <h3>Two report types</h3>
+    <p><strong>Executive Level Reporting</strong> — for decision-makers. Bottom line, headline metric, 5 Ws + H, pros / cons, timeline, the ask.</p>
+    <p><strong>Engineering Reporting</strong> — for technical reviewers. Proposal, effort, what changes, cost &amp; value, trade-offs, risks, open questions, the ask.</p>
+
+    <h3>How it works</h3>
+    <p>Fill the structured form on the left. The right pane updates live. Export the result as a PDF (A4 or A3 portrait), or save the project as a JSON file (image included as base64) to keep working on it later.</p>
+
+    <h3 data-i18n="about.overflowTitle">If text overflows, that&rsquo;s a feature</h3>
+    <p data-i18n="about.overflowBody">The app never truncates or auto-shrinks. Spillover is the app telling you the idea isn&rsquo;t tight enough yet — cut adjectives, pick the one number that matters, and edit until everything fits on two pages.</p>
+
+    <h3>Author</h3>
+    <div class="author">
+      <div class="avatar">RR</div>
+      <div class="meta">
+        <div class="name">Rene Radojčić</div>
+        <div class="role">Designer &amp; developer · <a href="mailto:rene.radojcic@hotmail.com">rene.radojcic@hotmail.com</a></div>
+        <div class="role" style="margin-top:6px;">Built end-to-end with HTML, Tailwind CSS, and Alpine.js — works offline, no server, no tracking.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <main class="container">
+
+    <p class="eyebrow" style="margin-bottom: 16px;" data-i18n="index.eyebrow">Start a briefing</p>
+    <h1 class="hero" data-i18n="index.hero">One page. One decision. Ninety seconds.</h1>
+    <p class="lede" data-i18n="index.lede">Choose the briefing type that matches your audience. Each project can be saved to a file and reopened later. Your work also auto-saves to this browser.</p>
+
+    <div class="grid-cards">
+
+      <a class="card clevel" href="app-exec.html?new=1">
+        <span class="icon">E</span>
+        <h2 data-i18n="index.cardExecTitle">New Executive Level Report</h2>
+        <p>For executive readers. Decision-focused: bottom line, headline metric, 5 Ws + H, pros / cons, timeline, the ask. Bento layout, A4 or A3 portrait.</p>
+        <span class="arrow" data-i18n="index.start">Start →</span>
+      </a>
+
+      <a class="card eng" href="app-eng.html?new=1">
+        <span class="icon">G</span>
+        <h2 data-i18n="index.cardEngTitle">New Engineering Report</h2>
+        <p>For engineering reviewers. Technical proposal, effort, what changes (before/after), cost &amp; value, trade-offs, risks, open questions, the ask.</p>
+        <span class="arrow" data-i18n="index.start">Start →</span>
+      </a>
+
+      <label class="card open">
+        <span class="icon">↑</span>
+        <h2 data-i18n="index.cardOpenTitle">Open existing project</h2>
+        <p>Load a previously saved <code>.json</code> project file. Routes you to the matching editor automatically.</p>
+        <span class="arrow" data-i18n="index.choose">Choose file →</span>
+        <input type="file" accept="application/json" id="openProject">
+      </label>
+
+    </div>
+
+    <p class="footnote">Tip: every briefing is two A3-portrait pages — page 1 is the dashboard you read in 90 seconds, page 2 is the depth that backs it up.</p>
+    <p class="footnote" style="margin-top: 12px;" data-i18n="index.overflowTip">If your text spills past the page edge, that&rsquo;s not a bug — it&rsquo;s the format pushing you to be more precise so everything fits on two pages.</p>
+  </main>
+
+  <footer class="bottom">
+    <span>R's Briefing Studio · by <a href="mailto:rene.radojcic@hotmail.com" style="color: var(--ink); text-decoration: underline; text-underline-offset: 2px;">Rene Radojčić</a></span>
+    <span>Saved automatically · works offline · ink-friendly print</span>
+  </footer>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const fileInput = document.getElementById('openProject');
+  const toast = document.getElementById('toast');
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  // Heuristic to decide if a project file is for the executive or engineering app
+  function detectKind(data) {
+    if (!data || typeof data !== 'object') return null;
+    if (data.proposal || data.effort || data.changes || data.tradeoffs || data.decision) return 'eng';
+    if (data.bluf || data.metric || data.fiveWsH || data.cta || data.timeline) return 'exec';
+    return null;
+  }
+
+  fileInput.addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      let data;
+      try { data = JSON.parse(r.result); }
+      catch (err) { showToast('Not a valid project file (invalid JSON).'); return; }
+      const kind = detectKind(data);
+      if (!kind) { showToast('Could not recognise this as an R\'s Briefing Studio project.'); return; }
+      const key = kind === 'eng' ? 'eng-briefing-import' : 'briefing-import';
+      sessionStorage.setItem(key, r.result);
+      window.location.href = kind === 'eng' ? 'app-eng.html' : 'app-exec.html';
+    };
+    r.readAsText(f);
+    e.target.value = '';
+  });
+</script>
+
+</body>
+</html>

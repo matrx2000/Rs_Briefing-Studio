@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Engineering Reporting — R's Briefing Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+<script src="i18n.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #1d1d1f;
+    --ink-soft: #6b6b70;
+    --hair: #e5e5e7;
+    --paper: #ffffff;
+    --paper-tint: #f5f5f7;
+    --accent-green: #16a34a;
+    --accent-amber: #b45309;
+    --accent-blue: #1d4ed8;
+    --accent-red: #b91c1c;
+    --mode-accent: #16a34a;          /* Engineering — green */
+    --mode-accent-soft: rgba(22,163,74,0.12);
+  }
+  .app-chrome { border-top: 3px solid var(--mode-accent) !important; }
+  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .mode-tag::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: var(--mode-accent); }
+  /* Resizable splitter */
+  .splitter { width: 5px; background: var(--hair); cursor: col-resize; flex-shrink: 0; transition: background .15s; position: relative; }
+  .splitter::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2px; height: 36px; background: var(--ink-soft); border-radius: 1px; opacity: 0.4; }
+  .splitter:hover { background: var(--mode-accent); }
+  .splitter:hover::before { background: #fff; opacity: 1; }
+  body.editor-dark .splitter { background: #2a2a2e; }
+  body.editor-dark .splitter::before { background: #6b6b70; }
+
+  /* Switch-mode dropdown */
+  .switch-menu { position: relative; display: inline-block; }
+  .switch-trigger { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--hair); background: transparent; color: var(--ink-soft); font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .switch-trigger:hover { color: var(--ink); border-color: var(--ink); }
+  body.editor-dark .switch-trigger { border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .switch-trigger:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  .switch-trigger .caret { font-size: 9px; opacity: 0.7; transition: transform .15s; }
+  .switch-menu.open .switch-trigger .caret { transform: rotate(180deg); }
+  .switch-pop { position: absolute; top: calc(100% + 6px); left: 0; min-width: 220px; background: #fff; border: 1px solid var(--hair); border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(0,0,0,0.18); padding: 6px; z-index: 40; }
+  body.editor-dark .switch-pop { background: #1c1c20; border-color: #2a2a2e; box-shadow: 0 12px 32px -8px rgba(0,0,0,0.5); }
+  .switch-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 13px; transition: background .12s; cursor: pointer; }
+  .switch-item:hover { background: rgba(0,0,0,0.05); }
+  body.editor-dark .switch-item { color: #f5f5f7; }
+  body.editor-dark .switch-item:hover { background: rgba(255,255,255,0.06); }
+  .switch-item .swatch { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+  .switch-item .label { font-weight: 500; }
+  .switch-item .desc { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
+  .switch-item.current { background: var(--mode-accent-soft); }
+  .switch-item.current .label { color: var(--mode-accent); }
+
+  .toggle-pill { background: rgba(0,0,0,0.06); border-radius: 999px; padding: 2px; display: inline-flex; gap: 0; }
+  body.editor-dark .toggle-pill { background: rgba(255,255,255,0.08); }
+  .toggle-pill .toggle-btn { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--ink-soft); transition: background .15s, color .15s; font-family: inherit; }
+  .toggle-pill .toggle-btn:hover:not(.active) { color: var(--ink); }
+  body.editor-dark .toggle-pill .toggle-btn { color: #a0a0a6; }
+  body.editor-dark .toggle-pill .toggle-btn:hover:not(.active) { color: #f5f5f7; }
+  .toggle-pill .toggle-btn.active { background: var(--mode-accent); color: #fff !important; }
+
+  /* UI scale stepper (form-pane top) */
+  .ui-scale-control { display: inline-flex; align-items: center; border: 1px solid var(--hair); border-radius: 999px; overflow: hidden; background: #fff; }
+  .ui-scale-control button { background: transparent; border: none; width: 24px; height: 22px; font-size: 14px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: background .15s, color .15s; padding: 0; line-height: 1; font-family: inherit; }
+  .ui-scale-control button:hover:not(:disabled) { background: var(--mode-accent-soft); color: var(--mode-accent); }
+  .ui-scale-control button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .ui-scale-control .value { min-width: 38px; text-align: center; font-size: 11px; color: var(--ink); font-feature-settings: "tnum"; padding: 0 2px; }
+  body.editor-dark .ui-scale-control { background: #232328; border-color: #34343a; }
+  body.editor-dark .ui-scale-control .value { color: #f5f5f7; }
+  body.editor-dark .ui-scale-control button { color: #a0a0a6; }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html, body { font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--ink); }
+  body { background: #f0f0f3; }
+  .serif { font-family: 'Geist', sans-serif; font-style: normal; font-weight: 400; }
+  .mono { font-family: 'Geist', sans-serif; }
+  .tnum { font-feature-settings: "tnum", "ss01"; letter-spacing: -0.05em; }
+  .italic, em, i { font-style: normal !important; }
+  .tpl-print-classic .a4, .tpl-print-classic h1, .tpl-print-classic h2, .tpl-print-classic h3 { font-family: 'Geist', sans-serif !important; }
+  .tight { letter-spacing: -0.035em; }
+  .eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; }
+
+  .app-input, .app-textarea, .app-select {
+    width: 100%; background: #fff; border: 1px solid var(--hair); border-radius: 8px;
+    padding: 5px 9px; font-size: 12px; color: var(--ink); outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .app-input:focus, .app-textarea:focus, .app-select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(29,29,31,0.08); }
+  .app-textarea { resize: vertical; min-height: 44px; line-height: 1.4; }
+  .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; display: block; }
+  .field-row { margin-bottom: 7px; }
+  .form-section { padding: 10px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 8px; }
+  .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+  /* Hint / info popover */
+  [x-cloak] { display: none !important; }
+  .hint { position: relative; display: inline-flex; }
+  @keyframes hint-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--mode-accent-soft); transform: scale(1); }
+    50%      { box-shadow: 0 0 0 6px var(--mode-accent-soft), 0 0 10px 0 var(--mode-accent); transform: scale(1.18); }
+  }
+  .hint-btn { width: 16px; height: 16px; border-radius: 999px; border: 1px solid var(--mode-accent); background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 700; cursor: pointer; padding: 0; line-height: 1; display: inline-flex; align-items: center; justify-content: center; transition: transform .15s, box-shadow .15s; animation: hint-pulse 1.8s ease-in-out infinite; }
+  .hint-btn:hover, .hint-btn:focus { animation: none; transform: scale(1.15); box-shadow: 0 0 0 4px var(--mode-accent-soft); }
+  @media (prefers-reduced-motion: reduce) { .hint-btn { animation: none !important; } }
+  .hint-bubble { position: absolute; left: -4px; top: calc(100% + 8px); width: 280px; padding: 10px 12px; background: var(--ink); color: #f5f5f7; border-radius: 8px; font-size: 11px; line-height: 1.5; z-index: 30; box-shadow: 0 8px 24px -8px rgba(0,0,0,0.35); text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .hint-bubble::before { content: ''; position: absolute; top: -4px; left: 9px; width: 8px; height: 8px; background: var(--ink); transform: rotate(45deg); }
+  body.editor-dark .hint-btn { border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .hint-btn:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  body.editor-dark .hint-bubble { background: #f5f5f7; color: #1d1d1f; }
+  body.editor-dark .hint-bubble::before { background: #f5f5f7; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; transition: all .15s; cursor: pointer; border: 1px solid transparent; }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #000; }
+  .btn-ghost { background: #fff; color: var(--ink); border-color: var(--hair); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-ghost.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .icon-btn { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--hair); background: #fff; color: var(--ink-soft); cursor: pointer; transition: all .15s; }
+  .icon-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+  .a4 {
+    background: #fff; margin: 0 auto;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.25), 0 4px 16px -4px rgba(0,0,0,0.08);
+    overflow: hidden; position: relative; color: var(--ink);
+    page-break-after: always;
+  }
+  body.paper-A4 .a4 { width: 210mm; height: 297mm; }
+  body.paper-A3 .a4 { width: 297mm; height: 420mm; }
+  .a4:last-child { page-break-after: auto; }
+  .a4-inner { padding: 10mm 12mm; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: min-content; gap: 3mm; flex: 1; min-height: 0; align-content: start; }
+  .tile { border-radius: 5mm; padding: 4mm 5mm; background: var(--paper); border: 1px solid var(--hair); display: flex; flex-direction: column; gap: 2mm; min-height: 0; overflow: hidden; }
+  .tile.tinted { background: var(--paper-tint); border-color: transparent; }
+  .tile.proposal { grid-column: span 8; }
+  .tile.effort { grid-column: span 4; justify-content: center; }
+  /* Effort stack — image position can be vertical (below) or horizontal (next to) */
+  .effort-stack { grid-column: span 4; display: flex; flex-direction: column; gap: 3mm; min-width: 0; }
+  .effort-stack .tile.effort { grid-column: auto; flex: 0 0 auto; }
+  .effort-stack .tile.effort-image { flex: 1 1 auto; min-height: 65mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
+  .effort-stack .tile.effort-image img { display: block; max-width: 100%; max-height: 100%; }
+  .effort-stack .tile.effort-image.fit-cover img  { width: 100%; height: 100%; object-fit: cover; }
+  .effort-stack .tile.effort-image.fit-width img  { width: 100%; height: auto; }
+  .effort-stack .tile.effort-image.fit-height img { width: auto; height: 100%; }
+  .effort-stack:not(.has-image) .tile.effort { flex: 1 1 auto; }
+  .effort-stack.horizontal { grid-column: span 6; flex-direction: row; }
+  .effort-stack.horizontal .tile.effort { flex: 0 0 50%; }
+  .effort-stack.horizontal .tile.effort-image { flex: 1 1 50%; min-height: 50mm; }
+  .bento:has(> .effort-stack.horizontal) .tile.proposal { grid-column: span 6; }
+  .tile.changes { grid-column: span 7; }
+  .tile.costvalue { grid-column: span 5; border-left: 3mm solid var(--accent-green); }
+  .tile.tradeoffs { grid-column: span 6; }
+  .tile.risks { grid-column: span 6; border-left: 3mm solid var(--accent-amber); }
+  .tile.questions { grid-column: span 8; }
+  .tile.decision { grid-column: span 4; border-left: 3mm solid var(--accent-blue); justify-content: center; }
+
+  /* Evidence stamps */
+  .ev { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 999px; font-size: 8px; font-weight: 700; line-height: 1; border: 1px solid currentColor; vertical-align: 1px; }
+  .ev-measured  { color: var(--accent-green); }
+  .ev-estimated { color: var(--accent-blue); }
+  .ev-gut       { color: var(--accent-amber); }
+
+  .stage-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 8.5pt; border: 1px solid var(--hair); background: var(--paper-tint); color: var(--ink); }
+  .stage-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--accent-amber); }
+  .stage-discovery .stage-dot { background: var(--accent-amber); }
+  .stage-hypothesis .stage-dot { background: var(--accent-blue); }
+  .stage-validated .stage-dot { background: var(--accent-green); }
+
+  .level-badge { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 4px; font-size: 8pt; font-weight: 500; border: 1px solid currentColor; }
+  .level-Low { color: var(--accent-green); }
+  .level-Medium { color: var(--accent-amber); }
+  .level-High { color: var(--accent-red); }
+
+  .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: 2px; }
+
+  .change-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; padding: 2mm 0; border-bottom: 1px dashed var(--hair); }
+  .change-row:last-child { border-bottom: none; }
+  .change-arrow { color: var(--ink-soft); font-size: 9pt; }
+
+  .cv-row { display: grid; grid-template-columns: 18px 1fr auto auto; gap: 6px; align-items: baseline; padding: 1.5mm 0; border-bottom: 1px dashed var(--hair); font-size: 9.5pt; }
+  .cv-row:last-child { border-bottom: none; }
+  .cv-sign { font-weight: 700; }
+  .cv-cost  .cv-sign { color: var(--accent-amber); }
+  .cv-value .cv-sign { color: var(--accent-green); }
+
+  .editorial { max-width: 240mm; margin: 0 auto; }
+  .editorial h2 { font-size: 18pt; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 2mm; }
+  .editorial h3 { font-size: 10pt; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); margin: 3mm 0 1mm; padding-top: 1.5mm; border-top: 1px solid var(--hair); }
+  .editorial h3:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .editorial p { font-size: 10pt; line-height: 1.4; color: var(--ink); margin-bottom: 1mm; }
+  .editorial ul { font-size: 10pt; line-height: 1.4; padding-left: 5mm; margin: 0; }
+  .editorial ul li { list-style: disc; margin-bottom: 0.5mm; }
+  .editorial .row { display: grid; grid-template-columns: 60mm 1fr; gap: 4mm; padding: 1mm 0; border-bottom: 1px solid var(--hair); font-size: 9.5pt; line-height: 1.35; }
+
+  /* Editor theme — applies ONLY to the form pane / app chrome, never to the printed sheet */
+  body.editor-dark { background: #0d0d0f; color: #f5f5f7; }
+  body.editor-dark .app-chrome { background: rgba(20,20,22,0.9) !important; border-bottom-color: #2a2a2e !important; color: #f5f5f7; }
+  body.editor-dark .app-chrome a, body.editor-dark .app-chrome .text-\[var\(--ink-soft\)\] { color: #a0a0a6 !important; }
+  body.editor-dark .form-pane { background: #141417 !important; border-right-color: #2a2a2e !important; }
+  body.editor-dark .form-section { background: #1c1c20; border-color: #2a2a2e; }
+  body.editor-dark .form-section h3 { color: #a0a0a6; }
+  body.editor-dark .app-input, body.editor-dark .app-textarea, body.editor-dark .app-select { background: #232328; border-color: #34343a; color: #f5f5f7; }
+  body.editor-dark .app-input:focus, body.editor-dark .app-textarea:focus, body.editor-dark .app-select:focus { border-color: #f5f5f7; box-shadow: 0 0 0 3px rgba(245,245,247,0.08); }
+  body.editor-dark .app-label { color: #a0a0a6; }
+  body.editor-dark .btn-ghost { background: #232328; color: #f5f5f7; border-color: #34343a; }
+  body.editor-dark .btn-ghost:hover { border-color: #f5f5f7; }
+  body.editor-dark .btn-primary { background: #f5f5f7; color: #1d1d1f; }
+  body.editor-dark .btn-primary:hover { background: #fff; }
+  body.editor-dark .icon-btn { background: #232328; border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .icon-btn:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  .preview-pane { background: #f0f0f3; }
+
+  /* Templates — printed-sheet looks (always light, ink-friendly) */
+  .tpl-eng-light .a4 { background: #fff; }
+  .tpl-eng-light .tile.proposal { background: var(--paper-tint); border-color: transparent; }
+  .tpl-eng-light .tile.effort { background: var(--paper-tint); border-color: transparent; }
+
+  .tpl-print-classic .a4 { background: #fff; font-family: 'Instrument Serif', Georgia, serif; }
+  .tpl-print-classic .tile { background: #fff; border: none; border-bottom: 1px solid var(--hair); border-radius: 0; padding: 5mm 4mm; }
+  .tpl-print-classic .tile.proposal { border-bottom: 2px solid var(--ink); }
+  .tpl-print-classic .tile.effort { text-align: left; }
+  .tpl-print-classic .tile.costvalue { border-bottom: 1px solid var(--hair); border-left: 1.5mm solid var(--accent-green); border-radius: 0; }
+  .tpl-print-classic .tile.risks    { border-bottom: 1px solid var(--hair); border-left: 1.5mm solid var(--accent-amber); border-radius: 0; }
+  .tpl-print-classic .tile.decision { border-bottom: 1px solid var(--hair); border-left: 1.5mm solid var(--accent-blue); border-radius: 0; }
+  .tpl-print-classic .eyebrow { font-family: 'Geist', sans-serif; }
+  .tpl-print-classic h1, .tpl-print-classic h2, .tpl-print-classic h3 { font-weight: 400; }
+
+  .preview-stage { padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .preview-frame { transform-origin: top center; }
+
+  /* Field clear button */
+  .field-clear-wrap { position: relative; display: block; flex: 1 1 auto; min-width: 0; }
+  .field-clear-wrap > .app-input, .field-clear-wrap > .app-textarea { padding-right: 26px; }
+  .field-clear { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; padding: 0; border-radius: 999px; border: none; background: var(--hair); color: var(--ink-soft); font-size: 13px; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; transition: background .15s, color .15s; }
+  .field-clear:hover { background: var(--ink); color: #fff; }
+  .app-textarea ~ .field-clear { top: 6px; transform: none; }
+  body.editor-dark .field-clear { background: #34343a; color: #a0a0a6; }
+  body.editor-dark .field-clear:hover { background: #f5f5f7; color: #1d1d1f; }
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal-card { background: #fff; color: var(--ink); border-radius: 16px; max-width: 480px; width: 100%; padding: 24px 26px; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.4); }
+  body.editor-dark .modal-card { background: #1c1c20; color: #f5f5f7; border: 1px solid #2a2a2e; }
+  .modal-card h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 10px; }
+  .modal-card p { font-size: 13px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 12px; }
+  body.editor-dark .modal-card p { color: #a0a0a6; }
+  .modal-card .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  .modal-warn { background: rgba(180,83,9,0.08); color: var(--accent-amber); border: 1px solid rgba(180,83,9,0.25); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
+
+  /* UI scale — applied to the form pane only */
+  :root { --ui-scale: 1; }
+  .form-pane { font-size: calc(13px * var(--ui-scale)); }
+  .form-pane .app-input,
+  .form-pane .app-textarea,
+  .form-pane .app-select { font-size: calc(12px * var(--ui-scale)); }
+  .form-pane .app-label { font-size: calc(10.5px * var(--ui-scale)); }
+  .form-pane .form-section h3 { font-size: calc(10.5px * var(--ui-scale)); }
+  .form-pane .btn { font-size: calc(12px * var(--ui-scale)); }
+  .form-pane .text-xs, .form-pane .text-\[11px\] { font-size: calc(11px * var(--ui-scale)); }
+  .form-pane .hint-bubble { font-size: calc(11px * var(--ui-scale)); }
+
+  .form-pane::-webkit-scrollbar, .preview-pane::-webkit-scrollbar { width: 8px; }
+  .form-pane::-webkit-scrollbar-thumb, .preview-pane::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
+
+  @media print {
+    /* @page rule injected dynamically via #pageSizeRule */
+    body { background: #fff !important; }
+    .app-chrome, .form-pane, .preview-toolbar, .modal-backdrop { display: none !important; }
+    .preview-pane { overflow: visible !important; display: block !important; }
+    main.preview-pane { grid-column: 1 / -1 !important; }
+    .preview-stage { padding: 0 !important; gap: 0 !important; display: block !important; }
+    .preview-frame { display: block !important; transform: none !important; }
+    .a4 { box-shadow: none !important; margin: 0 !important; page-break-after: always; break-after: page; }
+    .a4:last-child { page-break-after: auto !important; break-after: auto !important; }
+    body.paper-A4 .a4 { width: 210mm !important; height: 297mm !important; }
+    body.paper-A3 .a4 { width: 297mm !important; height: 420mm !important; }
+    .a4:last-child { page-break-after: auto; break-after: auto; }
+    .tpl-eng-dark .a4 { background: #fff !important; color: var(--ink) !important; }
+    .tpl-eng-dark .tile { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; }
+    .tpl-eng-dark .tile.proposal { background: var(--paper-tint) !important; border-color: transparent !important; }
+    .tpl-eng-dark .tile.effort { background: var(--paper-tint) !important; border-color: transparent !important; }
+    .tpl-eng-dark .tile.costvalue { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-green) !important; }
+    .tpl-eng-dark .tile.risks { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-amber) !important; }
+    .tpl-eng-dark .tile.decision { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-blue) !important; }
+    .tpl-eng-dark [class*="white/"] { color: var(--ink-soft) !important; }
+    .tpl-eng-dark .editorial h3 { border-top-color: var(--hair) !important; color: var(--ink) !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<style id="pageSizeRule">@media print { @page { size: A3 portrait; margin: 0; } }</style>
+<body x-data="engBriefing()" x-init="init()" :class="`tpl-${templateId} paper-${paperSize} ${editorMode === 'dark' ? 'editor-dark' : ''}`">
+
+<div class="app-chrome sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-[var(--hair)]">
+  <div class="flex items-center justify-between px-4 py-2">
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="text-[15px] font-medium tight hover:opacity-80" title="Back to start"><span class="serif italic font-normal text-[var(--ink-soft)]">R's</span> Briefing <span class="serif italic font-normal text-[var(--ink-soft)]">Studio</span></a>
+      <span class="mode-tag" data-i18n="mode.engineering">Engineering Reporting</span>
+      <span class="switch-menu" :class="{'open': switchOpen}" x-data="{ switchOpen: false }" @click.outside="switchOpen = false">
+        <button type="button" class="switch-trigger" @click="switchOpen = !switchOpen">
+          <span data-i18n="ui.switch">Switch</span> <span class="caret">▼</span>
+        </button>
+        <div class="switch-pop" x-show="switchOpen" x-cloak>
+          <a class="switch-item" href="app-exec.html">
+            <span class="swatch" style="background:#3b82f6"></span>
+            <span><span class="label" data-i18n="mode.executive">Executive Level Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
+          </a>
+          <a class="switch-item current" href="app-eng.html">
+            <span class="swatch" style="background:#16a34a"></span>
+            <span><span class="label" data-i18n="mode.engineering">Engineering Reporting</span><div class="desc" data-i18n="switch.engineeringDesc">Technical depth for reviewers</div></span>
+          </a>
+          <a class="switch-item" href="index.html">
+            <span class="swatch" style="background:#a0a0a6"></span>
+            <span><span class="label" data-i18n="switch.home">Home</span><div class="desc" data-i18n="switch.homeDesc">Project picker / load existing</div></span>
+          </a>
+        </div>
+      </span>
+      <span class="text-xs text-[var(--ink-soft)]" x-text="saveStatus"></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <select class="app-input !w-auto !py-1.5" onchange="window.I18N && window.I18N.apply(this.value)" id="lang-picker" title="Language">
+        <option value="en">EN</option>
+        <option value="de">DE</option>
+        <option value="it">IT</option>
+        <option value="hr">HR</option>
+      </select>
+      <label class="app-label !mb-0 mr-1" data-i18n="ui.template">Template</label>
+      <select class="app-input !w-auto !py-1.5" x-model="templateId">
+        <template x-for="t in templates" :key="t.id">
+          <option :value="t.id" x-text="t.name"></option>
+        </template>
+      </select>
+      <button class="btn btn-ghost !py-1 !px-3" @click="editorMode = editorMode === 'dark' ? 'light' : 'dark'" :title="`Editor: ${editorMode}`">
+        <span x-text="editorMode === 'dark' ? (window.I18N ? window.I18N.t('ui.darkmode') : '☾ Dark') : (window.I18N ? window.I18N.t('ui.lightmode') : '☀ Light')"></span>
+      </button>
+      <div class="toggle-pill ml-2" title="Paper size">
+        <button class="toggle-btn" :class="paperSize==='A4' ? 'active' : ''" @click="paperSize='A4'">A4</button>
+        <button class="toggle-btn" :class="paperSize==='A3' ? 'active' : ''" @click="paperSize='A3'">A3</button>
+      </div>
+      <button class="btn btn-ghost ml-1" @click="showSampleModal = true" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
+      <button class="btn btn-ghost" @click="exportJson()" title="Save current briefing to a project file" data-i18n="ui.saveproject">Save Project</button>
+      <label class="btn btn-ghost cursor-pointer" title="Load a previously saved project file">
+        <span data-i18n="ui.loadproject">Load Project</span>
+        <input type="file" accept="application/json" class="hidden" @change="importJson($event)">
+      </label>
+      <button class="btn btn-primary ml-1" @click="window.print()" data-i18n="ui.printpdf">Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="flex h-[calc(100vh-45px)]">
+
+  <!-- Form pane -->
+  <aside class="form-pane overflow-y-auto p-2.5 bg-[#fafafa]" :style="`width: ${formPaneWidth}px; flex-shrink: 0;`">
+
+    <div class="flex items-center justify-center gap-3 mb-3 px-2 py-1.5 rounded-lg" style="background: var(--mode-accent-soft);" title="Adjust form text size">
+      <span class="text-[12px] uppercase tracking-wider font-semibold flex items-center gap-1.5" style="color: var(--mode-accent);">
+        <span class="text-[15px] leading-none" style="font-weight:700;">Aa</span>
+        <span data-i18n="ui.textsize">Text size</span>
+      </span>
+      <div class="ui-scale-control">
+        <button type="button" @click="uiScale = Math.max(80, uiScale - 5)" :disabled="uiScale <= 80" aria-label="Decrease text size">−</button>
+        <span class="value" x-text="uiScale + '%'"></span>
+        <button type="button" @click="uiScale = Math.min(140, uiScale + 5)" :disabled="uiScale >= 140" aria-label="Increase text size">+</button>
+      </div>
+    </div>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.meta">Meta</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.meta.eng">Audience determines vocabulary. Confidence stage sets reader expectations: don't claim Validated unless the data is in.</span></span></h3>
+      <div class="field-row"><label class="app-label" data-i18n="field.title">Title</label><input class="app-input" x-model="data.meta.title"></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.subtitle">Subtitle (italic serif accent)</label><input class="app-input" x-model="data.meta.subtitle"></div>
+      <div class="grid grid-cols-2 gap-x-2">
+        <div class="field-row"><label class="app-label" data-i18n="field.author">Author</label><input class="app-input" x-model="data.meta.authorName"></div>
+        <div class="field-row"><label class="app-label" data-i18n="field.audience">Audience</label><input class="app-input" x-model="data.meta.audience" placeholder="e.g. Eng + PM + BD"></div>
+        <div class="field-row"><label class="app-label" data-i18n="field.date">Date</label><input type="date" class="app-input" x-model="data.meta.date"></div>
+        <div class="field-row"><label class="app-label" data-i18n="field.decisionby">Decision by</label><input type="date" class="app-input" x-model="data.meta.decisionBy"></div>
+      </div>
+      <div class="field-row">
+        <label class="app-label">Confidence stage <span class="text-[var(--ink-soft)] font-normal">· sets reader expectations</span></label>
+        <select class="app-input" x-model="data.meta.stage">
+          <option value="discovery">Discovery — exploring, mostly gut</option>
+          <option value="hypothesis">Hypothesis — modeled, partial data</option>
+          <option value="validated">Validated — measured, ready to commit</option>
+        </select>
+      </div>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.companyName">Company name</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.shownInFooter">· shown in footer</span></label><input class="app-input" x-model="data.meta.companyName" placeholder="e.g. Cookie Co."></div>
+      <div class="field-row">
+        <label class="app-label flex items-center gap-2 cursor-pointer" style="margin-bottom: 0;">
+          <input type="checkbox" x-model="data.meta.confidential" style="accent-color: var(--mode-accent); width: 14px; height: 14px;">
+          <span><span data-i18n-html="field.confidential">Mark document <strong>Confidential</strong> in the footer</span> <span class="font-normal text-[var(--ink-soft)]" data-i18n="field.confidentialNote">· for NDA-covered material</span></span>
+        </label>
+      </div>
+      <p class="text-[11px] text-[var(--ink-soft)] leading-snug">Tag every number with how you know it: <span class="ev ev-measured">M</span> measured, <span class="ev ev-estimated">E</span> estimated, <span class="ev ev-gut">G</span> gut-feeling.</p>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.proposal">Technical proposal</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.proposal">State the change and the success criterion in one line. Avoid implementation detail — that's for page 2.</span></span></h3>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.proposal.eyebrow"></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.headline">Headline</label><textarea class="app-textarea" x-model="data.proposal.headline"></textarea></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.headlineEmphasis">Substring to italicize</label><input class="app-input" x-model="data.proposal.headlineEmphasis"></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.supporting">Supporting sentence</label><textarea class="app-textarea" x-model="data.proposal.supporting"></textarea></div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.effort">Effort</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.effort">Pick ONE primary unit (hours, days, weeks, months, quarters, or years). Be honest about evidence.</span></span></h3>
+      <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
+      <div class="grid grid-cols-2 gap-x-2">
+        <div class="field-row"><label class="app-label">Value (e.g. 12)</label><input class="app-input" x-model="data.effort.value"></div>
+        <div class="field-row"><label class="app-label">Unit (e.g. hours, days, weeks, months, quarters, years)</label><input class="app-input" x-model="data.effort.unit"></div>
+        <div class="field-row col-span-2"><label class="app-label" data-i18n="field.caption">Caption</label><input class="app-input" x-model="data.effort.caption" placeholder="2 engineers · backend"></div>
+        <div class="field-row col-span-2">
+          <label class="app-label" data-i18n="field.evidence">Evidence</label>
+          <select class="app-input" x-model="data.effort.evidence">
+            <option value="measured">Measured (we've done similar)</option>
+            <option value="estimated">Estimated (broken down + sized)</option>
+            <option value="gut">Gut-feeling</option>
+          </select>
+        </div>
+        <div class="field-row col-span-2">
+          <label class="app-label flex justify-between items-center">
+            <span>Image <span class="text-[var(--ink-soft)] font-normal">· optional, shown next to effort</span></span>
+            <button type="button" x-show="data.effort.image" @click="data.effort.image=null" class="text-[10px] text-[var(--accent-amber)] hover:underline">Remove</button>
+          </label>
+          <input type="file" accept="image/*" @change="readImage($event, 'effort')" class="app-input !p-1.5">
+          <img x-show="data.effort.image" :src="data.effort.image" class="mt-1.5 max-h-28 w-full object-cover rounded border border-[var(--hair)]">
+        </div>
+        <div class="field-row col-span-2" x-show="data.effort.image">
+          <label class="app-label" data-i18n="field.imagePosition">Image position</label>
+          <select class="app-input" x-model="data.effort.orientation">
+            <option value="vertical">Vertical — image below effort</option>
+            <option value="horizontal">Horizontal — image next to effort</option>
+          </select>
+        </div>
+        <div class="field-row col-span-2" x-show="data.effort.image">
+          <label class="app-label" data-i18n="field.imageFit">Image fit</label>
+          <select class="app-input" x-model="data.effort.imageFit">
+            <option value="cover">Fill tile (may crop)</option>
+            <option value="width">Fit by width — full width</option>
+            <option value="height">Fit by height — full height</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.changes">What changes</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.changes">Before / after pairs the reader can verify in production. Use real metrics, not vibes.</span></span></h3>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.changes.eyebrow"></div>
+      <template x-for="(c, i) in data.changes.items" :key="i">
+        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+          <input class="app-input mb-2" placeholder="Component" x-model="data.changes.items[i].component">
+          <div class="grid grid-cols-2 gap-2">
+            <input class="app-input" placeholder="Before" x-model="data.changes.items[i].before">
+            <div class="flex gap-2">
+              <input class="app-input" placeholder="After" x-model="data.changes.items[i].after">
+              <button class="icon-btn" @click="data.changes.items.splice(i,1)">&times;</button>
+            </div>
+          </div>
+        </div>
+      </template>
+      <button class="btn btn-ghost" @click="data.changes.items.push({component:'',before:'',after:''})">+ Add change</button>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.costvalue">Cost &amp; value</span> <span class="text-[var(--ink-soft)] normal-case font-normal">— numbers if possible</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.costvalue">Numbers if possible, with evidence tags. Stack costs first (one-off, then recurring), then value.</span></span></h3>
+      <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured (we have data) · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated (sized &amp; broken down) · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.costValue.eyebrow"></div>
+      <template x-for="(r, i) in data.costValue.rows" :key="i">
+        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+          <div class="flex gap-1.5 mb-1.5">
+            <select class="app-input" style="flex: 0 0 90px;" x-model="data.costValue.rows[i].kind">
+              <option value="cost">Cost</option>
+              <option value="value">Value</option>
+            </select>
+            <input class="app-input flex-1 min-w-0" placeholder="Label (e.g. Saved devops hours)" x-model="data.costValue.rows[i].label">
+          </div>
+          <div class="flex gap-1.5 items-center">
+            <input class="app-input flex-1 min-w-0" placeholder="Amount (€80k or “unknown”)" x-model="data.costValue.rows[i].amount">
+            <input class="app-input flex-1 min-w-0" placeholder="Period (yr, one-off)" x-model="data.costValue.rows[i].period">
+            <select class="app-input" style="flex: 0 0 60px;" x-model="data.costValue.rows[i].evidence" title="Evidence: Measured / Estimated / Gut">
+              <option value="measured">M</option>
+              <option value="estimated">E</option>
+              <option value="gut">G</option>
+            </select>
+            <button class="icon-btn flex-shrink-0" @click="data.costValue.rows.splice(i,1)">&times;</button>
+          </div>
+        </div>
+      </template>
+      <button class="btn btn-ghost" @click="data.costValue.rows.push({kind:'value',label:'',amount:'',period:'yr',evidence:'gut'})">+ Add row</button>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.tradeoffs">Trade-offs</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.tradeoffs">List the 2–3 paths actually considered. Mark the chosen one.</span></span></h3>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.tradeoffs.eyebrow"></div>
+      <template x-for="(t, i) in data.tradeoffs.items" :key="i">
+        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+          <div class="flex gap-1.5 mb-1.5">
+            <input class="app-input" placeholder="Option" x-model="data.tradeoffs.items[i].option">
+            <label class="flex items-center gap-1 text-xs whitespace-nowrap">
+              <input type="checkbox" x-model="data.tradeoffs.items[i].chosen"> chosen
+            </label>
+            <button class="icon-btn" @click="data.tradeoffs.items.splice(i,1)">&times;</button>
+          </div>
+          <input class="app-input mb-2" placeholder="Pro / why it's appealing" x-model="data.tradeoffs.items[i].pros">
+          <input class="app-input" placeholder="Con / why it falls short" x-model="data.tradeoffs.items[i].cons">
+        </div>
+      </template>
+      <button class="btn btn-ghost" @click="data.tradeoffs.items.push({option:'',pros:'',cons:'',chosen:false})">+ Add option</button>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.risks">Risks</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.risks">Category + level + one-line note + evidence tag. List only the risks a reviewer would raise.</span></span></h3>
+      <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.risks.eyebrow"></div>
+      <template x-for="(r, i) in data.risks.items" :key="i">
+        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+          <div class="flex gap-1.5 mb-1.5 items-center">
+            <select class="app-input flex-1 min-w-0" x-model="data.risks.items[i].category">
+              <option>Security</option>
+              <option>Performance</option>
+              <option>Complexity</option>
+              <option>Tech debt</option>
+              <option>Operational</option>
+            </select>
+            <select class="app-input" style="flex: 0 0 90px;" x-model="data.risks.items[i].level">
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+            </select>
+            <select class="app-input" style="flex: 0 0 60px;" x-model="data.risks.items[i].evidence" title="Evidence: Measured / Estimated / Gut">
+              <option value="measured">M</option>
+              <option value="estimated">E</option>
+              <option value="gut">G</option>
+            </select>
+            <button class="icon-btn flex-shrink-0" @click="data.risks.items.splice(i,1)">&times;</button>
+          </div>
+          <input class="app-input" placeholder="One-line note" x-model="data.risks.items[i].note">
+        </div>
+      </template>
+      <button class="btn btn-ghost" @click="data.risks.items.push({category:'Performance',level:'Medium',note:'',evidence:'gut'})">+ Add risk</button>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.questions">Open questions</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.questions">Things you genuinely need the reviewer to decide. Each should block the decision until answered.</span></span></h3>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.questions.eyebrow"></div>
+      <template x-for="(_, i) in data.questions.items" :key="i">
+        <div class="flex gap-1.5 mb-1.5">
+          <input class="app-input" :value="data.questions.items[i]" @input="data.questions.items[i] = $event.target.value">
+          <button class="icon-btn" @click="data.questions.items.splice(i,1)">&times;</button>
+        </div>
+      </template>
+      <button class="btn btn-ghost" @click="data.questions.items.push('')">+ Add question</button>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.decision">The ask / decision</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.decision">Approve / reject framing, with reviewers named. Button text is the deadline.</span></span></h3>
+      <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.decision.eyebrow"></div>
+      <div class="field-row"><label class="app-label" data-i18n="field.headline">Headline</label><input class="app-input" x-model="data.decision.headline"></div>
+      <div class="field-row"><label class="app-label">Italic serif emphasis</label><input class="app-input" x-model="data.decision.headlineEmphasis"></div>
+      <div class="field-row"><label class="app-label">Reviewers needed</label><input class="app-input" x-model="data.decision.reviewers" placeholder="Eng lead, PM, BD"></div>
+      <div class="field-row"><label class="app-label">Button text</label><input class="app-input" x-model="data.decision.buttonText"></div>
+    </section>
+
+    <section class="form-section">
+      <h3><span data-i18n="section.engcontext">Page 2 — Technical context</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.engcontext">Depth that backs page 1: motivation, design, dependencies, testing, rollout, rollback, monitoring, references.</span></span></h3>
+      <div class="field-row"><label class="app-label">Motivation &amp; problem</label><textarea class="app-textarea" rows="3" x-model="data.context.motivation"></textarea></div>
+      <div class="field-row"><label class="app-label">Design approach</label><textarea class="app-textarea" rows="3" x-model="data.context.designApproach"></textarea></div>
+      <div class="field-row">
+        <label class="app-label">Dependencies</label>
+        <template x-for="(d, i) in data.context.dependencies" :key="i">
+          <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+            <input class="app-input" placeholder="Name" x-model="data.context.dependencies[i].name">
+            <div class="flex gap-2">
+              <input class="app-input" placeholder="Status / owner" x-model="data.context.dependencies[i].status">
+              <button class="icon-btn" @click="data.context.dependencies.splice(i,1)">&times;</button>
+            </div>
+          </div>
+        </template>
+        <button class="btn btn-ghost" @click="data.context.dependencies.push({name:'',status:''})">+ Add</button>
+      </div>
+      <div class="field-row"><label class="app-label">Testing plan</label><textarea class="app-textarea" rows="2" x-model="data.context.testingPlan"></textarea></div>
+      <div class="field-row"><label class="app-label">Rollout plan</label><textarea class="app-textarea" rows="2" x-model="data.context.rolloutPlan"></textarea></div>
+      <div class="field-row"><label class="app-label">Rollback</label><textarea class="app-textarea" rows="2" x-model="data.context.rollback"></textarea></div>
+      <div class="field-row"><label class="app-label">Monitoring &amp; metrics</label><textarea class="app-textarea" rows="2" x-model="data.context.monitoring"></textarea></div>
+      <div class="field-row"><label class="app-label">References / links</label><textarea class="app-textarea" rows="2" x-model="data.context.references"></textarea></div>
+    </section>
+
+    <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-1">Saved automatically to this browser. Ink-friendly print is built in.</p>
+    <p class="text-[11px] text-[var(--ink-soft)] text-center mb-3">by <a href="mailto:rene.radojcic@hotmail.com" class="underline underline-offset-2 hover:text-[var(--ink)]">Rene Radojčić</a></p>
+  </aside>
+
+  <!-- Preview pane -->
+  <!-- Resizable splitter -->
+  <div class="splitter" @mousedown="startResize($event)" title="Drag to resize"></div>
+
+  <main class="preview-pane flex-1 min-w-0 overflow-auto">
+    <div class="preview-stage">
+
+      <!-- PAGE 1 -->
+      <div class="preview-frame" :style="`transform: scale(${zoom})`">
+        <article class="a4" :class="`stage-${data.meta.stage}`">
+          <div class="a4-inner">
+
+            <header class="flex items-end justify-between pb-2 mb-3 border-b border-[var(--hair)]">
+              <div>
+                <p class="eyebrow text-[var(--ink-soft)] mb-2">
+                  <span x-text="`Engineering briefing · ${formatDate(data.meta.date)}`"></span>
+                </p>
+                <h1 class="text-[26pt] tight font-medium leading-[1]">
+                  <span class="serif italic font-normal text-[var(--ink-soft)]" x-text="data.meta.subtitle"></span>
+                  <span x-text="' ' + data.meta.title"></span>
+                </h1>
+                <div class="mt-2">
+                  <span class="stage-pill"><span class="stage-dot"></span><span x-text="stageLabel()"></span></span>
+                </div>
+              </div>
+              <div class="text-right space-y-0.5">
+                <p class="text-[10pt] font-medium text-[var(--ink)]" x-text="`For ${data.meta.audience}`"></p>
+                <p class="text-[9pt] text-[var(--ink)]" x-text="`Prepared by ${data.meta.authorName}`"></p>
+                <p class="text-[8pt] text-[var(--ink-soft)] mt-1" x-text="`Read time · ${page1ReadTime()} sec`"></p>
+                <p class="text-[8pt] text-[var(--ink-soft)]" x-text="`Decision by ${formatDate(data.meta.decisionBy)}`"></p>
+              </div>
+            </header>
+
+            <section class="bento">
+
+              <!-- Proposal -->
+              <article class="tile proposal">
+                <p class="eyebrow text-[var(--ink-soft)]" x-text="data.proposal.eyebrow"></p>
+                <div>
+                  <h2 class="text-[19pt] tight font-medium leading-[1.05]" x-html="emphasize(data.proposal.headline, data.proposal.headlineEmphasis)"></h2>
+                  <p class="text-[10pt] text-[var(--ink-soft)] mt-3 leading-snug" x-text="data.proposal.supporting"></p>
+                </div>
+              </article>
+
+              <div class="effort-stack" :class="[data.effort.image ? 'has-image' : '', data.effort.image && data.effort.orientation === 'horizontal' ? 'horizontal' : '']">
+                <article class="tile effort">
+                  <div class="flex items-center justify-between">
+                    <p class="eyebrow text-[var(--ink-soft)]">Effort</p>
+                    <span class="ev" :class="`ev-${data.effort.evidence}`" x-text="evLetter(data.effort.evidence)" :title="evLabel(data.effort.evidence)"></span>
+                  </div>
+                  <div>
+                    <p class="text-[54pt] font-medium tnum leading-none">
+                      <span x-text="data.effort.value"></span><span class="text-[24pt] text-[var(--ink-soft)] ml-1" x-text="data.effort.unit"></span>
+                    </p>
+                    <p class="text-[9pt] text-[var(--ink-soft)] mt-2" x-text="data.effort.caption"></p>
+                  </div>
+                </article>
+                <article class="tile effort-image" :class="`fit-${data.effort.imageFit || 'cover'}`" x-show="data.effort.image">
+                  <img :src="data.effort.image" alt="">
+                </article>
+              </div>
+
+              <!-- Changes -->
+              <article class="tile changes">
+                <p class="eyebrow text-[var(--ink-soft)] mb-2" x-text="data.changes.eyebrow"></p>
+                <div>
+                  <template x-for="c in data.changes.items" :key="c.component">
+                    <div class="change-row">
+                      <div class="text-[9pt] mono text-[var(--ink-soft)]" x-text="c.component"></div>
+                      <div class="text-[9pt] mono" x-text="c.before"></div>
+                      <div class="flex items-center gap-2">
+                        <span class="change-arrow">→</span>
+                        <span class="text-[9pt] mono" x-text="c.after"></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </article>
+
+              <!-- Cost / Value -->
+              <article class="tile costvalue">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="eyebrow" style="color: var(--accent-green)" x-text="data.costValue.eyebrow"></p>
+                  <span class="serif italic text-[var(--ink-soft)] text-[9pt]">value</span>
+                </div>
+                <div>
+                  <template x-for="(r, i) in data.costValue.rows" :key="i">
+                    <div class="cv-row" :class="`cv-${r.kind}`">
+                      <div class="cv-sign" x-text="r.kind==='value' ? '+' : '−'"></div>
+                      <div x-text="r.label"></div>
+                      <div class="mono tnum text-right">
+                        <span x-text="r.amount"></span>
+                        <span class="text-[var(--ink-soft)] ml-1" x-text="r.period ? '/'+r.period : ''"></span>
+                      </div>
+                      <span class="ev" :class="`ev-${r.evidence}`" x-text="evLetter(r.evidence)" :title="evLabel(r.evidence)"></span>
+                    </div>
+                  </template>
+                </div>
+              </article>
+
+              <!-- Trade-offs -->
+              <article class="tile tradeoffs">
+                <p class="eyebrow text-[var(--ink-soft)] mb-2" x-text="data.tradeoffs.eyebrow"></p>
+                <ul class="space-y-1.5 text-[9.5pt]">
+                  <template x-for="t in data.tradeoffs.items" :key="t.option">
+                    <li>
+                      <div class="flex items-baseline gap-2">
+                        <span class="font-medium" x-text="t.option"></span>
+                        <span x-show="t.chosen" class="text-[8pt] uppercase tracking-wider serif italic font-normal text-[var(--accent-blue)]">chosen</span>
+                      </div>
+                      <p class="text-[9pt] text-[var(--ink-soft)]"><span class="text-[var(--accent-green)]">+</span> <span x-text="t.pros"></span></p>
+                      <p class="text-[9pt] text-[var(--ink-soft)]"><span class="text-[var(--accent-amber)]">−</span> <span x-text="t.cons"></span></p>
+                    </li>
+                  </template>
+                </ul>
+              </article>
+
+              <!-- Risks -->
+              <article class="tile risks">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="eyebrow" style="color: var(--accent-amber)" x-text="data.risks.eyebrow"></p>
+                  <span class="serif italic text-[var(--ink-soft)] text-[9pt]">risk surface</span>
+                </div>
+                <ul class="space-y-1.5 text-[9.5pt]">
+                  <template x-for="(r, i) in data.risks.items" :key="i">
+                    <li class="flex items-start gap-2">
+                      <span class="level-badge" :class="`level-${r.level}`" x-text="r.level"></span>
+                      <span class="font-medium" x-text="r.category + ' ·'"></span>
+                      <span class="text-[var(--ink-soft)] flex-1" x-text="r.note"></span>
+                      <span class="ev" :class="`ev-${r.evidence}`" x-text="evLetter(r.evidence)" :title="evLabel(r.evidence)"></span>
+                    </li>
+                  </template>
+                </ul>
+              </article>
+
+              <!-- Open questions -->
+              <article class="tile questions">
+                <p class="eyebrow text-[var(--ink-soft)] mb-2" x-text="data.questions.eyebrow"></p>
+                <ul class="space-y-1 text-[9.5pt] columns-2 gap-6">
+                  <template x-for="q in data.questions.items" :key="q">
+                    <li class="break-inside-avoid"><span class="dot" style="background: var(--ink)"></span><span x-text="q"></span></li>
+                  </template>
+                </ul>
+              </article>
+
+              <!-- Decision -->
+              <article class="tile decision">
+                <p class="eyebrow text-[var(--ink-soft)]" x-text="data.decision.eyebrow"></p>
+                <div>
+                  <h3 class="text-[15pt] tight font-medium leading-tight" x-html="emphasize(data.decision.headline, data.decision.headlineEmphasis)"></h3>
+                  <p class="text-[8.5pt] text-[var(--ink-soft)] mt-2" x-text="`Reviewers: ${data.decision.reviewers}`"></p>
+                  <div class="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] text-[var(--ink)] px-3 py-1.5 rounded-full text-[9pt] font-medium">
+                    <span x-text="data.decision.buttonText"></span>
+                    <span aria-hidden="true">→</span>
+                  </div>
+                </div>
+              </article>
+
+            </section>
+
+            <footer class="mt-2 pt-2 border-t border-[var(--hair)] flex items-center justify-between text-[8.5pt]">
+              <p>
+                <span class="text-[var(--ink-soft)]">Prepared by </span>
+                <span class="font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span>
+                <span class="text-[var(--ink-soft)]"> · for </span>
+                <span class="font-medium text-[var(--ink)]" x-text="data.meta.audience"></span>
+                <span class="text-[var(--ink-soft)]" x-show="data.meta.companyName"> · </span>
+                <span class="font-medium text-[var(--ink)]" x-show="data.meta.companyName" x-text="data.meta.companyName"></span>
+              </p>
+              <p class="flex items-center gap-2 text-[var(--ink-soft)]">
+                <span x-show="data.meta.confidential" class="text-[8.5pt] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style="color: var(--accent-red); border: 1px solid var(--accent-red);">Confidential</span>
+                <span>Evidence:
+                  <span class="ev ev-measured">M</span> measured ·
+                  <span class="ev ev-estimated">E</span> estimated ·
+                  <span class="ev ev-gut">G</span> gut-feeling
+                </span>
+              </p>
+            </footer>
+          </div>
+        </article>
+      </div>
+
+      <!-- PAGE 2 -->
+      <div class="preview-frame" :style="`transform: scale(${zoom})`">
+        <article class="a4">
+          <div class="a4-inner">
+            <header class="flex items-end justify-between pb-2 mb-3 border-b border-[var(--hair)]">
+              <div>
+                <p class="eyebrow text-[var(--ink-soft)] mb-1">Technical context · design notes</p>
+                <h1 class="text-[20pt] tight font-medium leading-[1]">
+                  <span class="serif italic font-normal text-[var(--ink-soft)]">Behind</span> <span x-text="data.meta.title"></span>
+                </h1>
+              </div>
+              <div class="text-right space-y-0.5">
+                <p class="text-[10pt] font-medium text-[var(--ink)]" x-text="`For ${data.meta.audience}`"></p>
+                <p class="text-[9pt] text-[var(--ink)]" x-text="`Prepared by ${data.meta.authorName}`"></p>
+                <p class="text-[8pt] text-[var(--ink-soft)] mt-1">Page 2 of 2</p>
+                <p class="text-[8pt] text-[var(--ink-soft)]" x-text="`Read time · ~${page2ReadMinutes()} min`"></p>
+              </div>
+            </header>
+
+            <div class="editorial flex-1 overflow-hidden">
+              <h3>Motivation &amp; problem</h3>
+              <p x-text="data.context.motivation"></p>
+
+              <h3>Design approach</h3>
+              <p x-text="data.context.designApproach"></p>
+
+              <h3>Dependencies</h3>
+              <div>
+                <template x-for="d in data.context.dependencies" :key="d.name">
+                  <div class="row">
+                    <span x-text="d.name" class="font-medium"></span>
+                    <span x-text="d.status" class="text-[var(--ink-soft)]"></span>
+                  </div>
+                </template>
+              </div>
+
+              <h3>Testing plan</h3>
+              <p x-text="data.context.testingPlan"></p>
+
+              <h3>Rollout plan</h3>
+              <p x-text="data.context.rolloutPlan"></p>
+
+              <h3>Rollback</h3>
+              <p x-text="data.context.rollback"></p>
+
+              <h3>Monitoring &amp; metrics</h3>
+              <p x-text="data.context.monitoring"></p>
+
+              <h3>References</h3>
+              <p x-text="data.context.references"></p>
+            </div>
+
+            <footer class="mt-2 pt-2 border-t border-[var(--hair)] flex items-center justify-between text-[8.5pt]">
+              <p>
+                <span class="text-[var(--ink-soft)]">Prepared by </span>
+                <span class="font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span>
+                <span class="text-[var(--ink-soft)]" x-show="data.meta.companyName"> · </span>
+                <span class="font-medium text-[var(--ink)]" x-show="data.meta.companyName" x-text="data.meta.companyName"></span>
+                <span class="text-[var(--ink-soft)]"> · </span>
+                <span x-text="formatDate(data.meta.date)" class="text-[var(--ink-soft)]"></span>
+              </p>
+              <p class="flex items-center gap-2">
+                <span x-show="data.meta.confidential" class="text-[8.5pt] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style="color: var(--accent-red); border: 1px solid var(--accent-red);">Confidential</span>
+                <span class="serif italic text-[var(--ink-soft)]">For review · contact <span class="not-italic font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span></span>
+              </p>
+            </footer>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- Sample-text confirmation modal -->
+<div class="modal-backdrop" x-show="showSampleModal" x-cloak @keydown.escape.window="showSampleModal = false" @click.self="showSampleModal = false">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="sampleModalTitle">
+    <h2 id="sampleModalTitle" data-i18n="modal.sampleTitle">Load sample text?</h2>
+    <p data-i18n-html="modal.sampleWhat"><strong>What this does:</strong> fills every field with placeholder content.</p>
+    <p data-i18n-html="modal.sampleWhen"><strong>When it's useful:</strong> seeing the layout fully populated, checking how long text wraps, or starting fresh with a structured outline you can then edit.</p>
+    <div class="modal-warn" data-i18n-html="modal.sampleWarn"><strong>Heads up:</strong> this replaces every field with sample text and clears the uploaded image. Anything you haven't saved as a project file will be lost. To keep your current work, click Cancel and use <em>Save Project</em> first.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" @click="showSampleModal = false" data-i18n="modal.cancel">Cancel</button>
+      <button class="btn btn-primary" @click="loadSample()" data-i18n="modal.confirm">Replace with sample</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function engBriefing() {
+  return {
+    templateId: 'eng-light',
+    editorMode: 'dark',
+    paperSize: 'A3',
+    uiScale: 100,
+    page: 1,
+    zoom: 0.78,
+    saveStatus: '',
+    showSampleModal: false,
+    formPaneWidth: 420,
+    templates: [
+      { id: 'eng-light', name: 'Eng Bento' },
+      { id: 'print-classic', name: 'Print Classic' }
+    ],
+    data: sampleData(),
+
+    init() {
+      const params = new URLSearchParams(window.location.search);
+      const handoff = sessionStorage.getItem('eng-briefing-import');
+      if (handoff) {
+        try { this.data = JSON.parse(handoff); } catch(e) {}
+        sessionStorage.removeItem('eng-briefing-import');
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (params.get('new') === '1') {
+        this.data = sampleData();
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      const saved = localStorage.getItem('eng-briefing-data');
+      const tpl = localStorage.getItem('eng-briefing-template');
+      if (!handoff && params.get('new') !== '1' && saved) { try { this.data = JSON.parse(saved); } catch(e) {} }
+      if (this.data.effort && this.data.effort.image === undefined) this.data.effort.image = null;
+      if (this.data.meta && this.data.meta.companyName === undefined) this.data.meta.companyName = '';
+      if (this.data.meta && this.data.meta.confidential === undefined) this.data.meta.confidential = true;
+      if (this.data.effort && !this.data.effort.orientation) this.data.effort.orientation = 'vertical';
+      if (this.data.effort && !this.data.effort.imageFit) this.data.effort.imageFit = 'cover';
+      if (tpl && tpl !== 'eng-dark') this.templateId = tpl;
+      const em = localStorage.getItem('eng-briefing-editor-mode');
+      if (em === 'light' || em === 'dark') this.editorMode = em;
+      const ps = localStorage.getItem('eng-briefing-paper-size');
+      if (ps === 'A4' || ps === 'A3') this.paperSize = ps;
+      const us = parseInt(localStorage.getItem('eng-briefing-ui-scale'), 10);
+      if (!isNaN(us) && us >= 80 && us <= 200) this.uiScale = us;
+      const fw = parseInt(localStorage.getItem('eng-briefing-form-width'), 10);
+      if (!isNaN(fw) && fw >= 280 && fw <= 800) this.formPaneWidth = fw;
+      this.applyPageSize();
+      this.applyUiScale();
+      this.fitZoom();
+      window.addEventListener('resize', () => this.fitZoom());
+      this.$watch('data', () => this.persist(), { deep: true });
+      this.$watch('templateId', v => localStorage.setItem('eng-briefing-template', v));
+      this.$watch('editorMode', v => localStorage.setItem('eng-briefing-editor-mode', v));
+      this.$watch('paperSize', v => { localStorage.setItem('eng-briefing-paper-size', v); this.applyPageSize(); this.fitZoom(); });
+      this.$watch('uiScale', v => { localStorage.setItem('eng-briefing-ui-scale', v); this.applyUiScale(); });
+      this.initClearButtons();
+      const initLangPicker = () => {
+        const sel = document.getElementById('lang-picker');
+        if (sel && window.I18N) sel.value = window.I18N.current;
+      };
+      const reapplyI18n = () => { if (window.I18N) window.I18N.apply(window.I18N.current); };
+      setTimeout(() => { initLangPicker(); reapplyI18n(); }, 150);
+      setTimeout(reapplyI18n, 500);
+      window.addEventListener('i18n:changed', initLangPicker);
+    },
+
+    initClearButtons() {
+      const skip = new Set(['file', 'range', 'date', 'color', 'checkbox', 'radio']);
+      const layoutRe = /^(col-span-|row-span-|col-start-|col-end-|row-start-|row-end-|justify-self-|self-)/;
+      const wrap = (el) => {
+        if (el.dataset.clearBound) return;
+        if (el.tagName === 'SELECT') return;
+        if (skip.has(el.type)) return;
+        if (el.closest('.field-clear-wrap')) return;
+        el.dataset.clearBound = '1';
+        const w = document.createElement('div');
+        w.className = 'field-clear-wrap';
+        Array.from(el.classList).filter(c => layoutRe.test(c)).forEach(c => {
+          w.classList.add(c);
+          el.classList.remove(c);
+        });
+        el.parentNode.insertBefore(w, el);
+        w.appendChild(el);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '×';
+        btn.className = 'field-clear';
+        btn.tabIndex = -1;
+        btn.title = 'Clear field';
+        btn.addEventListener('mousedown', e => e.preventDefault());
+        btn.addEventListener('click', () => {
+          el.value = '';
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          el.focus();
+        });
+        w.appendChild(btn);
+        const upd = () => { btn.style.display = el.value ? 'inline-flex' : 'none'; };
+        el.addEventListener('input', upd);
+        upd();
+      };
+      const scan = () => document.querySelectorAll('.app-input, .app-textarea').forEach(wrap);
+      setTimeout(scan, 0);
+      new MutationObserver(() => scan()).observe(document.body, { childList: true, subtree: true });
+    },
+
+    fitZoom() {
+      const pane = document.querySelector('.preview-pane');
+      if (!pane) return;
+      const w = pane.clientWidth - 36;
+      const paperWmm = this.paperSize === 'A4' ? 210 : 297;
+      this.zoom = Math.min(1, w / (paperWmm * 3.78));
+    },
+
+    applyPageSize() {
+      const el = document.getElementById('pageSizeRule');
+      if (el) el.textContent = `@media print { @page { size: ${this.paperSize} portrait; margin: 0; } }`;
+      document.body.classList.remove('paper-A3', 'paper-A4');
+      document.body.classList.add('paper-' + this.paperSize);
+    },
+
+    applyUiScale() {
+      document.documentElement.style.setProperty('--ui-scale', this.uiScale / 100);
+    },
+
+    startResize(ev) {
+      ev.preventDefault();
+      const startX = ev.clientX;
+      const startW = this.formPaneWidth;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      const onMove = e => {
+        this.formPaneWidth = Math.max(280, Math.min(800, startW + (e.clientX - startX)));
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        localStorage.setItem('eng-briefing-form-width', this.formPaneWidth);
+        this.fitZoom();
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+
+    persist() {
+      localStorage.setItem('eng-briefing-data', JSON.stringify(this.data));
+      this.saveStatus = 'Saved';
+      clearTimeout(this._t);
+      this._t = setTimeout(() => this.saveStatus = '', 1200);
+    },
+
+    evLetter(e) { return ({measured:'M', estimated:'E', gut:'G'})[e] || '?'; },
+    evLabel(e)  { return ({measured:'Measured · we have data', estimated:'Estimated · modelled', gut:'Gut-feeling · no data yet'})[e] || ''; },
+    stageLabel() {
+      return ({
+        discovery: 'Discovery · gut-driven, exploring',
+        hypothesis: 'Hypothesis · modelled, partial data',
+        validated: 'Validated · measured, ready to commit'
+      })[this.data.meta.stage] || '';
+    },
+
+    emphasize(text, sub) {
+      if (!text) return '';
+      const safe = String(text).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      if (!sub) return safe;
+      const safeSub = String(sub).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      const re = new RegExp('(' + safeSub.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'i');
+      return safe.replace(re, '<span class="serif italic font-normal text-[var(--ink-soft)]">$1</span>');
+    },
+
+    formatDate(iso) {
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      } catch(e) { return iso; }
+    },
+
+    wordCount(s) { return s ? String(s).trim().split(/\s+/).filter(Boolean).length : 0; },
+
+    page1Words() {
+      const d = this.data;
+      let parts = [
+        d.proposal.eyebrow, d.proposal.headline, d.proposal.supporting,
+        d.effort.value, d.effort.unit, d.effort.caption,
+        d.changes.eyebrow,
+        d.costValue.eyebrow,
+        d.tradeoffs.eyebrow,
+        d.risks.eyebrow,
+        d.questions.eyebrow,
+        d.decision.eyebrow, d.decision.headline, d.decision.reviewers, d.decision.buttonText
+      ];
+      d.changes.items.forEach(c => parts.push(c.component, c.before, c.after));
+      d.costValue.rows.forEach(r => parts.push(r.label, r.amount, r.period));
+      d.tradeoffs.items.forEach(t => parts.push(t.option, t.pros, t.cons));
+      d.risks.items.forEach(r => parts.push(r.category, r.level, r.note));
+      d.questions.items.forEach(q => parts.push(q));
+      return parts.reduce((sum, s) => sum + this.wordCount(s), 0);
+    },
+
+    page2Words() {
+      const c = this.data.context;
+      let n = this.wordCount(c.motivation) + this.wordCount(c.designApproach)
+            + this.wordCount(c.testingPlan) + this.wordCount(c.rolloutPlan)
+            + this.wordCount(c.rollback) + this.wordCount(c.monitoring)
+            + this.wordCount(c.references);
+      c.dependencies.forEach(d => n += this.wordCount(d.name) + this.wordCount(d.status));
+      return n;
+    },
+
+    page1ReadTime() {
+      const seconds = Math.round((this.page1Words() / 230) * 60);
+      return Math.max(20, Math.round(seconds / 5) * 5);
+    },
+
+    page2ReadMinutes() {
+      return Math.max(1, Math.round(this.page2Words() / 220));
+    },
+
+    loadSample() {
+      this.data = sampleData();
+      this.showSampleModal = false;
+    },
+
+    exportJson() {
+      const blob = new Blob([JSON.stringify(this.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'eng-' + (this.data.meta.title || 'briefing').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+
+    importJson(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => { try { this.data = JSON.parse(r.result); } catch(err) { alert('Invalid JSON'); } };
+      r.readAsText(f);
+      e.target.value = '';
+    },
+
+    readImage(e, key) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        if (key === 'effort') this.data.effort.image = r.result;
+      };
+      r.readAsDataURL(f);
+      e.target.value = '';
+    }
+  };
+}
+
+function sampleData() {
+  return {
+    meta: {
+      title: 'Cookie depositor controller',
+      subtitle: 'Replace',
+      authorName: 'Anna Schmidt · Plant engineering',
+      date: '2026-04-25',
+      audience: 'Plant manager, Ops lead, QA',
+      decisionBy: '2026-05-23',
+      stage: 'hypothesis',
+      companyName: 'Cookie Co.',
+      confidential: true
+    },
+    proposal: {
+      eyebrow: 'Technical proposal',
+      headline: 'Replace the Line 2 depositor PLC with an IPC + servo controller, hold dough weight tolerance under ±1.5 g.',
+      headlineEmphasis: '±1.5 g',
+      supporting: 'Today the depositor uses a 2009-era PLC that drifts ±4 g during a shift, costing dough waste and triggering QA rejections. Modern IPC + closed-loop servo control holds tolerance, exposes line metrics to MES, and unblocks the new gluten-free SKU launch.'
+    },
+    effort: {
+      value: '8', unit: 'weeks', caption: '1 controls eng + 0.5 ops eng', evidence: 'estimated',
+      image: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><rect width="400" height="260" fill="#f5f5f7"/><polygon points="140,30 260,30 240,80 160,80" fill="#1d1d1f"/><rect x="160" y="80" width="80" height="40" fill="#1d1d1f"/><rect x="155" y="120" width="90" height="22" rx="3" fill="#3b82f6"/><text x="200" y="135" font-family="Geist, sans-serif" font-size="10" font-weight="600" fill="#fff" text-anchor="middle">DEPOSITOR</text><circle cx="180" cy="155" r="6" fill="#1d1d1f"/><circle cx="220" cy="155" r="6" fill="#1d1d1f"/><rect x="40" y="170" width="320" height="14" rx="2" fill="#a0a0a6"/><circle cx="60" cy="200" r="14" fill="#1d1d1f"/><circle cx="60" cy="200" r="6" fill="#a0a0a6"/><circle cx="340" cy="200" r="14" fill="#1d1d1f"/><circle cx="340" cy="200" r="6" fill="#a0a0a6"/><circle cx="120" cy="190" r="6" fill="#c08648"/><circle cx="160" cy="190" r="6" fill="#c08648"/><circle cx="200" cy="190" r="6" fill="#c08648"/><circle cx="240" cy="190" r="6" fill="#c08648"/><circle cx="280" cy="190" r="6" fill="#c08648"/><text x="200" y="240" font-family="Geist, sans-serif" font-size="11" font-weight="500" fill="#1d1d1f" text-anchor="middle" letter-spacing="1">LINE 2 / DEPOSITOR + CONVEYOR</text></svg>'),
+      orientation: 'vertical', imageFit: 'height'
+    },
+    changes: {
+      eyebrow: 'What changes',
+      items: [
+        { component: 'Depositor controller',  before: 'Allen-Bradley PLC (2009)',  after: 'Beckhoff IPC + EtherCAT servos' },
+        { component: 'Dough weight tolerance', before: '±4 g drift / shift',       after: '±1.5 g closed-loop' },
+        { component: 'Line metrics',          before: 'paper logs',                 after: 'live to MES via OPC-UA' },
+        { component: 'Recipe changeover',     before: '14 min manual setup',        after: '3 min recipe recall' }
+      ]
+    },
+    costValue: {
+      eyebrow: 'Cost & value',
+      rows: [
+        { kind: 'cost',  label: 'Hardware (IPC + servos + IO)',     amount: '€48k',  period: 'one-off', evidence: 'measured' },
+        { kind: 'cost',  label: 'Engineering effort',                amount: '€22k',  period: 'one-off', evidence: 'estimated' },
+        { kind: 'value', label: 'Avoided dough waste',               amount: '€31k',  period: 'yr',     evidence: 'measured' },
+        { kind: 'value', label: 'Faster changeovers (capacity)',     amount: '€44k',  period: 'yr',     evidence: 'estimated' },
+        { kind: 'value', label: 'Unblocks gluten-free SKU launch',   amount: '€180k', period: 'yr',     evidence: 'gut' }
+      ]
+    },
+    tradeoffs: {
+      eyebrow: 'Trade-offs',
+      items: [
+        { option: 'Beckhoff IPC + EtherCAT (chosen)', pros: 'Already in stack on Line 4, in-house expertise', cons: 'Vendor lock-in on TwinCAT', chosen: true },
+        { option: 'Siemens TIA Portal',                 pros: 'Industry standard, broader spare-parts pool', cons: 'New vendor relationship, higher integration cost', chosen: false },
+        { option: 'Refurbish existing PLC',             pros: 'Lower upfront cost', cons: 'Does not solve drift; spare parts EOL in 2027', chosen: false }
+      ]
+    },
+    risks: {
+      eyebrow: 'Risks',
+      items: [
+        { category: 'Operational', level: 'Medium', note: 'New HMI requires retraining — 2 day course for 6 operators',  evidence: 'estimated' },
+        { category: 'Performance', level: 'Low',    note: 'Vendor reference site reports stable ±0.8 g over 6 months',   evidence: 'measured' },
+        { category: 'Complexity',  level: 'Medium', note: 'OPC-UA mapping touches MES schema — coordinate with IT',       evidence: 'estimated' },
+        { category: 'Tech debt',   level: 'Low',    note: 'Same controller family as Line 4, reduces overall sprawl',     evidence: 'measured' }
+      ]
+    },
+    questions: {
+      eyebrow: 'Open questions for review',
+      items: [
+        'Do we keep the old PLC in storage as a 1-week fallback or scrap immediately?',
+        'Is QA willing to bank the gluten-free SKU launch on the new controller, or stays as gut?',
+        'Who owns the OPC-UA tag schema — controls eng or MES team?',
+        'Acceptable cap on auto-reject rate before alerting the line lead?'
+      ]
+    },
+    decision: {
+      eyebrow: 'The ask',
+      headline: 'Approve build. Start sprint 22.',
+      headlineEmphasis: 'Start sprint 22.',
+      reviewers: 'Plant manager · Ops lead · QA lead',
+      buttonText: 'Decision by 23 May'
+    },
+    context: {
+      motivation: 'Line 2 depositor weight drift caused 6 QA holds in Q1 2026, scrapping ~2,400 kg of dough. The controller is also the bottleneck for the gluten-free SKU we have been asked to ship by Q4 — its recipe needs sub-2-gram weight precision that the current PLC cannot hold over a full shift. The PLC platform also goes end-of-life on parts support in 2027, so we will replace it within 18 months regardless.',
+      designApproach: 'New controller is a Beckhoff CX5230 IPC running TwinCAT 3 with EtherCAT-connected servos on each depositor head. Closed-loop weight feedback from in-line checkweighers feeds the cycle controller every 50 ms. HMI is on the existing Line 2 panel; recipe storage moves to the plant MES. No mechanical changes — only the control cabinet, wiring, and HMI software change.',
+      dependencies: [
+        { name: 'IT / MES team',         status: 'OPC-UA broker provisioned · committed' },
+        { name: 'QA',                    status: 'Validates new control limits before go-live' },
+        { name: 'Vendor (Beckhoff)',     status: 'Hardware lead time 4 weeks, slot reserved' },
+        { name: 'Maintenance team',      status: 'Owns spare-parts plan + commissioning sign-off' }
+      ],
+      testingPlan: 'Bench test in maintenance bay with the existing depositor head wired to the new IPC. Run 200 simulated recipe cycles, verify ±1.5 g over a 4-hour soak. On the line: dual-mode for 1 week (old PLC owns production, new IPC shadows), then cutover during scheduled Saturday window.',
+      rolloutPlan: 'Saturday cutover with vendor on-site. Line 2 starts Monday on new controller for one SKU only (chocolate-chip), all others wait until QA signs off — typically 5 days. Old PLC stays in cabinet for 30 days as physical fallback before being decommissioned.',
+      rollback: 'Pre-built switchover kit lets us revert to the old PLC in under 90 minutes by swapping cabinet wiring. Recipe data on the old PLC is preserved untouched until decommissioning.',
+      monitoring: 'Dashboards: depositor weight p50/p95/p99 per SKU, auto-reject rate, recipe changeover time, controller uptime. Alarm on weight p99 outside ±2 g for >10 cycles, or auto-reject rate >2%.',
+      references: 'Line 4 commissioning report (Q3 2024) · vendor reference visit Wuppertal · ADR #017 (controller standardisation) · QA acceptance criteria doc rev 4.'
+    }
+  };
+}
+</script>
+
+</body>
+</html>
