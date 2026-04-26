@@ -534,7 +534,7 @@
     .preview-pane { overflow: visible !important; display: block !important; }
     main.preview-pane { grid-column: 1 / -1 !important; }
     .preview-stage { padding: 0 !important; gap: 0 !important; display: block !important; }
-    .preview-frame { display: block !important; transform: none !important; }
+    .preview-frame { display: block !important; transform: none !important; zoom: 1 !important; }
     .a4 {
       box-shadow: none !important; margin: 0 !important;
       page-break-after: always; break-after: page;
@@ -896,10 +896,10 @@
 
   <main class="preview-pane flex-1 min-w-0">
     <div class="preview-content">
-    <div class="preview-stage" x-show="exportMode==='print'">
+    <div class="preview-stage" x-show="exportMode==='print'" :style="`gap: ${zoom * 28}px`">
 
       <!-- PAGE 1 -->
-      <div class="preview-frame" :style="`transform: scale(${zoom})`">
+      <div class="preview-frame" :style="`zoom: ${zoom}`">
         <article class="a4">
           <div class="a4-inner">
             <!-- Header -->
@@ -1043,7 +1043,7 @@
       </div>
 
       <!-- PAGE 2 -->
-      <div class="preview-frame" :style="`transform: scale(${zoom})`">
+      <div class="preview-frame" :style="`zoom: ${zoom}`">
         <article class="a4">
           <div class="a4-inner">
             <header class="flex items-end justify-between pb-2 mb-3 border-b border-[var(--hair)]">
