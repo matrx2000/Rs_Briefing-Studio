@@ -125,7 +125,7 @@
       <option value="hr">HR</option>
     </select>
     <button class="nav-btn" onclick="document.getElementById('aboutModal').classList.add('show')" data-i18n="ui.about">About</button>
-    <button type="button" id="versionBadge" class="version-badge" onclick="openReleaseNotes()" title="Release notes">v1.2.0</button>
+    <button type="button" id="versionBadge" class="version-badge" onclick="openReleaseNotes()" title="Release notes">v1.2.1</button>
   </div>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
@@ -216,7 +216,7 @@
 <div id="releaseNotesModal" class="about-backdrop" onclick="if(event.target===this) closeReleaseNotes()">
   <div class="relnotes-card" role="dialog" aria-modal="true" aria-labelledby="relnotesTitle">
     <div class="relnotes-head">
-      <h2 id="relnotesTitle"><span data-i18n="ui.releaseNotes">Release notes</span> <span class="v-tag">v1.2.0</span></h2>
+      <h2 id="relnotesTitle"><span data-i18n="ui.releaseNotes">Release notes</span> <span class="v-tag">v1.2.1</span></h2>
       <button class="relnotes-close" onclick="closeReleaseNotes()" aria-label="Close">×</button>
     </div>
     <div class="relnotes-body" id="relnotesBody"></div>
@@ -231,30 +231,21 @@
 
   // Release-notes modal — content kept inline so it works on file:// (no fetch).
   // Update this alongside README.md on every release.
-  const RELEASE_NOTES_MD = `# What's new in v1.2.0
+  const RELEASE_NOTES_MD = `# What's new in v1.2.1
 
-## Reorganized chrome (top bar)
-The top bar now uses a **3-column layout**: identity left, document-tied actions centered above the document, app preferences right. Plus a hover tooltip on the mode pill, a pulsing version badge for these notes, visual dividers between groups, and an instant-updating Dark / Light toggle on language change.
+## Pop-out editor for multi-line fields
+Every textarea now has a small **pencil button** in its top-right corner, plus a **Ctrl+E** shortcut while focused — opens a fullscreen overlay editor with a much larger writing area. Esc cancels, Ctrl+Enter (⌘+Enter) saves, click outside to cancel.
 
-## Document properties (right tools pane)
-A new resizable right-side toolbar holds all formatting controls.
+## Calmer, more legible form pane
+- **List items now have their own card look** — every repeating row (pros, cons, timeline, stakeholders, considerations, alternatives, page-2 risks; eng changes, cost-value, trade-offs, risks, open questions, dependencies) sits inside a tinted card with an accent left border, so you don't get lost between fields.
+- More **vertical breathing room** throughout — bigger section padding, taller textareas, label-to-input spacing, looser tools-pane controls.
+- **Footers simplified** in the Executive briefing — removed duplicate "Prepared by / for / company / date" info; single low-profile line with the Confidential badge plus *For discussion · contact*.
+- **Engineering bento compaction** — page typography baseline reduced (~0.729×) and inter-tile spacing tightened.
 
-- **Sheet text size** — global ± slider that scales every text element on the printed sheet.
-- **Typography** — granular per-level pt control: Title (H1), Headline (H2), Subhead (H3), Body / paragraph. Defaults 22 / 20 / 16 / 10pt.
-- The toolbox itself is **draggable** — grab its inner edge to resize.
-
-## App settings (collapsible, anchored bottom)
-Cog-iconed, collapsible group at the bottom of the tools pane. Holds **UI Text size** (form-pane density) and the **Language** picker (moved here from the chrome).
-
-## Output controls
-Centered above the document: Print / Markdown · A4 / A3 (A4 is the new default) · **Refresh preview** (with icon + label and a gentle resting pulse) · Print / PDF.
-
-## Polish
-- About modal reframed as a permanent **Mission** statement (no version notes — those live on the badge).
-- About modal is scrollable on small screens.
-- Template name simplified to **"Bento"** in both apps.
-- Default audience / author set to neutral **"Operations Team"** / **"The Leadership Team"**.
-- All new strings translated in English, German, Italian, Croatian.
+## Other polish
+- **Refresh-preview button** now actually pulses (was too faint to see before).
+- Mode pill renamed **"Executive Reporting"** (was "Executive Level Reporting"); both pills now wrap consistently into two stacked rows.
+- Default engineering image height **75 mm** (was 95 mm).
 
 ## Compatibility
 Existing project \`.json\` files load unchanged. UI preferences stay browser-local.

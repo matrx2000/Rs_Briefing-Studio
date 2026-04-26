@@ -130,13 +130,16 @@
   /* App chrome */
   .app-input, .app-textarea {
     width: 100%; background: #fff; border: 1px solid var(--hair); border-radius: 8px;
-    padding: 5px 9px; font-size: 12px; color: var(--ink); outline: none;
+    padding: 7px 10px; font-size: 12px; color: var(--ink); outline: none;
     transition: border-color .15s, box-shadow .15s;
   }
   .app-input:focus, .app-textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(29,29,31,0.08); }
-  .app-textarea { resize: vertical; min-height: 44px; line-height: 1.4; }
-  .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; display: block; }
+  .app-textarea { resize: vertical; min-height: 64px; line-height: 1.5; padding-top: 9px; padding-bottom: 9px; }
+  .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 4px; display: block; }
   .field-row { margin-bottom: 9px; }
+  /* Repeating list items inside form sections — subtle background tint, accent left border, and breathing room */
+  .list-item { background: var(--paper-tint); border-left: 2px solid var(--mode-accent-soft); border-radius: 8px; padding: 10px 11px; margin-bottom: 10px; }
+  body.editor-dark .list-item { background: #26262b; }
   .form-section { padding: 14px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 12px; }
   .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 
@@ -316,17 +319,17 @@
   /* Right-side tools pane — formatting controls (text size, future features) */
   .tools-pane { flex-shrink: 0; padding: 14px 14px 20px; background: #fafafa; border-left: 1px solid var(--hair); overflow-y: auto; display: flex; flex-direction: column; }
   .tools-pane .tools-spacer { flex: 1 1 auto; min-height: 12px; }
-  .tools-pane .tools-header { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 12px; }
+  .tools-pane .tools-header { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 14px; }
   .tools-pane .tools-header.collapsible { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: color .15s; }
   .tools-pane .tools-header.collapsible:hover { color: var(--ink); }
   body.editor-dark .tools-pane .tools-header.collapsible:hover { color: #f5f5f7; }
   .tools-pane .tools-header .caret { font-size: 10px; opacity: 0.7; transition: transform .15s; }
   .tools-pane .tools-header.collapsed .caret { transform: rotate(-90deg); }
-  .tools-pane .tool-group { background: #fff; border: 1px solid var(--hair); border-radius: 10px; padding: 10px 11px; margin-bottom: 10px; }
-  .tools-pane .tool-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--mode-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .tools-pane .tool-group { background: #fff; border: 1px solid var(--hair); border-radius: 10px; padding: 14px 12px; margin-bottom: 14px; }
+  .tools-pane .tool-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--mode-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
   .tools-pane .tool-label .aa { font-size: 14px; font-weight: 700; line-height: 1; text-transform: none; letter-spacing: 0; }
   .tools-pane .tool-row { display: flex; justify-content: center; }
-  .tools-pane .type-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 11px; color: var(--ink); }
+  .tools-pane .type-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 0; font-size: 11px; color: var(--ink); }
   .tools-pane .type-row + .type-row { border-top: 1px solid var(--hair); }
   .tools-pane .type-row .type-label { color: var(--ink-soft); }
   body.editor-dark .tools-pane .type-row { color: #f5f5f7; }
@@ -696,8 +699,8 @@
     <section class="form-section">
       <h3><span data-i18n="section.commentary">Commentary</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.commentary">Optional 1–2 short paragraphs framing the decision. Use sparingly — page 1 is for skimming, not narrative. If the reader needs more than this, push detail to page 2.</span></span></h3>
       <div class="field-row"><label class="app-label">Heading</label><input class="app-input" x-model="data.commentary.heading" placeholder="Commentary"></div>
-      <div class="field-row"><label class="app-label">Paragraph 1</label><textarea class="app-textarea" rows="4" x-model="data.commentary.p1"></textarea></div>
-      <div class="field-row"><label class="app-label">Paragraph 2 <span class="text-[var(--ink-soft)] font-normal">· optional</span></label><textarea class="app-textarea" rows="4" x-model="data.commentary.p2"></textarea></div>
+      <div class="field-row"><label class="app-label">Paragraph 1</label><textarea class="app-textarea" rows="5" x-model="data.commentary.p1"></textarea></div>
+      <div class="field-row"><label class="app-label">Paragraph 2 <span class="text-[var(--ink-soft)] font-normal">· optional</span></label><textarea class="app-textarea" rows="5" x-model="data.commentary.p2"></textarea></div>
     </section>
 
     <section class="form-section">
@@ -715,7 +718,7 @@
     <section class="form-section">
       <h3><span data-i18n="section.pros">Pros (2–4)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.pros">Rank by importance and stop at 4. Write each as an outcome the reader can verify ("Saves €40k/yr"), not a feature ("modern infrastructure").</span></span></h3>
       <template x-for="(_, i) in data.pros" :key="i">
-        <div class="flex gap-1.5 mb-1.5">
+        <div class="list-item flex gap-1.5 items-center">
           <input class="app-input" :value="data.pros[i]" @input="data.pros[i] = $event.target.value">
           <button class="icon-btn" @click="data.pros.splice(i,1)" :disabled="data.pros.length<=1">&times;</button>
         </div>
@@ -726,7 +729,7 @@
     <section class="form-section">
       <h3><span data-i18n="section.cons">Cons (2–4)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.cons">Name the real risks, not strawmen. The reader trusts your pros only as much as they trust your cons. Mitigations belong on page 2.</span></span></h3>
       <template x-for="(_, i) in data.cons" :key="i">
-        <div class="flex gap-1.5 mb-1.5">
+        <div class="list-item flex gap-1.5 items-center">
           <input class="app-input" :value="data.cons[i]" @input="data.cons[i] = $event.target.value">
           <button class="icon-btn" @click="data.cons.splice(i,1)" :disabled="data.cons.length<=1">&times;</button>
         </div>
@@ -737,13 +740,13 @@
     <section class="form-section">
       <h3><span data-i18n="section.timeline">Timeline (4 phases)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.timeline">4 phases, one line each. Use real months or sprint names. The progress bar shows where you are right now — not where you plan to be.</span></span></h3>
       <template x-for="(phase, i) in data.timeline.phases" :key="i">
-        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
-          <div class="grid grid-cols-2 gap-1.5">
+        <div class="list-item">
+          <div class="grid grid-cols-2 gap-2">
             <input class="app-input" placeholder="Label" x-model="data.timeline.phases[i].label">
             <input class="app-input" placeholder="Title" x-model="data.timeline.phases[i].title">
           </div>
-          <input class="app-input mt-1.5" placeholder="Description" x-model="data.timeline.phases[i].description">
-          <div class="flex items-center gap-2 mt-1.5">
+          <input class="app-input mt-2" placeholder="Description" x-model="data.timeline.phases[i].description">
+          <div class="flex items-center gap-2 mt-2.5">
             <span class="app-label !mb-0">Progress</span>
             <input type="range" min="0" max="100" x-model.number="data.timeline.phases[i].progress" class="flex-1">
             <span class="text-xs text-[var(--ink-soft)] w-10 text-right" x-text="data.timeline.phases[i].progress + '%'"></span>
@@ -762,12 +765,12 @@
 
     <section class="form-section">
       <h3><span data-i18n="section.context">Page 2 — Context</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.context">Read time ~3–5 min. Depth on demand: only readers who need the full story open this. Keep prose tight; use bullets for considerations and risks, prose for background.</span></span></h3>
-      <div class="field-row"><label class="app-label">Background &amp; history</label><textarea class="app-textarea" rows="3" x-model="data.context.background"></textarea></div>
-      <div class="field-row"><label class="app-label">Problem statement</label><textarea class="app-textarea" rows="3" x-model="data.context.problem"></textarea></div>
+      <div class="field-row"><label class="app-label">Background &amp; history</label><textarea class="app-textarea" rows="4" x-model="data.context.background"></textarea></div>
+      <div class="field-row"><label class="app-label">Problem statement</label><textarea class="app-textarea" rows="4" x-model="data.context.problem"></textarea></div>
       <div class="field-row">
         <label class="app-label">Stakeholders</label>
         <template x-for="(s, i) in data.context.stakeholders" :key="i">
-          <div class="flex gap-1.5 mb-1.5">
+          <div class="list-item flex gap-1.5 items-center">
             <input class="app-input" placeholder="Name" x-model="data.context.stakeholders[i].name">
             <input class="app-input" placeholder="Role" x-model="data.context.stakeholders[i].role">
             <button class="icon-btn" @click="data.context.stakeholders.splice(i,1)">&times;</button>
@@ -778,7 +781,7 @@
       <div class="field-row">
         <label class="app-label">Considerations</label>
         <template x-for="(_, i) in data.context.considerations" :key="i">
-          <div class="flex gap-1.5 mb-1.5">
+          <div class="list-item flex gap-1.5 items-center">
             <input class="app-input" :value="data.context.considerations[i]" @input="data.context.considerations[i] = $event.target.value">
             <button class="icon-btn" @click="data.context.considerations.splice(i,1)">&times;</button>
           </div>
@@ -788,7 +791,7 @@
       <div class="field-row">
         <label class="app-label">Alternatives considered</label>
         <template x-for="(a, i) in data.context.alternatives" :key="i">
-          <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+          <div class="list-item grid grid-cols-2 gap-1.5">
             <input class="app-input" placeholder="Option" x-model="data.context.alternatives[i].option">
             <div class="flex gap-2">
               <input class="app-input" placeholder="Reason set aside" x-model="data.context.alternatives[i].reason">
@@ -801,7 +804,7 @@
       <div class="field-row">
         <label class="app-label">Risks &amp; mitigations</label>
         <template x-for="(r, i) in data.context.risks" :key="i">
-          <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+          <div class="list-item grid grid-cols-2 gap-1.5">
             <input class="app-input" placeholder="Risk" x-model="data.context.risks[i].risk">
             <div class="flex gap-2">
               <input class="app-input" placeholder="Mitigation" x-model="data.context.risks[i].mitigation">
@@ -811,11 +814,10 @@
         </template>
         <button class="btn btn-ghost" @click="data.context.risks.push({risk:'',mitigation:''})">+ Add</button>
       </div>
-      <div class="field-row"><label class="app-label">Supporting data</label><textarea class="app-textarea" rows="3" x-model="data.context.supportingData"></textarea></div>
+      <div class="field-row"><label class="app-label">Supporting data</label><textarea class="app-textarea" rows="4" x-model="data.context.supportingData"></textarea></div>
     </section>
 
-    <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-1">Saved automatically to this browser. Ink-friendly print is built in.</p>
-    <p class="text-[11px] text-[var(--ink-soft)] text-center mb-3">by <a href="mailto:rene.radojcic@hotmail.com" class="underline underline-offset-2 hover:text-[var(--ink)]">Rene Radojčić</a></p>
+    <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-3">Saved automatically to this browser. Ink-friendly print is built in.</p>
   </aside>
 
   <!-- Preview pane -->
@@ -1375,19 +1377,27 @@ function briefingApp() {
         el.addEventListener('input', upd);
         upd();
         if (el.tagName === 'TEXTAREA') {
+          const fireExpand = () => {
+            const labelEl = el.closest('.field-row') ? el.closest('.field-row').querySelector('.app-label') : null;
+            const label = labelEl ? (labelEl.textContent || '').trim() : '';
+            window.dispatchEvent(new CustomEvent('expand-open', { detail: { el, label } }));
+          };
           const ex = document.createElement('button');
           ex.type = 'button';
           ex.className = 'expand-btn';
           ex.tabIndex = -1;
-          ex.title = (window.I18N ? window.I18N.t('expand.open') : 'Open in editor');
+          ex.title = (window.I18N ? window.I18N.t('expand.open') : 'Open in editor') + ' (Ctrl+E)';
           ex.innerHTML = '&#9998;'; // pencil
           ex.addEventListener('mousedown', e => e.preventDefault());
-          ex.addEventListener('click', () => {
-            const labelEl = el.closest('.field-row') ? el.closest('.field-row').querySelector('.app-label') : null;
-            const label = labelEl ? (labelEl.textContent || '').trim() : '';
-            window.dispatchEvent(new CustomEvent('expand-open', { detail: { el, label } }));
-          });
+          ex.addEventListener('click', fireExpand);
           w.appendChild(ex);
+          // Ctrl+E (or Cmd+E) on the focused textarea opens the overlay editor
+          el.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 'e' || e.key === 'E')) {
+              e.preventDefault();
+              fireExpand();
+            }
+          });
         }
       };
       const scan = () => document.querySelectorAll('.app-input, .app-textarea').forEach(wrap);

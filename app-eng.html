@@ -129,13 +129,16 @@
 
   .app-input, .app-textarea, .app-select {
     width: 100%; background: #fff; border: 1px solid var(--hair); border-radius: 8px;
-    padding: 5px 9px; font-size: 12px; color: var(--ink); outline: none;
+    padding: 7px 10px; font-size: 12px; color: var(--ink); outline: none;
     transition: border-color .15s, box-shadow .15s;
   }
   .app-input:focus, .app-textarea:focus, .app-select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(29,29,31,0.08); }
-  .app-textarea { resize: vertical; min-height: 44px; line-height: 1.4; }
-  .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; display: block; }
+  .app-textarea { resize: vertical; min-height: 64px; line-height: 1.5; padding-top: 9px; padding-bottom: 9px; }
+  .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 4px; display: block; }
   .field-row { margin-bottom: 9px; }
+  /* Repeating list items inside form sections — subtle background tint, accent left border, and breathing room */
+  .list-item { background: var(--paper-tint); border-left: 2px solid var(--mode-accent-soft); border-radius: 8px; padding: 10px 11px; margin-bottom: 10px; }
+  body.editor-dark .list-item { background: #26262b; }
   .form-section { padding: 14px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 12px; }
   .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
@@ -352,17 +355,17 @@
   /* Right-side tools pane — formatting controls (text size, future features) */
   .tools-pane { flex-shrink: 0; padding: 14px 14px 20px; background: #fafafa; border-left: 1px solid var(--hair); overflow-y: auto; display: flex; flex-direction: column; }
   .tools-pane .tools-spacer { flex: 1 1 auto; min-height: 12px; }
-  .tools-pane .tools-header { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 12px; }
+  .tools-pane .tools-header { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 14px; }
   .tools-pane .tools-header.collapsible { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: color .15s; }
   .tools-pane .tools-header.collapsible:hover { color: var(--ink); }
   body.editor-dark .tools-pane .tools-header.collapsible:hover { color: #f5f5f7; }
   .tools-pane .tools-header .caret { font-size: 10px; opacity: 0.7; transition: transform .15s; }
   .tools-pane .tools-header.collapsed .caret { transform: rotate(-90deg); }
-  .tools-pane .tool-group { background: #fff; border: 1px solid var(--hair); border-radius: 10px; padding: 10px 11px; margin-bottom: 10px; }
-  .tools-pane .tool-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--mode-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .tools-pane .tool-group { background: #fff; border: 1px solid var(--hair); border-radius: 10px; padding: 14px 12px; margin-bottom: 14px; }
+  .tools-pane .tool-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--mode-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
   .tools-pane .tool-label .aa { font-size: 14px; font-weight: 700; line-height: 1; text-transform: none; letter-spacing: 0; }
   .tools-pane .tool-row { display: flex; justify-content: center; }
-  .tools-pane .type-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 11px; color: var(--ink); }
+  .tools-pane .type-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 0; font-size: 11px; color: var(--ink); }
   .tools-pane .type-row + .type-row { border-top: 1px solid var(--hair); }
   .tools-pane .type-row .type-label { color: var(--ink-soft); }
   body.editor-dark .tools-pane .type-row { color: #f5f5f7; }
@@ -685,7 +688,7 @@
       <h3><span data-i18n="section.changes">What changes</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.changes">Before / after pairs the reader can verify in production. Use real metrics, not vibes.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.changes.eyebrow"></div>
       <template x-for="(c, i) in data.changes.items" :key="i">
-        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
+        <div class="list-item">
           <input class="app-input mb-2" placeholder="Component" x-model="data.changes.items[i].component">
           <div class="grid grid-cols-2 gap-2">
             <input class="app-input" placeholder="Before" x-model="data.changes.items[i].before">
@@ -704,8 +707,8 @@
       <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured (we have data) · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated (sized &amp; broken down) · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.costValue.eyebrow"></div>
       <template x-for="(r, i) in data.costValue.rows" :key="i">
-        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
-          <div class="flex gap-1.5 mb-1.5">
+        <div class="list-item">
+          <div class="flex gap-1.5 mb-2">
             <select class="app-input" style="flex: 0 0 90px;" x-model="data.costValue.rows[i].kind">
               <option value="cost">Cost</option>
               <option value="value">Value</option>
@@ -731,8 +734,8 @@
       <h3><span data-i18n="section.tradeoffs">Trade-offs</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.tradeoffs">List the 2–3 paths actually considered. Mark the chosen one.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.tradeoffs.eyebrow"></div>
       <template x-for="(t, i) in data.tradeoffs.items" :key="i">
-        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
-          <div class="flex gap-1.5 mb-1.5">
+        <div class="list-item">
+          <div class="flex gap-1.5 mb-2">
             <input class="app-input" placeholder="Option" x-model="data.tradeoffs.items[i].option">
             <label class="flex items-center gap-1 text-xs whitespace-nowrap">
               <input type="checkbox" x-model="data.tradeoffs.items[i].chosen"> chosen
@@ -751,8 +754,8 @@
       <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.risks.eyebrow"></div>
       <template x-for="(r, i) in data.risks.items" :key="i">
-        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
-          <div class="flex gap-1.5 mb-1.5 items-center">
+        <div class="list-item">
+          <div class="flex gap-1.5 mb-2 items-center">
             <select class="app-input flex-1 min-w-0" x-model="data.risks.items[i].category">
               <option>Security</option>
               <option>Performance</option>
@@ -782,7 +785,7 @@
       <h3><span data-i18n="section.questions">Open questions</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.questions">Things you genuinely need the reviewer to decide. Each should block the decision until answered.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.questions.eyebrow"></div>
       <template x-for="(_, i) in data.questions.items" :key="i">
-        <div class="flex gap-1.5 mb-1.5">
+        <div class="list-item flex gap-1.5 items-center">
           <input class="app-input" :value="data.questions.items[i]" @input="data.questions.items[i] = $event.target.value">
           <button class="icon-btn" @click="data.questions.items.splice(i,1)">&times;</button>
         </div>
@@ -801,12 +804,12 @@
 
     <section class="form-section">
       <h3><span data-i18n="section.engcontext">Page 2 — Technical context</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.engcontext">Depth that backs page 1: motivation, design, dependencies, testing, rollout, rollback, monitoring, references.</span></span></h3>
-      <div class="field-row"><label class="app-label">Motivation &amp; problem</label><textarea class="app-textarea" rows="3" x-model="data.context.motivation"></textarea></div>
-      <div class="field-row"><label class="app-label">Design approach</label><textarea class="app-textarea" rows="3" x-model="data.context.designApproach"></textarea></div>
+      <div class="field-row"><label class="app-label">Motivation &amp; problem</label><textarea class="app-textarea" rows="4" x-model="data.context.motivation"></textarea></div>
+      <div class="field-row"><label class="app-label">Design approach</label><textarea class="app-textarea" rows="4" x-model="data.context.designApproach"></textarea></div>
       <div class="field-row">
         <label class="app-label">Dependencies</label>
         <template x-for="(d, i) in data.context.dependencies" :key="i">
-          <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+          <div class="list-item grid grid-cols-2 gap-1.5">
             <input class="app-input" placeholder="Name" x-model="data.context.dependencies[i].name">
             <div class="flex gap-2">
               <input class="app-input" placeholder="Status / owner" x-model="data.context.dependencies[i].status">
@@ -816,15 +819,14 @@
         </template>
         <button class="btn btn-ghost" @click="data.context.dependencies.push({name:'',status:''})">+ Add</button>
       </div>
-      <div class="field-row"><label class="app-label">Testing plan</label><textarea class="app-textarea" rows="2" x-model="data.context.testingPlan"></textarea></div>
-      <div class="field-row"><label class="app-label">Rollout plan</label><textarea class="app-textarea" rows="2" x-model="data.context.rolloutPlan"></textarea></div>
-      <div class="field-row"><label class="app-label">Rollback</label><textarea class="app-textarea" rows="2" x-model="data.context.rollback"></textarea></div>
-      <div class="field-row"><label class="app-label">Monitoring &amp; metrics</label><textarea class="app-textarea" rows="2" x-model="data.context.monitoring"></textarea></div>
-      <div class="field-row"><label class="app-label">References / links</label><textarea class="app-textarea" rows="2" x-model="data.context.references"></textarea></div>
+      <div class="field-row"><label class="app-label">Testing plan</label><textarea class="app-textarea" rows="3" x-model="data.context.testingPlan"></textarea></div>
+      <div class="field-row"><label class="app-label">Rollout plan</label><textarea class="app-textarea" rows="3" x-model="data.context.rolloutPlan"></textarea></div>
+      <div class="field-row"><label class="app-label">Rollback</label><textarea class="app-textarea" rows="3" x-model="data.context.rollback"></textarea></div>
+      <div class="field-row"><label class="app-label">Monitoring &amp; metrics</label><textarea class="app-textarea" rows="3" x-model="data.context.monitoring"></textarea></div>
+      <div class="field-row"><label class="app-label">References / links</label><textarea class="app-textarea" rows="3" x-model="data.context.references"></textarea></div>
     </section>
 
-    <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-1">Saved automatically to this browser. Ink-friendly print is built in.</p>
-    <p class="text-[11px] text-[var(--ink-soft)] text-center mb-3">by <a href="mailto:rene.radojcic@hotmail.com" class="underline underline-offset-2 hover:text-[var(--ink)]">Rene Radojčić</a></p>
+    <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-3">Saved automatically to this browser. Ink-friendly print is built in.</p>
   </aside>
 
   <!-- Preview pane -->
@@ -1413,19 +1415,27 @@ function engBriefing() {
         el.addEventListener('input', upd);
         upd();
         if (el.tagName === 'TEXTAREA') {
+          const fireExpand = () => {
+            const labelEl = el.closest('.field-row') ? el.closest('.field-row').querySelector('.app-label') : null;
+            const label = labelEl ? (labelEl.textContent || '').trim() : '';
+            window.dispatchEvent(new CustomEvent('expand-open', { detail: { el, label } }));
+          };
           const ex = document.createElement('button');
           ex.type = 'button';
           ex.className = 'expand-btn';
           ex.tabIndex = -1;
-          ex.title = (window.I18N ? window.I18N.t('expand.open') : 'Open in editor');
+          ex.title = (window.I18N ? window.I18N.t('expand.open') : 'Open in editor') + ' (Ctrl+E)';
           ex.innerHTML = '&#9998;'; // pencil
           ex.addEventListener('mousedown', e => e.preventDefault());
-          ex.addEventListener('click', () => {
-            const labelEl = el.closest('.field-row') ? el.closest('.field-row').querySelector('.app-label') : null;
-            const label = labelEl ? (labelEl.textContent || '').trim() : '';
-            window.dispatchEvent(new CustomEvent('expand-open', { detail: { el, label } }));
-          });
+          ex.addEventListener('click', fireExpand);
           w.appendChild(ex);
+          // Ctrl+E (or Cmd+E) on the focused textarea opens the overlay editor
+          el.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 'e' || e.key === 'E')) {
+              e.preventDefault();
+              fireExpand();
+            }
+          });
         }
       };
       const scan = () => document.querySelectorAll('.app-input, .app-textarea').forEach(wrap);
