@@ -135,9 +135,9 @@
   .app-input:focus, .app-textarea:focus, .app-select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(29,29,31,0.08); }
   .app-textarea { resize: vertical; min-height: 44px; line-height: 1.4; }
   .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; display: block; }
-  .field-row { margin-bottom: 7px; }
-  .form-section { padding: 10px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 8px; }
-  .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .field-row { margin-bottom: 9px; }
+  .form-section { padding: 14px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 12px; }
+  .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
   /* Hint / info popover */
   [x-cloak] { display: none !important; }
@@ -309,6 +309,33 @@
   body.editor-dark .modal-card p { color: #a0a0a6; }
   .modal-card .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
   .modal-warn { background: rgba(180,83,9,0.08); color: var(--accent-amber); border: 1px solid rgba(180,83,9,0.25); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
+
+  /* Expand-textarea overlay editor — appears on every .app-textarea via JS */
+  .expand-btn { position: absolute; right: 5px; top: 6px; width: 20px; height: 20px; padding: 0; border-radius: 5px; border: 1px solid var(--hair); background: #fff; color: var(--ink-soft); font-size: 12px; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; transition: background .15s, color .15s, border-color .15s; }
+  .expand-btn:hover { color: var(--ink); border-color: var(--ink); }
+  body.editor-dark .expand-btn { background: #232328; border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .expand-btn:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  .field-clear-wrap > .app-textarea ~ .expand-btn { display: inline-flex; }
+  .field-clear-wrap > .app-textarea ~ .field-clear { top: 32px; }
+  .field-clear-wrap > .app-textarea { padding-right: 30px; }
+
+  .expand-modal { background: #fff; color: var(--ink); border-radius: 14px; width: min(840px, 100%); max-height: 92vh; padding: 18px 18px 16px; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 12px; }
+  body.editor-dark .expand-modal { background: #1c1c20; color: #f5f5f7; border: 1px solid #2a2a2e; }
+  .expand-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .expand-label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0; }
+  body.editor-dark .expand-label { color: #a0a0a6; }
+  .expand-close { width: 28px; height: 28px; border-radius: 999px; border: 1px solid var(--hair); background: transparent; color: var(--ink-soft); font-size: 18px; line-height: 1; cursor: pointer; padding: 0; }
+  .expand-close:hover { color: var(--ink); border-color: var(--ink); }
+  body.editor-dark .expand-close { border-color: #34343a; color: #a0a0a6; }
+  body.editor-dark .expand-close:hover { color: #f5f5f7; border-color: #f5f5f7; }
+  .expand-textarea { flex: 1 1 auto; min-height: 55vh; resize: vertical; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--hair); background: #fafafa; font-size: 14px; line-height: 1.5; color: var(--ink); outline: none; font-family: inherit; }
+  .expand-textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(29,29,31,0.08); background: #fff; }
+  body.editor-dark .expand-textarea { background: #232328; border-color: #34343a; color: #f5f5f7; }
+  body.editor-dark .expand-textarea:focus { border-color: #f5f5f7; box-shadow: 0 0 0 3px rgba(245,245,247,0.08); background: #2a2a30; }
+  .expand-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .expand-hint { font-size: 11px; color: var(--ink-soft); }
+  body.editor-dark .expand-hint { color: #a0a0a6; }
+  .expand-actions { display: flex; gap: 8px; }
 
   /* UI scale — applied to the form pane only */
   :root { --ui-scale: 1; --sheet-scale: 1; }
@@ -565,7 +592,7 @@
 <div class="flex h-[calc(100vh-45px)]">
 
   <!-- Form pane -->
-  <aside class="form-pane overflow-y-auto p-2.5 bg-[#fafafa]" :style="`width: ${formPaneWidth}px; flex-shrink: 0;`">
+  <aside class="form-pane overflow-y-auto px-2.5 py-5 bg-[#fafafa]" :style="`width: ${formPaneWidth}px; flex-shrink: 0;`">
 
     <section class="form-section">
       <h3><span data-i18n="section.meta">Meta</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.meta.eng">Audience determines vocabulary. Confidence stage sets reader expectations: don't claim Validated unless the data is in.</span></span></h3>
@@ -658,7 +685,7 @@
       <h3><span data-i18n="section.changes">What changes</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.changes">Before / after pairs the reader can verify in production. Use real metrics, not vibes.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.changes.eyebrow"></div>
       <template x-for="(c, i) in data.changes.items" :key="i">
-        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
           <input class="app-input mb-2" placeholder="Component" x-model="data.changes.items[i].component">
           <div class="grid grid-cols-2 gap-2">
             <input class="app-input" placeholder="Before" x-model="data.changes.items[i].before">
@@ -677,7 +704,7 @@
       <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured (we have data) · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated (sized &amp; broken down) · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.costValue.eyebrow"></div>
       <template x-for="(r, i) in data.costValue.rows" :key="i">
-        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
           <div class="flex gap-1.5 mb-1.5">
             <select class="app-input" style="flex: 0 0 90px;" x-model="data.costValue.rows[i].kind">
               <option value="cost">Cost</option>
@@ -704,7 +731,7 @@
       <h3><span data-i18n="section.tradeoffs">Trade-offs</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.tradeoffs">List the 2–3 paths actually considered. Mark the chosen one.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.tradeoffs.eyebrow"></div>
       <template x-for="(t, i) in data.tradeoffs.items" :key="i">
-        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
           <div class="flex gap-1.5 mb-1.5">
             <input class="app-input" placeholder="Option" x-model="data.tradeoffs.items[i].option">
             <label class="flex items-center gap-1 text-xs whitespace-nowrap">
@@ -724,7 +751,7 @@
       <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.risks.eyebrow"></div>
       <template x-for="(r, i) in data.risks.items" :key="i">
-        <div class="border border-[var(--hair)] rounded-lg p-2 mb-1.5">
+        <div class="border-l-2 border-[var(--mode-accent-soft)] pl-2 mb-2.5">
           <div class="flex gap-1.5 mb-1.5 items-center">
             <select class="app-input flex-1 min-w-0" x-model="data.risks.items[i].category">
               <option>Security</option>
@@ -1220,6 +1247,29 @@
   </div>
 </div>
 
+<!-- Expand-textarea overlay editor — opens via 'expand-open' window event from .expand-btn -->
+<div class="modal-backdrop" x-show="expandOpen" x-cloak
+     @expand-open.window="openExpand($event.detail.el, $event.detail.label)"
+     @keydown.escape.window="if(expandOpen) cancelExpand()"
+     @click.self="cancelExpand()">
+  <div class="expand-modal" role="dialog" aria-modal="true">
+    <div class="expand-head">
+      <p class="expand-label" x-text="expandLabel || 'Edit'"></p>
+      <button type="button" class="expand-close" @click="cancelExpand()" :title="(window.I18N ? window.I18N.t('expand.close') : 'Close') + ' (Esc)'">×</button>
+    </div>
+    <textarea class="expand-textarea" x-model="expandValue" x-ref="expandTextarea"
+              @keydown.meta.enter.prevent="commitExpand()"
+              @keydown.ctrl.enter.prevent="commitExpand()"></textarea>
+    <div class="expand-footer">
+      <span class="expand-hint" data-i18n="expand.hint">Esc to cancel · Ctrl+Enter to save</span>
+      <div class="expand-actions">
+        <button type="button" class="btn btn-ghost" @click="cancelExpand()" data-i18n="modal.cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" @click="commitExpand()" data-i18n="expand.done">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 function engBriefing() {
   return {
@@ -1242,7 +1292,11 @@ function engBriefing() {
     showReleaseNotes: false,
     releaseNotesHtml: '',
     releaseNotesLoading: false,
-    appVersion: '1.2.0',
+    appVersion: '1.2.1',
+    expandOpen: false,
+    expandValue: '',
+    expandLabel: '',
+    expandTarget: null,
     formPaneWidth: 420,
     toolsPaneWidth: 220,
     templates: [
@@ -1358,10 +1412,50 @@ function engBriefing() {
         const upd = () => { btn.style.display = el.value ? 'inline-flex' : 'none'; };
         el.addEventListener('input', upd);
         upd();
+        if (el.tagName === 'TEXTAREA') {
+          const ex = document.createElement('button');
+          ex.type = 'button';
+          ex.className = 'expand-btn';
+          ex.tabIndex = -1;
+          ex.title = (window.I18N ? window.I18N.t('expand.open') : 'Open in editor');
+          ex.innerHTML = '&#9998;'; // pencil
+          ex.addEventListener('mousedown', e => e.preventDefault());
+          ex.addEventListener('click', () => {
+            const labelEl = el.closest('.field-row') ? el.closest('.field-row').querySelector('.app-label') : null;
+            const label = labelEl ? (labelEl.textContent || '').trim() : '';
+            window.dispatchEvent(new CustomEvent('expand-open', { detail: { el, label } }));
+          });
+          w.appendChild(ex);
+        }
       };
       const scan = () => document.querySelectorAll('.app-input, .app-textarea').forEach(wrap);
       setTimeout(scan, 0);
       new MutationObserver(() => scan()).observe(document.body, { childList: true, subtree: true });
+    },
+
+    openExpand(el, label) {
+      this.expandTarget = el;
+      this.expandLabel = label || (window.I18N ? window.I18N.t('expand.title') : 'Edit');
+      this.expandValue = el ? (el.value || '') : '';
+      this.expandOpen = true;
+      this.$nextTick(() => {
+        const ta = this.$refs.expandTextarea;
+        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+      });
+    },
+    commitExpand() {
+      if (this.expandTarget) {
+        this.expandTarget.value = this.expandValue;
+        this.expandTarget.dispatchEvent(new Event('input', { bubbles: true }));
+        this.expandTarget.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      this.cancelExpand();
+    },
+    cancelExpand() {
+      this.expandOpen = false;
+      this.expandTarget = null;
+      this.expandValue = '';
+      this.expandLabel = '';
     },
 
     fitZoom() {
@@ -1799,7 +1893,28 @@ function fallbackCopy(text) {
  */
 // Inline release notes — used when fetch('README.md') is blocked (file:// protocol).
 // Update this alongside README.md on every release.
-const RELEASE_NOTES_MD = `# What's new in v1.2.0
+const RELEASE_NOTES_MD = `# What's new in v1.2.1
+
+## Pop-out editor for multi-line fields
+Every textarea (headlines, supporting copy, page-2 prose, etc.) now has a small **pencil button** in its top-right corner. Click it to open a fullscreen overlay editor with a much larger writing area — easier on long-form content than fighting a 3-row textarea.
+
+- **Esc** cancels (no changes saved).
+- **Ctrl + Enter** (or **⌘ + Enter** on Mac) saves and closes.
+- Click outside the modal to cancel.
+- Translated in English, German, Italian, Croatian.
+
+## Tighter, calmer form pane
+- More **vertical breathing room** on the left form pane — sections sit further apart, padding inside each section bumped, fields spaced.
+- Removed the **redundant box** around timeline phases (exec) and around changes / cost-value / trade-offs / risks rows (eng). Replaced with a soft left-accent in the mode color so each item still reads as a group without the boxy frame.
+
+## Other polish
+- **Footers simplified** in the Executive briefing — the duplicated "Prepared by / for / company / date" info is removed (it's already in the header). Footer is now a single low-profile line: the Confidential badge plus *For discussion · contact*.
+- **Engineering bento compaction** — section padding, gaps, list spacing, and stack heights all tightened so the page feels less crowded; the bento baseline type scale is now **0.729×** of the original 1.0× (roughly 81% of v1.2.0's already-reduced 0.9×).
+- **Refresh-preview button** now actually pulses — the previous keyframe was too faint to see; it's been redone with the same accent ring + glow + slight scale used by the version badge.
+- Mode pill renamed **"Executive Reporting"** (was "Executive Level Reporting"), and both pills now wrap consistently into two stacked rows.
+- Default engineering image height is now **75 mm** (was 95 mm).
+
+# What's new in v1.2.0
 
 ## Reorganized chrome (top bar)
 The top bar now uses a **3-column layout** so logical groups have a fixed home:

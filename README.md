@@ -10,7 +10,26 @@ Runs from plain HTML files — no server, no installer, no tracking. Tailwind, A
 
 ---
 
-## What's new — v1.2.0
+## What's new — v1.2.1
+
+A polish-and-comfort release.
+
+**Pop-out editor for multi-line fields.** Every textarea (headlines, supporting copy, page-2 prose) now has a small **pencil button** in its top-right. Click to open a fullscreen overlay with a much larger writing area — easier on long-form content than fighting a 3-row textarea. **Esc** cancels, **Ctrl + Enter** (⌘+Enter on Mac) saves, click outside to cancel. Fully translated.
+
+**Tighter, calmer form pane.** More vertical breathing room (sections sit further apart, more padding inside each, fields spaced). The redundant box around timeline phases (exec) and around changes / cost-value / trade-offs / risks rows (eng) is replaced with a soft left-accent in the mode color — same grouping signal, no boxy frame.
+
+**Other polish.**
+- **Footers simplified** in the Executive briefing — duplicated "Prepared by / for / company / date" info removed (it's already in the header). Single low-profile line: Confidential badge + *For discussion · contact*.
+- **Engineering bento compaction** — section padding, gaps, list spacing, and stack heights all tightened so the page feels less crowded; the bento baseline type scale is now **0.729×** of the original (≈81% of v1.2.0's 0.9×).
+- **Refresh-preview button** now actually pulses — the previous keyframe was too faint; it's been redone with the same accent ring + glow + slight scale used by the version badge.
+- Mode pill renamed **"Executive Reporting"** (was "Executive Level Reporting") and both pills now wrap consistently into two stacked rows.
+- Default engineering image height is now **75 mm** (was 95 mm).
+
+**Compatibility.** Existing project `.json` files load unchanged. UI preferences stay browser-local.
+
+---
+
+## What's shipped — v1.2.0
 
 A focused release on **layout control, formatting, and chrome IA**. Highlights:
 

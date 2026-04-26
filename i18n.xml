@@ -273,6 +273,26 @@
     <hr>Zamijeni primjerom</hr>
   </string>
 
+  <!-- Expand-textarea overlay editor -->
+  <string key="expand.open">
+    <en>Open in editor</en><de>Im Editor öffnen</de><it>Apri nell'editor</it><hr>Otvori u uređivaču</hr>
+  </string>
+  <string key="expand.close">
+    <en>Close</en><de>Schließen</de><it>Chiudi</it><hr>Zatvori</hr>
+  </string>
+  <string key="expand.done">
+    <en>Done</en><de>Fertig</de><it>Fatto</it><hr>Gotovo</hr>
+  </string>
+  <string key="expand.title">
+    <en>Edit</en><de>Bearbeiten</de><it>Modifica</it><hr>Uredi</hr>
+  </string>
+  <string key="expand.hint">
+    <en>Esc to cancel · Ctrl+Enter to save</en>
+    <de>Esc zum Abbrechen · Strg+Eingabe zum Speichern</de>
+    <it>Esc per annullare · Ctrl+Invio per salvare</it>
+    <hr>Esc za odustajanje · Ctrl+Enter za spremanje</hr>
+  </string>
+
   <!-- Index landing page -->
   <string key="index.hero">
     <en>One page. One decision. Ninety seconds.</en>

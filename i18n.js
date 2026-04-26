@@ -64,6 +64,11 @@
   <string key="modal.sampleTitle"><en>Load sample text?</en><de>Beispieltext laden?</de><it>Caricare il testo di esempio?</it><hr>Učitati primjer teksta?</hr></string>
   <string key="modal.cancel"><en>Cancel</en><de>Abbrechen</de><it>Annulla</it><hr>Odustani</hr></string>
   <string key="modal.confirm"><en>Replace with sample</en><de>Mit Beispiel ersetzen</de><it>Sostituisci con esempio</it><hr>Zamijeni primjerom</hr></string>
+  <string key="expand.open"><en>Open in editor</en><de>Im Editor öffnen</de><it>Apri nell'editor</it><hr>Otvori u uređivaču</hr></string>
+  <string key="expand.close"><en>Close</en><de>Schließen</de><it>Chiudi</it><hr>Zatvori</hr></string>
+  <string key="expand.done"><en>Done</en><de>Fertig</de><it>Fatto</it><hr>Gotovo</hr></string>
+  <string key="expand.title"><en>Edit</en><de>Bearbeiten</de><it>Modifica</it><hr>Uredi</hr></string>
+  <string key="expand.hint"><en>Esc to cancel · Ctrl+Enter to save</en><de>Esc zum Abbrechen · Strg+Eingabe zum Speichern</de><it>Esc per annullare · Ctrl+Invio per salvare</it><hr>Esc za odustajanje · Ctrl+Enter za spremanje</hr></string>
   <string key="index.hero"><en>One page. One decision. Ninety seconds.</en><de>Eine Seite. Eine Entscheidung. Neunzig Sekunden.</de><it>Una pagina. Una decisione. Novanta secondi.</it><hr>Jedna stranica. Jedna odluka. Devedeset sekundi.</hr></string>
   <string key="index.eyebrow"><en>Start a briefing</en><de>Briefing starten</de><it>Inizia un briefing</it><hr>Pokreni izvještaj</hr></string>
   <string key="index.lede"><en>Choose the briefing type that matches your audience. Each project can be saved to a file and reopened later. Your work also auto-saves to this browser.</en><de>Wählen Sie den Briefing-Typ, der zu Ihrem Publikum passt. Jedes Projekt kann in einer Datei gespeichert und später wieder geöffnet werden. Ihre Arbeit wird zudem automatisch in diesem Browser gespeichert.</de><it>Scegli il tipo di briefing più adatto al tuo pubblico. Ogni progetto può essere salvato in un file e riaperto in seguito. Il lavoro viene anche salvato automaticamente in questo browser.</it><hr>Odaberi vrstu izvještaja koja odgovara tvojoj publici. Svaki projekt može se spremiti u datoteku i kasnije ponovno otvoriti. Tvoj rad također se automatski sprema u ovaj preglednik.</hr></string>
