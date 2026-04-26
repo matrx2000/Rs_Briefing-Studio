@@ -273,6 +273,23 @@
     <hr>Zamijeni primjerom</hr>
   </string>
 
+  <!-- Preview zoom toolbar -->
+  <string key="ui.zoomin">
+    <en>Zoom in</en><de>Vergrößern</de><it>Ingrandisci</it><hr>Povećaj</hr>
+  </string>
+  <string key="ui.zoomout">
+    <en>Zoom out</en><de>Verkleinern</de><it>Riduci</it><hr>Smanji</hr>
+  </string>
+  <string key="ui.zoomreset">
+    <en>Click to reset to 100%</en>
+    <de>Klicken zum Zurücksetzen auf 100%</de>
+    <it>Clic per ripristinare al 100%</it>
+    <hr>Klikni za vraćanje na 100%</hr>
+  </string>
+  <string key="ui.zoomfit">
+    <en>Fit</en><de>Anpassen</de><it>Adatta</it><hr>Prilagodi</hr>
+  </string>
+
   <!-- Responsive chrome burgers -->
   <string key="ui.tools">
     <en>Tools</en><de>Werkzeuge</de><it>Strumenti</it><hr>Alati</hr>

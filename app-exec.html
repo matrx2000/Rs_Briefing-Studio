@@ -335,6 +335,22 @@
   .preview-stage { padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .preview-frame { transform-origin: top center; }
 
+  /* Bottom zoom toolbar — spans the preview pane between the form pane (left) and the tools pane (right) */
+  .preview-toolbar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; background: rgba(255,255,255,0.95); border-top: 1px solid var(--hair); backdrop-filter: blur(6px); flex-shrink: 0; }
+  body.editor-dark .preview-toolbar { background: rgba(20,20,22,0.92); border-top-color: #2a2a2e; }
+  .preview-toolbar .zoom-btn { width: 30px; height: 28px; border-radius: 6px; border: 1px solid var(--hair); background: #fff; color: var(--ink); font-size: 15px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; font-family: inherit; transition: border-color .15s, background .15s; }
+  .preview-toolbar .zoom-btn:hover:not(:disabled) { border-color: var(--ink); }
+  .preview-toolbar .zoom-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  body.editor-dark .preview-toolbar .zoom-btn { background: #232328; border-color: #34343a; color: #f5f5f7; }
+  body.editor-dark .preview-toolbar .zoom-btn:hover:not(:disabled) { border-color: #f5f5f7; }
+  .preview-toolbar .zoom-pct { min-width: 52px; text-align: center; font-size: 12px; color: var(--ink); font-feature-settings: "tnum"; cursor: pointer; padding: 0 4px; user-select: none; }
+  .preview-toolbar .zoom-pct:hover { color: var(--mode-accent); }
+  body.editor-dark .preview-toolbar .zoom-pct { color: #f5f5f7; }
+  .preview-toolbar .zoom-fit { font-size: 11px; padding: 0 10px; height: 28px; border-radius: 6px; border: 1px solid var(--hair); background: transparent; color: var(--ink-soft); cursor: pointer; font-family: inherit; transition: color .15s, border-color .15s; }
+  .preview-toolbar .zoom-fit:hover { color: var(--ink); border-color: var(--ink); }
+  body.editor-dark .preview-toolbar .zoom-fit { color: #a0a0a6; border-color: #34343a; }
+  body.editor-dark .preview-toolbar .zoom-fit:hover { color: #f5f5f7; border-color: #f5f5f7; }
+
   /* Field clear button */
   .field-clear-wrap { position: relative; display: block; flex: 1 1 auto; min-width: 0; }
   .field-clear-wrap > .app-input, .field-clear-wrap > .app-textarea { padding-right: 26px; }
@@ -505,8 +521,10 @@
   /* Form scrollbar nicety */
   .form-pane::-webkit-scrollbar { width: 8px; }
   .form-pane::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
-  .preview-pane::-webkit-scrollbar { width: 8px; }
-  .preview-pane::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
+  .preview-pane, .preview-content { display: flex; flex-direction: column; }
+  .preview-content { flex: 1 1 auto; overflow: auto; min-height: 0; }
+  .preview-content::-webkit-scrollbar { width: 8px; }
+  .preview-content::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
 
   /* PRINT — strip the app chrome and force ink-light rendering */
   @media print {
@@ -876,7 +894,8 @@
   <!-- Resizable splitter -->
   <div class="splitter" @mousedown="startResize($event)" title="Drag to resize"></div>
 
-  <main class="preview-pane flex-1 min-w-0 overflow-auto">
+  <main class="preview-pane flex-1 min-w-0">
+    <div class="preview-content">
     <div class="preview-stage" x-show="exportMode==='print'">
 
       <!-- PAGE 1 -->
@@ -1112,7 +1131,15 @@
       </div>
       <div class="md-rendered" x-html="renderedMarkdown"></div>
     </div>
+    </div>
 
+    <!-- Bottom zoom toolbar (print mode only) -->
+    <div class="preview-toolbar" x-show="exportMode==='print'">
+      <button type="button" class="zoom-btn" @click="zoomOut()" :disabled="zoom <= 0.25" :title="window.I18N ? window.I18N.t('ui.zoomout') : 'Zoom out'">−</button>
+      <span class="zoom-pct" @click="setZoom(1)" :title="window.I18N ? window.I18N.t('ui.zoomreset') : 'Click to reset to 100%'" x-text="Math.round(zoom * 100) + '%'"></span>
+      <button type="button" class="zoom-btn" @click="zoomIn()" :disabled="zoom >= 2.0" :title="window.I18N ? window.I18N.t('ui.zoomin') : 'Zoom in'">+</button>
+      <button type="button" class="zoom-fit" @click="fitZoom()" :title="window.I18N ? window.I18N.t('ui.zoomfit') : 'Fit to width'" data-i18n="ui.zoomfit">Fit</button>
+    </div>
   </main>
 
   <div class="splitter" @mousedown="startToolsResize($event)" title="Drag to resize"></div>
@@ -1489,6 +1516,10 @@ function briefingApp() {
       const paperWmm = this.paperSize === 'A4' ? 210 : 297;
       this.zoom = Math.min(1, w / (paperWmm * 3.78));
     },
+
+    zoomIn()  { this.zoom = Math.min(2.0, Math.round((this.zoom + 0.1) * 100) / 100); },
+    zoomOut() { this.zoom = Math.max(0.25, Math.round((this.zoom - 0.1) * 100) / 100); },
+    setZoom(z) { this.zoom = Math.max(0.25, Math.min(2.0, z)); },
 
     applyPageSize() {
       const el = document.getElementById('pageSizeRule');

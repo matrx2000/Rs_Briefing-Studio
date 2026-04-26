@@ -64,6 +64,10 @@
   <string key="modal.sampleTitle"><en>Load sample text?</en><de>Beispieltext laden?</de><it>Caricare il testo di esempio?</it><hr>Učitati primjer teksta?</hr></string>
   <string key="modal.cancel"><en>Cancel</en><de>Abbrechen</de><it>Annulla</it><hr>Odustani</hr></string>
   <string key="modal.confirm"><en>Replace with sample</en><de>Mit Beispiel ersetzen</de><it>Sostituisci con esempio</it><hr>Zamijeni primjerom</hr></string>
+  <string key="ui.zoomin"><en>Zoom in</en><de>Vergrößern</de><it>Ingrandisci</it><hr>Povećaj</hr></string>
+  <string key="ui.zoomout"><en>Zoom out</en><de>Verkleinern</de><it>Riduci</it><hr>Smanji</hr></string>
+  <string key="ui.zoomreset"><en>Click to reset to 100%</en><de>Klicken zum Zurücksetzen auf 100%</de><it>Clic per ripristinare al 100%</it><hr>Klikni za vraćanje na 100%</hr></string>
+  <string key="ui.zoomfit"><en>Fit</en><de>Anpassen</de><it>Adatta</it><hr>Prilagodi</hr></string>
   <string key="ui.tools"><en>Tools</en><de>Werkzeuge</de><it>Strumenti</it><hr>Alati</hr></string>
   <string key="ui.preferences"><en>Preferences</en><de>Einstellungen</de><it>Preferenze</it><hr>Postavke</hr></string>
   <string key="ui.group.project"><en>Project</en><de>Projekt</de><it>Progetto</it><hr>Projekt</hr></string>
