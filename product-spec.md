@@ -127,7 +127,7 @@ A `body.editor-dark` class triggers darker form pane, chrome, inputs, modal, spl
 
 ### Templates (deprecated)
 
-The earlier "Apple Bento Dark" template is gone. The remaining templates are `bento-light` (executive) / `eng-light` (engineering) and `print-classic` (a serif-led variant kept for completeness — kept as a class hook but not heavily styled).
+The remaining templates are `bento-light` (executive) / `eng-light` (engineering) and `print-classic` (a serif-led variant kept for completeness — kept as a class hook but not heavily styled).
 
 ## 6. Data model (TypeScript-style)
 
