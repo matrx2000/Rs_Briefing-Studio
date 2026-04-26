@@ -112,10 +112,10 @@
 
   <!-- Mode tags -->
   <string key="mode.executive">
-    <en>Executive Level Reporting</en>
-    <de>Berichterstattung Führungsebene</de>
+    <en>Executive Reporting</en>
+    <de>Führungsberichte</de>
     <it>Reportistica direzionale</it>
-    <hr>Izvještavanje izvršne razine</hr>
+    <hr>Izvršno izvještavanje</hr>
   </string>
   <string key="mode.engineering">
     <en>Engineering Reporting</en>

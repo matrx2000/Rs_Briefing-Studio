@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Executive Level Reporting — R's Briefing Studio</title>
+<title>Executive Reporting — R's Briefing Studio</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
 <script src="i18n.js"></script>
@@ -20,12 +20,12 @@
     --accent-green: #16a34a;
     --accent-amber: #b45309;
     --accent-blue: #1d4ed8;
-    --mode-accent: #3b82f6;          /* Executive Level Reporting — bright blue, pops on dark */
+    --mode-accent: #3b82f6;          /* Executive Reporting — bright blue, pops on dark */
     --mode-accent-soft: rgba(59,130,246,0.18);
   }
   /* Mode accent stripe at top of chrome and sidebar tint */
   .app-chrome { border-top: 3px solid var(--mode-accent) !important; }
-  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: help; }
+  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 14px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: help; max-width: 110px; line-height: 1.15; text-align: left; white-space: normal; word-spacing: 100vw; }
 
   /* Hover tooltip on the mode-tag — explains what each mode is built for */
   .mode-tag-wrap { position: relative; display: inline-block; }
@@ -490,7 +490,7 @@
 
       <span class="chrome-group">
         <span class="mode-tag-wrap" tabindex="0">
-          <span class="mode-tag" data-i18n="mode.executive">Executive Level Reporting</span>
+          <span class="mode-tag" data-i18n="mode.executive">Executive Reporting</span>
           <span class="mode-tooltip" data-i18n="mode.executiveTooltip">For decision-makers under time pressure. Page 1: bottom line, headline number, 5 Ws + H, pros / cons, timeline, the ask. Page 2: context and depth. Designed to be skimmed in 90 seconds.</span>
         </span>
         <span class="switch-menu" :class="{'open': switchOpen}" x-data="{ switchOpen: false }" @click.outside="switchOpen = false">
@@ -500,7 +500,7 @@
           <div class="switch-pop" x-show="switchOpen" x-cloak>
             <a class="switch-item current" href="app-exec.html">
               <span class="swatch" style="background:#3b82f6"></span>
-              <span><span class="label" data-i18n="mode.executive">Executive Level Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
+              <span><span class="label" data-i18n="mode.executive">Executive Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
             </a>
             <a class="switch-item" href="app-eng.html">
               <span class="swatch" style="background:#16a34a"></span>

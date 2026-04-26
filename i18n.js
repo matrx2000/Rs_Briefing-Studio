@@ -34,7 +34,7 @@
   <string key="ui.template"><en>Template</en><de>Vorlage</de><it>Modello</it><hr>Predložak</hr></string>
   <string key="ui.about"><en>About</en><de>Über</de><it>Informazioni</it><hr>O aplikaciji</hr></string>
   <string key="ui.language"><en>Language</en><de>Sprache</de><it>Lingua</it><hr>Jezik</hr></string>
-  <string key="mode.executive"><en>Executive Level Reporting</en><de>Berichterstattung Führungsebene</de><it>Reportistica direzionale</it><hr>Izvještavanje izvršne razine</hr></string>
+  <string key="mode.executive"><en>Executive Reporting</en><de>Führungsberichte</de><it>Reportistica direzionale</it><hr>Izvršno izvještavanje</hr></string>
   <string key="mode.engineering"><en>Engineering Reporting</en><de>Technische Berichterstattung</de><it>Reportistica ingegneristica</it><hr>Inženjersko izvještavanje</hr></string>
   <string key="switch.executiveDesc"><en>Decision-focused for leadership</en><de>Entscheidungsorientiert für Führungskräfte</de><it>Orientato alle decisioni per la leadership</it><hr>Usmjereno na odluke za vodstvo</hr></string>
   <string key="switch.engineeringDesc"><en>Technical depth for reviewers</en><de>Technische Tiefe für Prüfer</de><it>Approfondimento tecnico per i revisori</it><hr>Tehnička dubina za recenzente</hr></string>

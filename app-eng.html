@@ -25,7 +25,7 @@
     --mode-accent-soft: rgba(22,163,74,0.12);
   }
   .app-chrome { border-top: 3px solid var(--mode-accent) !important; }
-  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: help; }
+  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 14px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: help; max-width: 110px; line-height: 1.15; text-align: left; white-space: normal; word-spacing: 100vw; }
 
   /* Hover tooltip on the mode-tag — explains what each mode is built for */
   .mode-tag-wrap { position: relative; display: inline-block; }
@@ -487,7 +487,7 @@
           <div class="switch-pop" x-show="switchOpen" x-cloak>
             <a class="switch-item" href="app-exec.html">
               <span class="swatch" style="background:#3b82f6"></span>
-              <span><span class="label" data-i18n="mode.executive">Executive Level Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
+              <span><span class="label" data-i18n="mode.executive">Executive Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
             </a>
             <a class="switch-item current" href="app-eng.html">
               <span class="swatch" style="background:#16a34a"></span>
@@ -644,7 +644,7 @@
         <div class="field-row col-span-2" x-show="data.effort.image && exportMode==='print' && data.effort.orientation !== 'horizontal'">
           <label class="app-label flex justify-between items-center">
             <span>Image height <span class="text-[var(--ink-soft)] font-normal">· vertical mode only</span></span>
-            <span class="text-[var(--ink-soft)] font-normal tnum"><span x-text="data.effort.imageScale || 80"></span> mm</span>
+            <span class="text-[var(--ink-soft)] font-normal tnum"><span x-text="data.effort.imageScale || 75"></span> mm</span>
           </label>
           <input type="range" min="40" max="160" step="5" class="app-input !p-0" x-model.number="data.effort.imageScale">
         </div>
@@ -863,7 +863,7 @@
               </div>
 
               <!-- Vertical mode: image rendered full-width below proposal+effort so it can be shown completely -->
-              <article class="tile effort-image-full" :class="`fit-${data.effort.imageFit || 'cover'}`" :style="`--img-h:${data.effort.imageScale || 80}mm`" x-show="data.effort.image && data.effort.orientation !== 'horizontal'">
+              <article class="tile effort-image-full" :class="`fit-${data.effort.imageFit || 'cover'}`" :style="`--img-h:${data.effort.imageScale || 75}mm`" x-show="data.effort.image && data.effort.orientation !== 'horizontal'">
                 <img :src="data.effort.image" alt="">
               </article>
 
@@ -1998,7 +1998,7 @@ function sampleData() {
     effort: {
       value: '8', unit: 'weeks', caption: '1 controls eng + 0.5 ops eng', evidence: 'estimated',
       image: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><rect width="400" height="260" fill="#f5f5f7"/><polygon points="140,30 260,30 240,80 160,80" fill="#1d1d1f"/><rect x="160" y="80" width="80" height="40" fill="#1d1d1f"/><rect x="155" y="120" width="90" height="22" rx="3" fill="#3b82f6"/><text x="200" y="135" font-family="Geist, sans-serif" font-size="10" font-weight="600" fill="#fff" text-anchor="middle">DEPOSITOR</text><circle cx="180" cy="155" r="6" fill="#1d1d1f"/><circle cx="220" cy="155" r="6" fill="#1d1d1f"/><rect x="40" y="170" width="320" height="14" rx="2" fill="#a0a0a6"/><circle cx="60" cy="200" r="14" fill="#1d1d1f"/><circle cx="60" cy="200" r="6" fill="#a0a0a6"/><circle cx="340" cy="200" r="14" fill="#1d1d1f"/><circle cx="340" cy="200" r="6" fill="#a0a0a6"/><circle cx="120" cy="190" r="6" fill="#c08648"/><circle cx="160" cy="190" r="6" fill="#c08648"/><circle cx="200" cy="190" r="6" fill="#c08648"/><circle cx="240" cy="190" r="6" fill="#c08648"/><circle cx="280" cy="190" r="6" fill="#c08648"/><text x="200" y="240" font-family="Geist, sans-serif" font-size="11" font-weight="500" fill="#1d1d1f" text-anchor="middle" letter-spacing="1">LINE 2 / DEPOSITOR + CONVEYOR</text></svg>'),
-      orientation: 'vertical', imageFit: 'height', imageScale: 80
+      orientation: 'vertical', imageFit: 'height', imageScale: 75
     },
     changes: {
       eyebrow: 'What changes',
