@@ -64,6 +64,10 @@
   <string key="modal.sampleTitle"><en>Load sample text?</en><de>Beispieltext laden?</de><it>Caricare il testo di esempio?</it><hr>Učitati primjer teksta?</hr></string>
   <string key="modal.cancel"><en>Cancel</en><de>Abbrechen</de><it>Annulla</it><hr>Odustani</hr></string>
   <string key="modal.confirm"><en>Replace with sample</en><de>Mit Beispiel ersetzen</de><it>Sostituisci con esempio</it><hr>Zamijeni primjerom</hr></string>
+  <string key="ui.tools"><en>Tools</en><de>Werkzeuge</de><it>Strumenti</it><hr>Alati</hr></string>
+  <string key="ui.preferences"><en>Preferences</en><de>Einstellungen</de><it>Preferenze</it><hr>Postavke</hr></string>
+  <string key="ui.group.project"><en>Project</en><de>Projekt</de><it>Progetto</it><hr>Projekt</hr></string>
+  <string key="ui.group.output"><en>Output</en><de>Ausgabe</de><it>Output</it><hr>Izlaz</hr></string>
   <string key="expand.open"><en>Open in editor</en><de>Im Editor öffnen</de><it>Apri nell'editor</it><hr>Otvori u uređivaču</hr></string>
   <string key="expand.close"><en>Close</en><de>Schließen</de><it>Chiudi</it><hr>Zatvori</hr></string>
   <string key="expand.done"><en>Done</en><de>Fertig</de><it>Fatto</it><hr>Gotovo</hr></string>

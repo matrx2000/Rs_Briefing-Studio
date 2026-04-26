@@ -47,6 +47,46 @@
   .chrome-row .chrome-center { display: flex; align-items: center; gap: 8px; justify-self: center; }
   .chrome-row .chrome-right { display: flex; align-items: center; gap: 8px; justify-self: end; min-width: 0; }
 
+  /* Responsive collapse — each .chrome-collapse wraps a burger trigger and a content group.
+     Wide screens: burger hidden, content rendered inline (display: contents pulls children into the row).
+     Narrow screens: burger visible, content hidden until .open, then shown as a dropdown popover. */
+  .chrome-collapse { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+  .chrome-burger { display: none; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--hair); background: #fff; color: var(--ink); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 500; transition: background .15s, border-color .15s; }
+  .chrome-burger:hover { border-color: var(--ink); }
+  .chrome-burger .burger-icon { display: inline-flex; flex-direction: column; gap: 3px; }
+  .chrome-burger .burger-icon span { display: block; width: 14px; height: 1.5px; background: currentColor; border-radius: 2px; }
+  body.editor-dark .chrome-burger { background: #232328; border-color: #34343a; color: #f5f5f7; }
+  body.editor-dark .chrome-burger:hover { border-color: #f5f5f7; }
+  .chrome-collapse-content { display: contents; }
+  .chrome-collapse-content > .chrome-group-label { display: none; }
+
+  @media (max-width: 1180px) {
+    .chrome-row { grid-template-columns: 1fr auto auto; gap: 6px; padding: 8px 12px; }
+    .chrome-row .chrome-center { justify-self: end; }
+    .chrome-burger { display: inline-flex; }
+    .chrome-collapse > .chrome-collapse-content { display: none; }
+    .chrome-collapse > .chrome-collapse-content.open {
+      display: flex; flex-direction: column; align-items: stretch; gap: 8px;
+      position: absolute; top: calc(100% + 6px); right: 0; min-width: 240px;
+      background: #fff; border: 1px solid var(--hair); border-radius: 10px;
+      padding: 10px; box-shadow: 0 12px 32px -8px rgba(0,0,0,0.25); z-index: 50;
+    }
+    body.editor-dark .chrome-collapse > .chrome-collapse-content.open { background: #1c1c20; border-color: #2a2a2e; }
+    .chrome-collapse > .chrome-collapse-content.open > * { width: 100%; justify-content: flex-start; text-align: left; }
+    .chrome-collapse > .chrome-collapse-content.open .chrome-divider { width: 100%; height: 1px; margin: 2px 0; }
+    .chrome-collapse > .chrome-collapse-content.open .toggle-pill,
+    .chrome-collapse > .chrome-collapse-content.open .btn,
+    .chrome-collapse > .chrome-collapse-content.open label.btn { width: 100%; }
+    .chrome-collapse > .chrome-collapse-content.open .toggle-pill { justify-content: center; }
+    .chrome-collapse > .chrome-collapse-content.open .app-input { width: 100% !important; }
+    .chrome-collapse > .chrome-collapse-content.open > .chrome-group-label { display: block; color: var(--mode-accent); margin: 4px 0 2px; width: 100%; }
+  }
+  @media (max-width: 820px) {
+    .chrome-row .chrome-left .chrome-divider { display: none; }
+    .chrome-row .chrome-left .mode-tag-wrap { display: none; }
+    .chrome-row .chrome-left a[href="index.html"] { font-size: 13px; }
+  }
+
   /* Pulsing version badge — clickable, opens release notes (renders README.md) */
   @keyframes version-pulse {
     0%, 100% { box-shadow: 0 0 0 0 var(--mode-accent-soft); }
@@ -538,54 +578,66 @@
 
     <!-- CENTER: document-tied tools (sit visually above the document) -->
     <div class="chrome-center">
-
-      <!-- Project file I/O -->
-      <span class="chrome-group">
-        <button class="btn btn-ghost" @click="showSampleModal = true" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
-        <label class="btn btn-ghost cursor-pointer" title="Load a previously saved project file">
-          <span data-i18n="ui.loadproject">Load Project</span>
-          <input type="file" accept="application/json" class="hidden" @change="importJson($event)">
-        </label>
-        <button class="btn btn-ghost" @click="exportJson()" title="Save current briefing to a project file" data-i18n="ui.saveproject">Save Project</button>
-      </span>
-
-      <span class="chrome-divider"></span>
-
-      <!-- Output: format · paper · refresh · primary export action -->
-      <span class="chrome-group">
-        <div class="toggle-pill" :title="window.I18N ? window.I18N.t('ui.exportmode') : 'Export mode'">
-          <button class="toggle-btn" :class="exportMode==='print' ? 'active' : ''" @click="exportMode='print'" data-i18n="ui.mode.print">Print</button>
-          <button class="toggle-btn" :class="exportMode==='markdown' ? 'active' : ''" @click="exportMode='markdown'" data-i18n="ui.mode.markdown">Markdown</button>
-        </div>
-        <div class="toggle-pill" :title="window.I18N ? window.I18N.t('ui.papersize') : 'Paper size'" x-show="exportMode==='print'">
-          <button class="toggle-btn" :class="paperSize==='A4' ? 'active' : ''" @click="paperSize='A4'">A4</button>
-          <button class="toggle-btn" :class="paperSize==='A3' ? 'active' : ''" @click="paperSize='A3'">A3</button>
-        </div>
-        <button type="button" class="btn btn-ghost refresh-btn" x-show="exportMode==='print'" @click="refreshPreview($event)" :title="window.I18N ? window.I18N.t('ui.refreshPreview') : 'Refresh preview'">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
-          <span data-i18n="ui.refreshPreview">Refresh preview</span>
+      <span class="chrome-collapse" x-data="{ open: false }" @click.outside="open = false">
+        <button type="button" class="chrome-burger" @click="open = !open" :title="window.I18N ? window.I18N.t('ui.tools') : 'Tools'" :aria-expanded="open">
+          <span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span data-i18n="ui.tools">Tools</span>
         </button>
-        <button class="btn btn-primary" x-show="exportMode==='print'" @click="window.print()" data-i18n="ui.printpdf">Print / PDF</button>
-        <button class="btn btn-primary" x-show="exportMode==='markdown'" @click="exportMarkdown()" data-i18n="ui.exportmd">Export .md</button>
+        <span class="chrome-collapse-content" :class="{ 'open': open }">
+          <!-- Project file I/O -->
+          <span class="chrome-group-label" data-i18n="ui.group.project">Project</span>
+          <button class="btn btn-ghost" @click="showSampleModal = true; open = false" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
+          <label class="btn btn-ghost cursor-pointer" title="Load a previously saved project file">
+            <span data-i18n="ui.loadproject">Load Project</span>
+            <input type="file" accept="application/json" class="hidden" @change="importJson($event); open = false">
+          </label>
+          <button class="btn btn-ghost" @click="exportJson(); open = false" title="Save current briefing to a project file" data-i18n="ui.saveproject">Save Project</button>
+
+          <span class="chrome-divider"></span>
+
+          <!-- Output: format · paper · refresh · primary export action -->
+          <span class="chrome-group-label" data-i18n="ui.group.output">Output</span>
+          <div class="toggle-pill" :title="window.I18N ? window.I18N.t('ui.exportmode') : 'Export mode'">
+            <button class="toggle-btn" :class="exportMode==='print' ? 'active' : ''" @click="exportMode='print'" data-i18n="ui.mode.print">Print</button>
+            <button class="toggle-btn" :class="exportMode==='markdown' ? 'active' : ''" @click="exportMode='markdown'" data-i18n="ui.mode.markdown">Markdown</button>
+          </div>
+          <div class="toggle-pill" :title="window.I18N ? window.I18N.t('ui.papersize') : 'Paper size'" x-show="exportMode==='print'">
+            <button class="toggle-btn" :class="paperSize==='A4' ? 'active' : ''" @click="paperSize='A4'">A4</button>
+            <button class="toggle-btn" :class="paperSize==='A3' ? 'active' : ''" @click="paperSize='A3'">A3</button>
+          </div>
+          <button type="button" class="btn btn-ghost refresh-btn" x-show="exportMode==='print'" @click="refreshPreview($event)" :title="window.I18N ? window.I18N.t('ui.refreshPreview') : 'Refresh preview'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span data-i18n="ui.refreshPreview">Refresh preview</span>
+          </button>
+          <button class="btn btn-primary" x-show="exportMode==='print'" @click="window.print(); open = false" data-i18n="ui.printpdf">Print / PDF</button>
+          <button class="btn btn-primary" x-show="exportMode==='markdown'" @click="exportMarkdown(); open = false" data-i18n="ui.exportmd">Export .md</button>
+        </span>
       </span>
     </div>
 
-    <!-- RIGHT: app preferences (least frequent — far right) -->
+    <!-- RIGHT: app preferences (collapses to burger on narrow screens) -->
     <div class="chrome-right">
-      <span class="chrome-group">
-        <select class="app-input !w-auto !py-1.5" x-model="templateId" :title="window.I18N ? window.I18N.t('ui.template') : 'Template'">
-          <template x-for="t in templates" :key="t.id">
-            <option :value="t.id" x-text="t.name"></option>
-          </template>
-        </select>
-        <button class="btn btn-ghost !py-1 !px-3" @click="editorMode = editorMode === 'dark' ? 'light' : 'dark'" :title="`Editor: ${editorMode}`">
-          <span x-show="editorMode === 'dark'" data-i18n="ui.darkmode">☾ Dark</span>
-          <span x-show="editorMode === 'light'" data-i18n="ui.lightmode">☀ Light</span>
+      <span class="chrome-collapse" x-data="{ open: false }" @click.outside="open = false">
+        <button type="button" class="chrome-burger" @click="open = !open" :title="window.I18N ? window.I18N.t('ui.preferences') : 'Preferences'" :aria-expanded="open">
+          <span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span data-i18n="ui.preferences">Preferences</span>
         </button>
+        <span class="chrome-collapse-content" :class="{ 'open': open }">
+          <span class="chrome-group-label" data-i18n="ui.template">Template</span>
+          <select class="app-input !w-auto !py-1.5" x-model="templateId" :title="window.I18N ? window.I18N.t('ui.template') : 'Template'">
+            <template x-for="t in templates" :key="t.id">
+              <option :value="t.id" x-text="t.name"></option>
+            </template>
+          </select>
+          <button class="btn btn-ghost !py-1 !px-3" @click="editorMode = editorMode === 'dark' ? 'light' : 'dark'" :title="`Editor: ${editorMode}`">
+            <span x-show="editorMode === 'dark'" data-i18n="ui.darkmode">☾ Dark</span>
+            <span x-show="editorMode === 'light'" data-i18n="ui.lightmode">☀ Light</span>
+          </button>
+        </span>
       </span>
     </div>
 
