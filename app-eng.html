@@ -183,17 +183,17 @@
   body.paper-A4 .a4 { width: 210mm; height: 297mm; }
   body.paper-A3 .a4 { width: 297mm; height: 420mm; }
   .a4:last-child { page-break-after: auto; }
-  .a4-inner { padding: 10mm 12mm; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+  .a4-inner { padding: 8mm 12mm; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
 
-  .bento { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: min-content; gap: 3mm; flex: 1; min-height: 0; align-content: start; }
-  .tile { border-radius: 5mm; padding: 4mm 5mm; background: var(--paper); border: 1px solid var(--hair); display: flex; flex-direction: column; gap: 2mm; min-height: 0; overflow: hidden; }
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: min-content; gap: 2.2mm; flex: 1; min-height: 0; align-content: start; }
+  .tile { border-radius: 4mm; padding: 2.8mm 3.8mm; background: var(--paper); border: 1px solid var(--hair); display: flex; flex-direction: column; gap: 1.4mm; min-height: 0; overflow: hidden; }
   .tile.tinted { background: var(--paper-tint); border-color: transparent; }
   .tile.proposal { grid-column: span 8; }
   .tile.effort { grid-column: span 4; justify-content: center; }
   /* Effort stack — image position can be vertical (below) or horizontal (next to) */
-  .effort-stack { grid-column: span 4; display: flex; flex-direction: column; gap: 3mm; min-width: 0; }
+  .effort-stack { grid-column: span 4; display: flex; flex-direction: column; gap: 2.2mm; min-width: 0; }
   .effort-stack .tile.effort { grid-column: auto; flex: 0 0 auto; }
-  .effort-stack .tile.effort-image { flex: 1 1 auto; min-height: 65mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
+  .effort-stack .tile.effort-image { flex: 1 1 auto; min-height: 50mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
   .effort-stack .tile.effort-image img { display: block; max-width: 100%; max-height: 100%; }
   .effort-stack .tile.effort-image.fit-cover img  { width: 100%; height: 100%; object-fit: cover; }
   .effort-stack .tile.effort-image.fit-width img  { width: 100%; height: auto; }
@@ -201,7 +201,7 @@
   .effort-stack:not(.has-image) .tile.effort { flex: 1 1 auto; }
   .effort-stack.horizontal { grid-column: span 6; flex-direction: row; }
   .effort-stack.horizontal .tile.effort { flex: 0 0 50%; }
-  .effort-stack.horizontal .tile.effort-image { flex: 1 1 50%; min-height: 50mm; }
+  .effort-stack.horizontal .tile.effort-image { flex: 1 1 50%; min-height: 40mm; }
   .bento:has(> .effort-stack.horizontal) .tile.proposal { grid-column: span 6; }
 
   /* Vertical + image: image moves out to a full-width tile below proposal/effort.
@@ -237,11 +237,11 @@
 
   .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: 2px; }
 
-  .change-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; padding: 2mm 0; border-bottom: 1px dashed var(--hair); }
+  .change-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; padding: 1.2mm 0; border-bottom: 1px dashed var(--hair); }
   .change-row:last-child { border-bottom: none; }
   .change-arrow { color: var(--ink-soft); font-size: 9pt; }
 
-  .cv-row { display: grid; grid-template-columns: 18px 1fr auto auto; gap: 6px; align-items: baseline; padding: 1.5mm 0; border-bottom: 1px dashed var(--hair); font-size: 9.5pt; }
+  .cv-row { display: grid; grid-template-columns: 18px 1fr auto auto; gap: 6px; align-items: baseline; padding: 0.9mm 0; border-bottom: 1px dashed var(--hair); font-size: 9.5pt; }
   .cv-row:last-child { border-bottom: none; }
   .cv-sign { font-weight: 700; }
   .cv-cost  .cv-sign { color: var(--accent-amber); }
@@ -812,23 +812,23 @@
         <article class="a4" :class="`stage-${data.meta.stage}`">
           <div class="a4-inner">
 
-            <header class="flex items-end justify-between pb-2 mb-3 border-b border-[var(--hair)]">
+            <header class="flex items-end justify-between pb-1.5 mb-2 border-b border-[var(--hair)]">
               <div>
-                <p class="eyebrow text-[var(--ink-soft)] mb-2">
+                <p class="eyebrow text-[var(--ink-soft)] mb-1">
                   <span x-text="`Engineering briefing · ${formatDate(data.meta.date)}`"></span>
                 </p>
                 <h1 class="text-[26pt] tight font-medium leading-[1]">
                   <span class="serif italic font-normal text-[var(--ink-soft)]" x-text="data.meta.subtitle"></span>
                   <span x-text="' ' + data.meta.title"></span>
                 </h1>
-                <div class="mt-2">
+                <div class="mt-1">
                   <span class="stage-pill"><span class="stage-dot"></span><span x-text="stageLabel()"></span></span>
                 </div>
               </div>
-              <div class="text-right space-y-0.5">
+              <div class="text-right space-y-0">
                 <p class="text-[10pt] font-medium text-[var(--ink)]" x-text="`For ${data.meta.audience}`"></p>
                 <p class="text-[9pt] text-[var(--ink)]" x-text="`Prepared by ${data.meta.authorName}`"></p>
-                <p class="text-[8pt] text-[var(--ink-soft)] mt-1" x-text="`Read time · ${page1ReadTime()} sec`"></p>
+                <p class="text-[8pt] text-[var(--ink-soft)] mt-0.5" x-text="`Read time · ${page1ReadTime()} sec`"></p>
                 <p class="text-[8pt] text-[var(--ink-soft)]" x-text="`Decision by ${formatDate(data.meta.decisionBy)}`"></p>
               </div>
             </header>
@@ -840,7 +840,7 @@
                 <p class="eyebrow text-[var(--ink-soft)]" x-text="data.proposal.eyebrow"></p>
                 <div>
                   <h2 class="text-[19pt] tight font-medium leading-[1.05]" x-html="emphasize(data.proposal.headline, data.proposal.headlineEmphasis)"></h2>
-                  <p class="text-[10pt] text-[var(--ink-soft)] mt-3 leading-snug" x-text="data.proposal.supporting"></p>
+                  <p class="text-[10pt] text-[var(--ink-soft)] mt-1.5 leading-snug" x-text="data.proposal.supporting"></p>
                 </div>
               </article>
 
@@ -854,7 +854,7 @@
                     <p class="text-[54pt] font-medium tnum leading-none">
                       <span x-text="data.effort.value"></span><span class="text-[24pt] text-[var(--ink-soft)] ml-1" x-text="data.effort.unit"></span>
                     </p>
-                    <p class="text-[9pt] text-[var(--ink-soft)] mt-2" x-text="data.effort.caption"></p>
+                    <p class="text-[9pt] text-[var(--ink-soft)] mt-1" x-text="data.effort.caption"></p>
                   </div>
                 </article>
                 <article class="tile effort-image" :class="`fit-${data.effort.imageFit || 'cover'}`" x-show="data.effort.image && data.effort.orientation === 'horizontal'">
@@ -869,7 +869,7 @@
 
               <!-- Changes -->
               <article class="tile changes">
-                <p class="eyebrow text-[var(--ink-soft)] mb-2" x-text="data.changes.eyebrow"></p>
+                <p class="eyebrow text-[var(--ink-soft)] mb-1" x-text="data.changes.eyebrow"></p>
                 <div>
                   <template x-for="c in data.changes.items" :key="c.component">
                     <div class="change-row">
@@ -886,7 +886,7 @@
 
               <!-- Cost / Value -->
               <article class="tile costvalue">
-                <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center justify-between mb-1">
                   <p class="eyebrow" style="color: var(--accent-green)" x-text="data.costValue.eyebrow"></p>
                   <span class="serif italic text-[var(--ink-soft)] text-[9pt]">value</span>
                 </div>
@@ -907,8 +907,8 @@
 
               <!-- Trade-offs -->
               <article class="tile tradeoffs">
-                <p class="eyebrow text-[var(--ink-soft)] mb-2" x-text="data.tradeoffs.eyebrow"></p>
-                <ul class="space-y-1.5 text-[9.5pt]">
+                <p class="eyebrow text-[var(--ink-soft)] mb-1" x-text="data.tradeoffs.eyebrow"></p>
+                <ul class="space-y-1 text-[9.5pt]">
                   <template x-for="t in data.tradeoffs.items" :key="t.option">
                     <li>
                       <div class="flex items-baseline gap-2">
@@ -924,11 +924,11 @@
 
               <!-- Risks -->
               <article class="tile risks">
-                <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center justify-between mb-1">
                   <p class="eyebrow" style="color: var(--accent-amber)" x-text="data.risks.eyebrow"></p>
                   <span class="serif italic text-[var(--ink-soft)] text-[9pt]">risk surface</span>
                 </div>
-                <ul class="space-y-1.5 text-[9.5pt]">
+                <ul class="space-y-1 text-[9.5pt]">
                   <template x-for="(r, i) in data.risks.items" :key="i">
                     <li class="flex items-start gap-2">
                       <span class="level-badge" :class="`level-${r.level}`" x-text="r.level"></span>
@@ -942,8 +942,8 @@
 
               <!-- Open questions -->
               <article class="tile questions">
-                <p class="eyebrow text-[var(--ink-soft)] mb-2" x-text="data.questions.eyebrow"></p>
-                <ul class="space-y-1 text-[9.5pt] columns-2 gap-6">
+                <p class="eyebrow text-[var(--ink-soft)] mb-1" x-text="data.questions.eyebrow"></p>
+                <ul class="space-y-0.5 text-[9.5pt] columns-2 gap-6">
                   <template x-for="q in data.questions.items" :key="q">
                     <li class="break-inside-avoid"><span class="dot" style="background: var(--ink)"></span><span x-text="q"></span></li>
                   </template>
@@ -955,8 +955,8 @@
                 <p class="eyebrow text-[var(--ink-soft)]" x-text="data.decision.eyebrow"></p>
                 <div>
                   <h3 class="text-[15pt] tight font-medium leading-tight" x-html="emphasize(data.decision.headline, data.decision.headlineEmphasis)"></h3>
-                  <p class="text-[8.5pt] text-[var(--ink-soft)] mt-2" x-text="`Reviewers: ${data.decision.reviewers}`"></p>
-                  <div class="mt-3 inline-flex items-center gap-1.5 border border-[var(--ink)] text-[var(--ink)] px-3 py-1.5 rounded-full text-[9pt] font-medium">
+                  <p class="text-[8.5pt] text-[var(--ink-soft)] mt-1" x-text="`Reviewers: ${data.decision.reviewers}`"></p>
+                  <div class="mt-2 inline-flex items-center gap-1.5 border border-[var(--ink)] text-[var(--ink)] px-3 py-1 rounded-full text-[9pt] font-medium">
                     <span x-text="data.decision.buttonText"></span>
                     <span aria-hidden="true">→</span>
                   </div>
@@ -1384,8 +1384,8 @@ function engBriefing() {
     },
 
     applySheetScale() {
-      // 100% on the slider = 0.9× of original sheet typography (the new baseline).
-      document.documentElement.style.setProperty('--sheet-scale', (this.sheetScale / 100) * 0.9);
+      // 100% on the slider = 0.81× of original sheet typography (the new baseline).
+      document.documentElement.style.setProperty('--sheet-scale', (this.sheetScale / 100) * 0.81);
     },
 
     applyTypeScales() {

@@ -267,10 +267,15 @@
   /* The preview pane and printed A4 stay light always */
   .preview-pane { background: #f0f0f3; }
 
-  /* Template: Bento — Light (default, ink-friendly) */
+  /* Template: Bento — Light (default, ink-friendly)
+     Every tile keeps a slight hairline frame so block boundaries survive print-to-PDF
+     (the tinted background alone often disappears in printed output). */
   .tpl-bento-light .a4 { background: #fff; }
-  .tpl-bento-light .tile-hero { background: var(--paper-tint); border-color: transparent; }
-  .tpl-bento-light .tile-metric { background: var(--paper-tint); border-color: transparent; }
+  .tpl-bento-light .tile-hero { background: var(--paper-tint); border-color: var(--hair); }
+  .tpl-bento-light .tile-metric { background: var(--paper-tint); border-color: var(--hair); }
+  .tpl-bento-light .tile.tinted,
+  .tpl-bento-light .metric-stack .tile.metric-image,
+  .tpl-bento-light .tile.metric-image-full { border-color: var(--hair); }
 
   /* Template: Print Classic — formal, serif-led */
   .tpl-print-classic .a4 { background: #fff; font-family: 'Instrument Serif', Georgia, serif; }
@@ -452,8 +457,8 @@
     /* Force every template to the ink-light rendering on paper */
     .tpl-bento-dark .a4 { background: #fff !important; color: var(--ink) !important; }
     .tpl-bento-dark .tile { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; }
-    .tpl-bento-dark .tile.tinted, .tpl-bento-dark .tile-hero { background: var(--paper-tint) !important; color: var(--ink) !important; border-color: transparent !important; }
-    .tpl-bento-dark .tile-metric { background: var(--paper-tint) !important; color: var(--ink) !important; border-color: transparent !important; }
+    .tpl-bento-dark .tile.tinted, .tpl-bento-dark .tile-hero { background: var(--paper-tint) !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; }
+    .tpl-bento-dark .tile-metric { background: var(--paper-tint) !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; }
     .tpl-bento-dark .tile-pros { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-green) !important; }
     .tpl-bento-dark .tile-cons { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-amber) !important; }
     .tpl-bento-dark .tile.cta { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; border-left: 3mm solid var(--accent-blue) !important; }
@@ -928,23 +933,10 @@
             </section>
 
             <!-- Footer -->
-            <footer class="mt-2 pt-2 border-t border-[var(--hair)] text-[8.5pt]">
-              <div class="grid grid-cols-3 items-center gap-2">
-                <p class="text-left">
-                  <span class="text-[var(--ink-soft)]">Prepared by </span>
-                  <span class="font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span>
-                  <span class="text-[var(--ink-soft)]"> · for </span>
-                  <span class="font-medium text-[var(--ink)]" x-text="data.meta.audience"></span>
-                  <span class="text-[var(--ink-soft)]" x-show="data.meta.companyName"> · </span>
-                  <span class="font-medium text-[var(--ink)]" x-show="data.meta.companyName" x-text="data.meta.companyName"></span>
-                  <span class="text-[var(--ink-soft)]"> · appendix on page 2</span>
-                </p>
-                <p class="text-center">
-                  <span x-show="data.meta.confidential" class="text-[8.5pt] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style="color: var(--accent-red); border: 1px solid var(--accent-red);">Confidential</span>
-                </p>
-                <p></p>
-              </div>
-              <p class="serif italic text-[var(--ink-soft)] text-center mt-1">One page. One decision. Ninety seconds.</p>
+            <footer class="mt-1 pt-1 border-t border-[var(--hair)] text-[7.5pt] text-[var(--ink-soft)] flex items-center justify-center gap-1.5 leading-none">
+              <span x-show="data.meta.confidential" class="font-semibold uppercase tracking-wider" style="color: var(--accent-red);">Confidential</span>
+              <span x-show="data.meta.confidential">·</span>
+              <span class="serif italic">For discussion · contact <span class="not-italic font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span></span>
             </footer>
           </div>
         </article>
@@ -1015,22 +1007,10 @@
               <p x-text="data.context.supportingData"></p>
             </div>
 
-            <footer class="mt-2 pt-2 border-t border-[var(--hair)] text-[8.5pt]">
-              <div class="grid grid-cols-3 items-center gap-2">
-                <p class="text-left">
-                  <span class="text-[var(--ink-soft)]">Prepared by </span>
-                  <span class="font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span>
-                  <span class="text-[var(--ink-soft)]" x-show="data.meta.companyName"> · </span>
-                  <span class="font-medium text-[var(--ink)]" x-show="data.meta.companyName" x-text="data.meta.companyName"></span>
-                  <span class="text-[var(--ink-soft)]"> · </span>
-                  <span x-text="formatDate(data.meta.date)" class="text-[var(--ink-soft)]"></span>
-                </p>
-                <p class="text-center">
-                  <span x-show="data.meta.confidential" class="text-[8.5pt] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style="color: var(--accent-red); border: 1px solid var(--accent-red);">Confidential</span>
-                </p>
-                <p></p>
-              </div>
-              <p class="serif italic text-[var(--ink-soft)] text-center mt-1">For discussion · contact <span class="not-italic font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span></p>
+            <footer class="mt-1 pt-1 border-t border-[var(--hair)] text-[7.5pt] text-[var(--ink-soft)] flex items-center justify-center gap-1.5 leading-none">
+              <span x-show="data.meta.confidential" class="font-semibold uppercase tracking-wider" style="color: var(--accent-red);">Confidential</span>
+              <span x-show="data.meta.confidential">·</span>
+              <span class="serif italic">For discussion · contact <span class="not-italic font-medium text-[var(--ink)]" x-text="data.meta.authorName"></span></span>
             </footer>
           </div>
         </article>
