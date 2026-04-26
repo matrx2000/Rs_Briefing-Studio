@@ -173,11 +173,11 @@
   .icon-btn.spinning svg, .btn.spinning svg { animation: refresh-spin .55s ease-in-out; }
   /* Gentle resting pulse on the refresh-preview button — calms down on hover/click */
   @keyframes refresh-pulse-light {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(77,143,255,0); }
-    50%      { box-shadow: 0 0 0 4px var(--mode-accent-soft); }
+    0%, 100% { box-shadow: 0 0 0 0 var(--mode-accent-soft); transform: scale(1); }
+    50%      { box-shadow: 0 0 0 5px var(--mode-accent-soft), 0 0 10px 0 var(--mode-accent); transform: scale(1.03); }
   }
-  .btn.refresh-btn { animation: refresh-pulse-light 2.6s ease-in-out infinite; }
-  .btn.refresh-btn:hover, .btn.refresh-btn:focus, .btn.refresh-btn.spinning { animation: none; }
+  .btn.refresh-btn { animation: refresh-pulse-light 2.2s ease-in-out infinite; transition: transform .15s, color .15s, background .15s, border-color .15s; border-color: var(--mode-accent); color: var(--mode-accent); }
+  .btn.refresh-btn:hover, .btn.refresh-btn:focus, .btn.refresh-btn.spinning { animation: none; transform: scale(1.04); box-shadow: 0 0 0 4px var(--mode-accent-soft); outline: none; }
   @media (prefers-reduced-motion: reduce) { .btn.refresh-btn { animation: none !important; } }
 
   /* Paper sheet — width/height set via body.paper-A4 / body.paper-A3 */
