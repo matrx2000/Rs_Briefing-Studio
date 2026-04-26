@@ -204,6 +204,10 @@
   .btn-ghost { background: #fff; color: var(--ink); border-color: var(--hair); }
   .btn-ghost:hover { border-color: var(--ink); }
   .btn-ghost.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-danger { background: #fff; color: #c0392b; border-color: #e9b8b1; }
+  .btn-danger:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
+  body.editor-dark .btn-danger { background: #2a1f1f; color: #ff7a6b; border-color: #5a2a26; }
+  body.editor-dark .btn-danger:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
   .icon-btn { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--hair); background: #fff; color: var(--ink-soft); cursor: pointer; transition: all .15s; }
   .icon-btn:hover { color: var(--ink); border-color: var(--ink); }
   @keyframes refresh-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -524,6 +528,7 @@
     /* @page rule injected dynamically via #pageSizeRule */
     body { background: #fff !important; }
     .app-chrome, .form-pane, .tools-pane, .splitter, .preview-toolbar, .modal-backdrop { display: none !important; }
+    .preview-content { display: block !important; overflow: visible !important; flex: none !important; min-height: 0 !important; }
     .preview-pane { overflow: visible !important; display: block !important; }
     main.preview-pane { grid-column: 1 / -1 !important; }
     .preview-stage { padding: 0 !important; gap: 0 !important; display: block !important; }
@@ -604,12 +609,12 @@
         <span class="chrome-collapse-content" :class="{ 'open': open }">
           <!-- Project file I/O -->
           <span class="chrome-group-label" data-i18n="ui.group.project">Project</span>
-          <button class="btn btn-ghost" @click="showSampleModal = true; open = false" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
+          <button class="btn btn-ghost" @click="exportJson(); open = false" title="Save current briefing to a project file (Ctrl+S)" data-i18n="ui.saveproject">Save Project<span style="opacity:.6;font-size:.85em;margin-left:.4em">Ctrl+S</span></button>
           <label class="btn btn-ghost cursor-pointer" title="Load a previously saved project file">
             <span data-i18n="ui.loadproject">Load Project</span>
             <input type="file" accept="application/json" class="hidden" @change="importJson($event); open = false">
           </label>
-          <button class="btn btn-ghost" @click="exportJson(); open = false" title="Save current briefing to a project file" data-i18n="ui.saveproject">Save Project</button>
+          <button class="btn btn-danger" @click="showSampleModal = true; open = false" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
 
           <span class="chrome-divider"></span>
 
@@ -971,7 +976,7 @@
               <article class="tile changes">
                 <p class="eyebrow text-[var(--ink-soft)] mb-1" x-text="data.changes.eyebrow"></p>
                 <div>
-                  <template x-for="c in data.changes.items" :key="c.component">
+                  <template x-for="(c, i) in data.changes.items" :key="i">
                     <div class="change-row">
                       <div class="text-[9pt] mono text-[var(--ink-soft)]" x-text="c.component"></div>
                       <div class="text-[9pt] mono" x-text="c.before"></div>
@@ -1009,7 +1014,7 @@
               <article class="tile tradeoffs">
                 <p class="eyebrow text-[var(--ink-soft)] mb-1" x-text="data.tradeoffs.eyebrow"></p>
                 <ul class="space-y-1 text-[9.5pt]">
-                  <template x-for="t in data.tradeoffs.items" :key="t.option">
+                  <template x-for="(t, i) in data.tradeoffs.items" :key="i">
                     <li>
                       <div class="flex items-baseline gap-2">
                         <span class="font-medium" x-text="t.option"></span>
@@ -1044,7 +1049,7 @@
               <article class="tile questions">
                 <p class="eyebrow text-[var(--ink-soft)] mb-1" x-text="data.questions.eyebrow"></p>
                 <ul class="space-y-0.5 text-[9.5pt] columns-2 gap-6">
-                  <template x-for="q in data.questions.items" :key="q">
+                  <template x-for="(q, i) in data.questions.items" :key="i">
                     <li class="break-inside-avoid"><span class="dot" style="background: var(--ink)"></span><span x-text="q"></span></li>
                   </template>
                 </ul>
@@ -1115,7 +1120,7 @@
 
               <h3>Dependencies</h3>
               <div>
-                <template x-for="d in data.context.dependencies" :key="d.name">
+                <template x-for="(d, i) in data.context.dependencies" :key="i">
                   <div class="row">
                     <span x-text="d.name" class="font-medium"></span>
                     <span x-text="d.status" class="text-[var(--ink-soft)]"></span>
@@ -1434,6 +1439,15 @@ function engBriefing() {
       this.applyTypeScales();
       this.fitZoom();
       window.addEventListener('resize', () => this.fitZoom());
+      if (!window.__briefingSaveHotkeyBound) {
+        window.__briefingSaveHotkeyBound = true;
+        window.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 's' || e.key === 'S')) {
+            e.preventDefault();
+            this.exportJson();
+          }
+        });
+      }
       this.$watch('data', () => this.persist(), { deep: true });
       this.$watch('templateId', v => localStorage.setItem('eng-briefing-template', v));
       this.$watch('editorMode', v => localStorage.setItem('eng-briefing-editor-mode', v));
