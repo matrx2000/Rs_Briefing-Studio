@@ -1,6 +1,6 @@
 # Product spec — R's Briefing Studio
 
-A working spec for an offline web app that turns proposals into beautifully designed, two-page briefings, with two flavors (Executive Level Reporting and Engineering Reporting), live preview, and PDF export.
+A working spec for a static web app that turns proposals into beautifully designed, two-page briefings, with two flavors (Executive Level Reporting and Engineering Reporting), live preview, and PDF export. Runs from plain HTML files — no server, no installer, no tracking. Tailwind, Alpine.js and the Geist font are pulled from public CDNs on first load and cached afterwards, so the app works offline thereafter; for an air-gapped build see *Going fully offline* in the README.
 
 This document describes **the implementation as it currently ships**. Use it when you need to extend or modify the project.
 
@@ -420,7 +420,7 @@ For inline term hints next to a single field label, use the `.term-hint` modifie
 - **Default to writing no comments.** Names should explain what; comments only explain *why* when the why is non-obvious.
 - **Tailwind for layout, raw CSS for design tokens.** Heavy design styling lives in the `<style>` block. Tailwind classes are used for one-off layout (flex / grid / spacing).
 - **Alpine for reactivity, no framework.** Don't reach for Vue / React. The two editors are intentionally one-file each.
-- **No build step.** If you find yourself needing one, reconsider — the project's offline / no-server / works-from-a-thumb-drive guarantee depends on this.
+- **No build step.** If you find yourself needing one, reconsider — the project's no-server / works-from-a-thumb-drive guarantee depends on this. (Note: the runtime CDN dependencies — Tailwind, Alpine, Geist — mean the *first* load needs internet; subsequent loads are cached. For a strictly air-gapped distribution, vendor those three locally per the README's *Going fully offline* section.)
 
 ## 10. License
 

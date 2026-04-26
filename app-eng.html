@@ -25,7 +25,51 @@
     --mode-accent-soft: rgba(22,163,74,0.12);
   }
   .app-chrome { border-top: 3px solid var(--mode-accent) !important; }
-  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .mode-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: help; }
+
+  /* Hover tooltip on the mode-tag — explains what each mode is built for */
+  .mode-tag-wrap { position: relative; display: inline-block; }
+  .mode-tooltip { position: absolute; top: calc(100% + 8px); left: 0; width: 340px; padding: 10px 12px; background: var(--ink); color: #f5f5f7; border-radius: 8px; font-size: 11px; line-height: 1.5; z-index: 40; box-shadow: 0 8px 24px -8px rgba(0,0,0,0.35); opacity: 0; pointer-events: none; transform: translateY(-3px); transition: opacity .15s, transform .15s; text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .mode-tooltip::before { content: ''; position: absolute; top: -4px; left: 14px; width: 8px; height: 8px; background: var(--ink); transform: rotate(45deg); }
+  .mode-tag-wrap:hover .mode-tooltip, .mode-tag-wrap:focus-within .mode-tooltip { opacity: 1; transform: translateY(0); }
+  body.editor-dark .mode-tooltip { background: #f5f5f7; color: #1d1d1f; }
+  body.editor-dark .mode-tooltip::before { background: #f5f5f7; }
+
+  /* Chrome group dividers + group labels — visually separate logical clusters of controls */
+  .chrome-group { display: inline-flex; align-items: center; gap: 6px; }
+  .chrome-divider { width: 1px; height: 20px; background: var(--hair); margin: 0 6px; flex-shrink: 0; }
+  body.editor-dark .chrome-divider { background: #2a2a2e; }
+  .chrome-group-label { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-right: 2px; }
+  body.editor-dark .chrome-group-label { color: #6b6b70; }
+  /* 3-column chrome row: left identity / centered document tools / right app prefs */
+  .chrome-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 8px 16px; }
+  .chrome-row .chrome-left { display: flex; align-items: center; gap: 8px; justify-self: start; min-width: 0; }
+  .chrome-row .chrome-center { display: flex; align-items: center; gap: 8px; justify-self: center; }
+  .chrome-row .chrome-right { display: flex; align-items: center; gap: 8px; justify-self: end; min-width: 0; }
+
+  /* Pulsing version badge — clickable, opens release notes (renders README.md) */
+  @keyframes version-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--mode-accent-soft); }
+    50%      { box-shadow: 0 0 0 5px var(--mode-accent-soft), 0 0 8px 0 var(--mode-accent); }
+  }
+  .version-badge { display: inline-flex; align-items: center; gap: 2px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--mode-accent); background: var(--mode-accent-soft); color: var(--mode-accent); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; font-family: inherit; transition: transform .15s, box-shadow .15s; animation: version-pulse 2.2s ease-in-out infinite; }
+  .version-badge:hover, .version-badge:focus { transform: scale(1.05); animation: none; box-shadow: 0 0 0 4px var(--mode-accent-soft); outline: none; }
+  @media (prefers-reduced-motion: reduce) { .version-badge { animation: none !important; } }
+  body.editor-dark .version-badge { background: rgba(74,222,128,0.12); }
+
+  /* Release-notes modal — wide, scrollable, renders README.md */
+  .relnotes-card { max-width: 760px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; }
+  .relnotes-card .relnotes-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--hair); }
+  .relnotes-card .relnotes-head h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .relnotes-card .relnotes-head .v-tag { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--hair); font-size: 11px; font-weight: 500; color: var(--ink-soft); }
+  body.editor-dark .relnotes-card .relnotes-head .v-tag { border-color: #34343a; color: #a0a0a6; }
+  .relnotes-card .relnotes-body { padding: 18px 24px 24px; overflow-y: auto; }
+  .relnotes-card .relnotes-body .md-rendered { font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+  .relnotes-card .relnotes-body .md-rendered img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+  body.editor-dark .relnotes-card .relnotes-body .md-rendered { color: #f5f5f7; }
+  .relnotes-card .relnotes-close { background: transparent; border: 1px solid var(--hair); color: var(--ink-soft); width: 28px; height: 28px; border-radius: 999px; font-size: 16px; line-height: 1; cursor: pointer; }
+  .relnotes-card .relnotes-close:hover { color: var(--ink); border-color: var(--ink); }
+  body.editor-dark .relnotes-card .relnotes-close { border-color: #34343a; color: #a0a0a6; }
   .mode-tag::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: var(--mode-accent); }
   /* Resizable splitter */
   .splitter { width: 5px; background: var(--hair); cursor: col-resize; flex-shrink: 0; transition: background .15s; position: relative; }
@@ -119,6 +163,16 @@
   .btn-ghost.active { background: var(--ink); color: #fff; border-color: var(--ink); }
   .icon-btn { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--hair); background: #fff; color: var(--ink-soft); cursor: pointer; transition: all .15s; }
   .icon-btn:hover { color: var(--ink); border-color: var(--ink); }
+  @keyframes refresh-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .icon-btn.spinning svg, .btn.spinning svg { animation: refresh-spin .55s ease-in-out; }
+  /* Gentle resting pulse on the refresh-preview button — calms down on hover/click */
+  @keyframes refresh-pulse-light {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+    50%      { box-shadow: 0 0 0 4px var(--mode-accent-soft); }
+  }
+  .btn.refresh-btn { animation: refresh-pulse-light 2.6s ease-in-out infinite; }
+  .btn.refresh-btn:hover, .btn.refresh-btn:focus, .btn.refresh-btn.spinning { animation: none; }
+  @media (prefers-reduced-motion: reduce) { .btn.refresh-btn { animation: none !important; } }
 
   .a4 {
     background: #fff; margin: 0 auto;
@@ -257,7 +311,7 @@
   .modal-warn { background: rgba(180,83,9,0.08); color: var(--accent-amber); border: 1px solid rgba(180,83,9,0.25); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
 
   /* UI scale — applied to the form pane only */
-  :root { --ui-scale: 1; }
+  :root { --ui-scale: 1; --sheet-scale: 1; }
   .form-pane { font-size: calc(13px * var(--ui-scale)); }
   .form-pane .app-input,
   .form-pane .app-textarea,
@@ -267,6 +321,53 @@
   .form-pane .btn { font-size: calc(12px * var(--ui-scale)); }
   .form-pane .text-xs, .form-pane .text-\[11px\] { font-size: calc(11px * var(--ui-scale)); }
   .form-pane .hint-bubble { font-size: calc(11px * var(--ui-scale)); }
+
+  /* Right-side tools pane — formatting controls (text size, future features) */
+  .tools-pane { flex-shrink: 0; padding: 14px 14px 20px; background: #fafafa; border-left: 1px solid var(--hair); overflow-y: auto; display: flex; flex-direction: column; }
+  .tools-pane .tools-spacer { flex: 1 1 auto; min-height: 12px; }
+  .tools-pane .tools-header { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 12px; }
+  .tools-pane .tools-header.collapsible { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: color .15s; }
+  .tools-pane .tools-header.collapsible:hover { color: var(--ink); }
+  body.editor-dark .tools-pane .tools-header.collapsible:hover { color: #f5f5f7; }
+  .tools-pane .tools-header .caret { font-size: 10px; opacity: 0.7; transition: transform .15s; }
+  .tools-pane .tools-header.collapsed .caret { transform: rotate(-90deg); }
+  .tools-pane .tool-group { background: #fff; border: 1px solid var(--hair); border-radius: 10px; padding: 10px 11px; margin-bottom: 10px; }
+  .tools-pane .tool-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--mode-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .tools-pane .tool-label .aa { font-size: 14px; font-weight: 700; line-height: 1; text-transform: none; letter-spacing: 0; }
+  .tools-pane .tool-row { display: flex; justify-content: center; }
+  .tools-pane .type-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 11px; color: var(--ink); }
+  .tools-pane .type-row + .type-row { border-top: 1px solid var(--hair); }
+  .tools-pane .type-row .type-label { color: var(--ink-soft); }
+  body.editor-dark .tools-pane .type-row { color: #f5f5f7; }
+  body.editor-dark .tools-pane .type-row + .type-row { border-top-color: #2a2a2e; }
+  body.editor-dark .tools-pane { background: #141417; border-left-color: #2a2a2e; }
+  body.editor-dark .tools-pane .tools-header { color: #a0a0a6; }
+  body.editor-dark .tools-pane .tool-group { background: #1c1c20; border-color: #2a2a2e; }
+
+  /* Sheet text scale — every text size on the printed sheet is multiplied by the global
+     --sheet-scale (overall slider) AND the matching per-type multiplier (--fs-h1/h2/h3/body)
+     for granular emphasis control. Tile padding, gaps, image dimensions (mm) stay untouched. */
+  .a4 .text-\[54pt\]   { font-size: calc(54pt   * var(--sheet-scale, 1) * var(--fs-h1, 1)); }
+  .a4 .text-\[26pt\]   { font-size: calc(26pt   * var(--sheet-scale, 1) * var(--fs-h1, 1)); }
+  .a4 .text-\[24pt\]   { font-size: calc(24pt   * var(--sheet-scale, 1) * var(--fs-h1, 1)); }
+  .a4 .text-\[20pt\]   { font-size: calc(20pt   * var(--sheet-scale, 1) * var(--fs-h2, 1)); }
+  .a4 .text-\[19pt\]   { font-size: calc(19pt   * var(--sheet-scale, 1) * var(--fs-h2, 1)); }
+  .a4 .text-\[18pt\]   { font-size: calc(18pt   * var(--sheet-scale, 1) * var(--fs-h2, 1)); }
+  .a4 .text-\[15pt\]   { font-size: calc(15pt   * var(--sheet-scale, 1) * var(--fs-h3, 1)); }
+  .a4 .text-\[10pt\]   { font-size: calc(10pt   * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .text-\[9\.5pt\] { font-size: calc(9.5pt  * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .text-\[9pt\]    { font-size: calc(9pt    * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .text-\[8\.5pt\] { font-size: calc(8.5pt  * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .text-\[8pt\]    { font-size: calc(8pt    * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .stage-pill   { font-size: calc(8.5pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .level-badge  { font-size: calc(8pt   * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .change-arrow { font-size: calc(9pt   * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .cv-row       { font-size: calc(9.5pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .editorial h2 { font-size: calc(18pt * var(--sheet-scale, 1) * var(--fs-h2, 1)); }
+  .a4 .editorial h3 { font-size: calc(10pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .editorial p  { font-size: calc(10pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .editorial ul { font-size: calc(10pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  .a4 .editorial .row { font-size: calc(9.5pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
 
   .form-pane::-webkit-scrollbar, .preview-pane::-webkit-scrollbar { width: 8px; }
   .form-pane::-webkit-scrollbar-thumb, .preview-pane::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
@@ -334,7 +435,7 @@
   @media print {
     /* @page rule injected dynamically via #pageSizeRule */
     body { background: #fff !important; }
-    .app-chrome, .form-pane, .preview-toolbar, .modal-backdrop { display: none !important; }
+    .app-chrome, .form-pane, .tools-pane, .splitter, .preview-toolbar, .modal-backdrop { display: none !important; }
     .preview-pane { overflow: visible !important; display: block !important; }
     main.preview-pane { grid-column: 1 / -1 !important; }
     .preview-stage { padding: 0 !important; gap: 0 !important; display: block !important; }
@@ -361,64 +462,103 @@
 <body x-data="engBriefing()" x-init="init()" :class="`tpl-${templateId} paper-${paperSize} ${editorMode === 'dark' ? 'editor-dark' : ''}`">
 
 <div class="app-chrome sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-[var(--hair)]">
-  <div class="flex items-center justify-between px-4 py-2">
-    <div class="flex items-center gap-3">
-      <a href="index.html" class="text-[15px] font-medium tight hover:opacity-80" title="Back to start"><span class="serif italic font-normal text-[var(--ink-soft)]">R's</span> Briefing <span class="serif italic font-normal text-[var(--ink-soft)]">Studio</span></a>
-      <span class="mode-tag" data-i18n="mode.engineering">Engineering Reporting</span>
-      <span class="switch-menu" :class="{'open': switchOpen}" x-data="{ switchOpen: false }" @click.outside="switchOpen = false">
-        <button type="button" class="switch-trigger" @click="switchOpen = !switchOpen">
-          <span data-i18n="ui.switch">Switch</span> <span class="caret">▼</span>
+  <div class="chrome-row">
+
+    <!-- LEFT: identity + navigation -->
+    <div class="chrome-left">
+      <span class="chrome-group">
+        <a href="index.html" class="text-[15px] font-medium tight hover:opacity-80" title="Back to start"><span class="serif italic font-normal text-[var(--ink-soft)]">R's</span> Briefing <span class="serif italic font-normal text-[var(--ink-soft)]">Studio</span></a>
+        <button type="button" class="version-badge" @click="openReleaseNotes()" :title="'v' + appVersion + ' — ' + (window.I18N ? window.I18N.t('ui.releaseNotes') : 'Release notes')">
+          v<span x-text="appVersion"></span>
         </button>
-        <div class="switch-pop" x-show="switchOpen" x-cloak>
-          <a class="switch-item" href="app-exec.html">
-            <span class="swatch" style="background:#3b82f6"></span>
-            <span><span class="label" data-i18n="mode.executive">Executive Level Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
-          </a>
-          <a class="switch-item current" href="app-eng.html">
-            <span class="swatch" style="background:#16a34a"></span>
-            <span><span class="label" data-i18n="mode.engineering">Engineering Reporting</span><div class="desc" data-i18n="switch.engineeringDesc">Technical depth for reviewers</div></span>
-          </a>
-          <a class="switch-item" href="index.html">
-            <span class="swatch" style="background:#a0a0a6"></span>
-            <span><span class="label" data-i18n="switch.home">Home</span><div class="desc" data-i18n="switch.homeDesc">Project picker / load existing</div></span>
-          </a>
-        </div>
       </span>
-      <span class="text-xs text-[var(--ink-soft)]" x-text="saveStatus"></span>
+
+      <span class="chrome-divider"></span>
+
+      <span class="chrome-group">
+        <span class="mode-tag-wrap" tabindex="0">
+          <span class="mode-tag" data-i18n="mode.engineering">Engineering Reporting</span>
+          <span class="mode-tooltip" data-i18n="mode.engineeringTooltip">For technical reviewers. Page 1: proposal, effort, what changes (before / after), cost &amp; value, trade-offs, risks, open questions, the ask. Page 2: detailed considerations, stakeholders, alternatives, supporting data.</span>
+        </span>
+        <span class="switch-menu" :class="{'open': switchOpen}" x-data="{ switchOpen: false }" @click.outside="switchOpen = false">
+          <button type="button" class="switch-trigger" @click="switchOpen = !switchOpen">
+            <span data-i18n="ui.switch">Switch</span> <span class="caret">▼</span>
+          </button>
+          <div class="switch-pop" x-show="switchOpen" x-cloak>
+            <a class="switch-item" href="app-exec.html">
+              <span class="swatch" style="background:#3b82f6"></span>
+              <span><span class="label" data-i18n="mode.executive">Executive Level Reporting</span><div class="desc" data-i18n="switch.executiveDesc">Decision-focused for leadership</div></span>
+            </a>
+            <a class="switch-item current" href="app-eng.html">
+              <span class="swatch" style="background:#16a34a"></span>
+              <span><span class="label" data-i18n="mode.engineering">Engineering Reporting</span><div class="desc" data-i18n="switch.engineeringDesc">Technical depth for reviewers</div></span>
+            </a>
+            <a class="switch-item" href="index.html">
+              <span class="swatch" style="background:#a0a0a6"></span>
+              <span><span class="label" data-i18n="switch.home">Home</span><div class="desc" data-i18n="switch.homeDesc">Project picker / load existing</div></span>
+            </a>
+          </div>
+        </span>
+      </span>
+
+      <span class="chrome-divider"></span>
+
+      <span class="text-xs text-[var(--ink-soft)] italic" x-text="saveStatus"></span>
     </div>
-    <div class="flex items-center gap-2">
-      <select class="app-input !w-auto !py-1.5" onchange="window.I18N && window.I18N.apply(this.value)" id="lang-picker" title="Language">
-        <option value="en">EN</option>
-        <option value="de">DE</option>
-        <option value="it">IT</option>
-        <option value="hr">HR</option>
-      </select>
-      <label class="app-label !mb-0 mr-1" data-i18n="ui.template">Template</label>
-      <select class="app-input !w-auto !py-1.5" x-model="templateId">
-        <template x-for="t in templates" :key="t.id">
-          <option :value="t.id" x-text="t.name"></option>
-        </template>
-      </select>
-      <button class="btn btn-ghost !py-1 !px-3" @click="editorMode = editorMode === 'dark' ? 'light' : 'dark'" :title="`Editor: ${editorMode}`">
-        <span x-text="editorMode === 'dark' ? (window.I18N ? window.I18N.t('ui.darkmode') : '☾ Dark') : (window.I18N ? window.I18N.t('ui.lightmode') : '☀ Light')"></span>
-      </button>
-      <div class="toggle-pill ml-2" :title="window.I18N ? window.I18N.t('ui.exportmode') : 'Export mode'">
-        <button class="toggle-btn" :class="exportMode==='print' ? 'active' : ''" @click="exportMode='print'" data-i18n="ui.mode.print">Print</button>
-        <button class="toggle-btn" :class="exportMode==='markdown' ? 'active' : ''" @click="exportMode='markdown'" data-i18n="ui.mode.markdown">Markdown</button>
-      </div>
-      <div class="toggle-pill ml-2" title="Paper size" x-show="exportMode==='print'">
-        <button class="toggle-btn" :class="paperSize==='A4' ? 'active' : ''" @click="paperSize='A4'">A4</button>
-        <button class="toggle-btn" :class="paperSize==='A3' ? 'active' : ''" @click="paperSize='A3'">A3</button>
-      </div>
-      <button class="btn btn-ghost ml-1" @click="showSampleModal = true" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
-      <button class="btn btn-ghost" @click="exportJson()" title="Save current briefing to a project file" data-i18n="ui.saveproject">Save Project</button>
-      <label class="btn btn-ghost cursor-pointer" title="Load a previously saved project file">
-        <span data-i18n="ui.loadproject">Load Project</span>
-        <input type="file" accept="application/json" class="hidden" @change="importJson($event)">
-      </label>
-      <button class="btn btn-primary ml-1" x-show="exportMode==='print'" @click="window.print()" data-i18n="ui.printpdf">Print / PDF</button>
-      <button class="btn btn-primary ml-1" x-show="exportMode==='markdown'" @click="exportMarkdown()" data-i18n="ui.exportmd">Export .md</button>
+
+    <!-- CENTER: document-tied tools (sit visually above the document) -->
+    <div class="chrome-center">
+
+      <!-- Project file I/O -->
+      <span class="chrome-group">
+        <button class="btn btn-ghost" @click="showSampleModal = true" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
+        <label class="btn btn-ghost cursor-pointer" title="Load a previously saved project file">
+          <span data-i18n="ui.loadproject">Load Project</span>
+          <input type="file" accept="application/json" class="hidden" @change="importJson($event)">
+        </label>
+        <button class="btn btn-ghost" @click="exportJson()" title="Save current briefing to a project file" data-i18n="ui.saveproject">Save Project</button>
+      </span>
+
+      <span class="chrome-divider"></span>
+
+      <!-- Output: format · paper · refresh · primary export action -->
+      <span class="chrome-group">
+        <div class="toggle-pill" :title="window.I18N ? window.I18N.t('ui.exportmode') : 'Export mode'">
+          <button class="toggle-btn" :class="exportMode==='print' ? 'active' : ''" @click="exportMode='print'" data-i18n="ui.mode.print">Print</button>
+          <button class="toggle-btn" :class="exportMode==='markdown' ? 'active' : ''" @click="exportMode='markdown'" data-i18n="ui.mode.markdown">Markdown</button>
+        </div>
+        <div class="toggle-pill" :title="window.I18N ? window.I18N.t('ui.papersize') : 'Paper size'" x-show="exportMode==='print'">
+          <button class="toggle-btn" :class="paperSize==='A4' ? 'active' : ''" @click="paperSize='A4'">A4</button>
+          <button class="toggle-btn" :class="paperSize==='A3' ? 'active' : ''" @click="paperSize='A3'">A3</button>
+        </div>
+        <button type="button" class="btn btn-ghost refresh-btn" x-show="exportMode==='print'" @click="refreshPreview($event)" :title="window.I18N ? window.I18N.t('ui.refreshPreview') : 'Refresh preview'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span data-i18n="ui.refreshPreview">Refresh preview</span>
+        </button>
+        <button class="btn btn-primary" x-show="exportMode==='print'" @click="window.print()" data-i18n="ui.printpdf">Print / PDF</button>
+        <button class="btn btn-primary" x-show="exportMode==='markdown'" @click="exportMarkdown()" data-i18n="ui.exportmd">Export .md</button>
+      </span>
     </div>
+
+    <!-- RIGHT: app preferences (least frequent — far right) -->
+    <div class="chrome-right">
+      <span class="chrome-group">
+        <select class="app-input !w-auto !py-1.5" x-model="templateId" :title="window.I18N ? window.I18N.t('ui.template') : 'Template'">
+          <template x-for="t in templates" :key="t.id">
+            <option :value="t.id" x-text="t.name"></option>
+          </template>
+        </select>
+        <button class="btn btn-ghost !py-1 !px-3" @click="editorMode = editorMode === 'dark' ? 'light' : 'dark'" :title="`Editor: ${editorMode}`">
+          <span x-show="editorMode === 'dark'" data-i18n="ui.darkmode">☾ Dark</span>
+          <span x-show="editorMode === 'light'" data-i18n="ui.lightmode">☀ Light</span>
+        </button>
+      </span>
+    </div>
+
   </div>
 </div>
 
@@ -426,18 +566,6 @@
 
   <!-- Form pane -->
   <aside class="form-pane overflow-y-auto p-2.5 bg-[#fafafa]" :style="`width: ${formPaneWidth}px; flex-shrink: 0;`">
-
-    <div class="flex items-center justify-center gap-3 mb-3 px-2 py-1.5 rounded-lg" style="background: var(--mode-accent-soft);" title="Adjust form text size">
-      <span class="text-[12px] uppercase tracking-wider font-semibold flex items-center gap-1.5" style="color: var(--mode-accent);">
-        <span class="text-[15px] leading-none" style="font-weight:700;">Aa</span>
-        <span data-i18n="ui.textsize">Text size</span>
-      </span>
-      <div class="ui-scale-control">
-        <button type="button" @click="uiScale = Math.max(80, uiScale - 5)" :disabled="uiScale <= 80" aria-label="Decrease text size">−</button>
-        <span class="value" x-text="uiScale + '%'"></span>
-        <button type="button" @click="uiScale = Math.min(140, uiScale + 5)" :disabled="uiScale >= 140" aria-label="Increase text size">+</button>
-      </div>
-    </div>
 
     <section class="form-section">
       <h3><span data-i18n="section.meta">Meta</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.meta.eng">Audience determines vocabulary. Confidence stage sets reader expectations: don't claim Validated unless the data is in.</span></span></h3>
@@ -947,6 +1075,135 @@
 
   </main>
 
+  <div class="splitter" @mousedown="startToolsResize($event)" title="Drag to resize"></div>
+
+  <!-- Right tools pane — formatting controls -->
+  <aside class="tools-pane" :style="`width: ${toolsPaneWidth}px;`">
+
+    <h4 class="tools-header" data-i18n="ui.docProperties">Document properties</h4>
+
+    <div class="tool-group" x-show="exportMode==='print'" x-cloak>
+      <div class="tool-label">
+        <span class="aa">Aa</span>
+        <span data-i18n="ui.sheettextsize">Sheet text size</span>
+      </div>
+      <div class="tool-row">
+        <div class="ui-scale-control">
+          <button type="button" @click="sheetScale = Math.max(70, sheetScale - 5)" :disabled="sheetScale <= 70" aria-label="Decrease sheet text size">−</button>
+          <span class="value" x-text="sheetScale + '%'"></span>
+          <button type="button" @click="sheetScale = Math.min(150, sheetScale + 5)" :disabled="sheetScale >= 150" aria-label="Increase sheet text size">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-group" x-show="exportMode==='print'" x-cloak>
+      <div class="tool-label">
+        <span class="aa">Aa</span>
+        <span data-i18n="ui.typography">Typography</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label" data-i18n="ui.fs.h1">Title (H1)</span>
+        <div class="ui-scale-control">
+          <button type="button" @click="h1Pt = Math.max(16, h1Pt - 1)" :disabled="h1Pt <= 16" aria-label="Decrease H1">−</button>
+          <span class="value" x-text="h1Pt + 'pt'"></span>
+          <button type="button" @click="h1Pt = Math.min(48, h1Pt + 1)" :disabled="h1Pt >= 48" aria-label="Increase H1">+</button>
+        </div>
+      </div>
+      <div class="type-row">
+        <span class="type-label" data-i18n="ui.fs.h2">Headline (H2)</span>
+        <div class="ui-scale-control">
+          <button type="button" @click="h2Pt = Math.max(12, h2Pt - 1)" :disabled="h2Pt <= 12" aria-label="Decrease H2">−</button>
+          <span class="value" x-text="h2Pt + 'pt'"></span>
+          <button type="button" @click="h2Pt = Math.min(32, h2Pt + 1)" :disabled="h2Pt >= 32" aria-label="Increase H2">+</button>
+        </div>
+      </div>
+      <div class="type-row">
+        <span class="type-label" data-i18n="ui.fs.h3">Subhead (H3)</span>
+        <div class="ui-scale-control">
+          <button type="button" @click="h3Pt = Math.max(10, h3Pt - 1)" :disabled="h3Pt <= 10" aria-label="Decrease H3">−</button>
+          <span class="value" x-text="h3Pt + 'pt'"></span>
+          <button type="button" @click="h3Pt = Math.min(24, h3Pt + 1)" :disabled="h3Pt >= 24" aria-label="Increase H3">+</button>
+        </div>
+      </div>
+      <div class="type-row">
+        <span class="type-label" data-i18n="ui.fs.body">Body / paragraph</span>
+        <div class="ui-scale-control">
+          <button type="button" @click="bodyPt = Math.max(6, bodyPt - 1)" :disabled="bodyPt <= 6" aria-label="Decrease body">−</button>
+          <span class="value" x-text="bodyPt + 'pt'"></span>
+          <button type="button" @click="bodyPt = Math.min(16, bodyPt + 1)" :disabled="bodyPt >= 16" aria-label="Increase body">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tools-spacer"></div>
+
+    <div x-data="{ appSettingsOpen: localStorage.getItem('eng-briefing-app-settings-open') !== '0' }"
+         x-init="$watch('appSettingsOpen', v => localStorage.setItem('eng-briefing-app-settings-open', v ? '1' : '0'))">
+      <h4 class="tools-header collapsible" :class="{ 'collapsed': !appSettingsOpen }" @click="appSettingsOpen = !appSettingsOpen">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span data-i18n="ui.appSettings">App settings</span>
+        </span>
+        <span class="caret">▾</span>
+      </h4>
+
+      <div x-show="appSettingsOpen" x-cloak>
+        <div class="tool-group">
+          <div class="tool-label">
+            <span class="aa">Aa</span>
+            <span data-i18n="ui.textsize">UI Text size</span>
+          </div>
+          <div class="tool-row">
+            <div class="ui-scale-control">
+              <button type="button" @click="uiScale = Math.max(80, uiScale - 5)" :disabled="uiScale <= 80" aria-label="Decrease UI text size">−</button>
+              <span class="value" x-text="uiScale + '%'"></span>
+              <button type="button" @click="uiScale = Math.min(140, uiScale + 5)" :disabled="uiScale >= 140" aria-label="Increase UI text size">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-group" style="margin-bottom: 0;">
+          <div class="tool-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span data-i18n="ui.language">Language</span>
+          </div>
+          <div class="tool-row">
+            <select class="app-input !w-full !py-1.5" onchange="window.I18N && window.I18N.apply(this.value)" id="lang-picker">
+              <option value="en">EN — English</option>
+              <option value="de">DE — Deutsch</option>
+              <option value="it">IT — Italiano</option>
+              <option value="hr">HR — Hrvatski</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Release-notes modal — renders README.md -->
+<div class="modal-backdrop" x-show="showReleaseNotes" x-cloak @keydown.escape.window="showReleaseNotes = false" @click.self="showReleaseNotes = false">
+  <div class="modal-card relnotes-card" role="dialog" aria-modal="true" aria-labelledby="relnotesTitle">
+    <div class="relnotes-head">
+      <h2 id="relnotesTitle">
+        <span data-i18n="ui.releaseNotes">Release notes</span>
+        <span class="v-tag">v<span x-text="appVersion"></span></span>
+      </h2>
+      <button class="relnotes-close" @click="showReleaseNotes = false" aria-label="Close">×</button>
+    </div>
+    <div class="relnotes-body">
+      <p x-show="releaseNotesLoading" class="text-[var(--ink-soft)] text-sm">Loading…</p>
+      <div class="md-rendered" x-show="!releaseNotesLoading" x-html="releaseNotesHtml"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Sample-text confirmation modal -->
@@ -968,18 +1225,28 @@ function engBriefing() {
   return {
     templateId: 'eng-light',
     editorMode: 'dark',
-    paperSize: 'A3',
+    paperSize: 'A4',
     exportMode: 'print',
     mdStripImages: false,
     renderedMarkdown: '',
     uiScale: 100,
+    sheetScale: 100,
+    h1Pt: 22,
+    h2Pt: 20,
+    h3Pt: 16,
+    bodyPt: 10,
     page: 1,
     zoom: 0.78,
     saveStatus: '',
     showSampleModal: false,
+    showReleaseNotes: false,
+    releaseNotesHtml: '',
+    releaseNotesLoading: false,
+    appVersion: '1.2.0',
     formPaneWidth: 420,
+    toolsPaneWidth: 220,
     templates: [
-      { id: 'eng-light', name: 'Eng Bento' },
+      { id: 'eng-light', name: 'Bento' },
       { id: 'print-classic', name: 'Print Classic' }
     ],
     data: sampleData(),
@@ -1012,10 +1279,24 @@ function engBriefing() {
       if (xm === 'print' || xm === 'markdown') this.exportMode = xm;
       const us = parseInt(localStorage.getItem('eng-briefing-ui-scale'), 10);
       if (!isNaN(us) && us >= 80 && us <= 200) this.uiScale = us;
+      const ss = parseInt(localStorage.getItem('eng-briefing-sheet-scale'), 10);
+      if (!isNaN(ss) && ss >= 70 && ss <= 150) this.sheetScale = ss;
+      const h1 = parseInt(localStorage.getItem('eng-briefing-h1pt'), 10);
+      if (!isNaN(h1) && h1 >= 16 && h1 <= 48) this.h1Pt = h1;
+      const h2 = parseInt(localStorage.getItem('eng-briefing-h2pt'), 10);
+      if (!isNaN(h2) && h2 >= 12 && h2 <= 32) this.h2Pt = h2;
+      const h3 = parseInt(localStorage.getItem('eng-briefing-h3pt'), 10);
+      if (!isNaN(h3) && h3 >= 10 && h3 <= 24) this.h3Pt = h3;
+      const bp = parseInt(localStorage.getItem('eng-briefing-bodypt'), 10);
+      if (!isNaN(bp) && bp >= 6 && bp <= 16) this.bodyPt = bp;
       const fw = parseInt(localStorage.getItem('eng-briefing-form-width'), 10);
       if (!isNaN(fw) && fw >= 280 && fw <= 800) this.formPaneWidth = fw;
+      const tw = parseInt(localStorage.getItem('eng-briefing-tools-width'), 10);
+      if (!isNaN(tw) && tw >= 160 && tw <= 480) this.toolsPaneWidth = tw;
       this.applyPageSize();
       this.applyUiScale();
+      this.applySheetScale();
+      this.applyTypeScales();
       this.fitZoom();
       window.addEventListener('resize', () => this.fitZoom());
       this.$watch('data', () => this.persist(), { deep: true });
@@ -1023,6 +1304,11 @@ function engBriefing() {
       this.$watch('editorMode', v => localStorage.setItem('eng-briefing-editor-mode', v));
       this.$watch('paperSize', v => { localStorage.setItem('eng-briefing-paper-size', v); this.applyPageSize(); this.fitZoom(); });
       this.$watch('uiScale', v => { localStorage.setItem('eng-briefing-ui-scale', v); this.applyUiScale(); });
+      this.$watch('sheetScale', v => { localStorage.setItem('eng-briefing-sheet-scale', v); this.applySheetScale(); });
+      this.$watch('h1Pt',  v => { localStorage.setItem('eng-briefing-h1pt',  v); this.applyTypeScales(); });
+      this.$watch('h2Pt',  v => { localStorage.setItem('eng-briefing-h2pt',  v); this.applyTypeScales(); });
+      this.$watch('h3Pt',  v => { localStorage.setItem('eng-briefing-h3pt',  v); this.applyTypeScales(); });
+      this.$watch('bodyPt', v => { localStorage.setItem('eng-briefing-bodypt', v); this.applyTypeScales(); });
       this.$watch('exportMode', v => { localStorage.setItem('eng-briefing-export-mode', v); this.refreshMarkdown(); });
       this.$watch('mdStripImages', () => this.refreshMarkdown());
       this.$watch('data', () => this.refreshMarkdown(), { deep: true });
@@ -1097,6 +1383,36 @@ function engBriefing() {
       document.documentElement.style.setProperty('--ui-scale', this.uiScale / 100);
     },
 
+    applySheetScale() {
+      // 100% on the slider = 0.9× of original sheet typography (the new baseline).
+      document.documentElement.style.setProperty('--sheet-scale', (this.sheetScale / 100) * 0.9);
+    },
+
+    applyTypeScales() {
+      // Anchor pt sizes (the rendered size of the dominant member of each category at 100%).
+      const root = document.documentElement.style;
+      root.setProperty('--fs-h1',   this.h1Pt   / 26);
+      root.setProperty('--fs-h2',   this.h2Pt   / 19);
+      root.setProperty('--fs-h3',   this.h3Pt   / 15);
+      root.setProperty('--fs-body', this.bodyPt / 10);
+    },
+
+    refreshPreview(ev) {
+      this.applyPageSize();
+      this.applyUiScale();
+      this.applySheetScale();
+      this.applyTypeScales();
+      this.fitZoom();
+      this.refreshMarkdown();
+      const btn = ev && ev.currentTarget;
+      if (btn) {
+        btn.classList.remove('spinning');
+        void btn.offsetWidth;
+        btn.classList.add('spinning');
+        setTimeout(() => btn.classList.remove('spinning'), 600);
+      }
+    },
+
     startResize(ev) {
       ev.preventDefault();
       const startX = ev.clientX;
@@ -1112,6 +1428,27 @@ function engBriefing() {
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
         localStorage.setItem('eng-briefing-form-width', this.formPaneWidth);
+        this.fitZoom();
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+
+    startToolsResize(ev) {
+      ev.preventDefault();
+      const startX = ev.clientX;
+      const startW = this.toolsPaneWidth;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      const onMove = e => {
+        this.toolsPaneWidth = Math.max(160, Math.min(480, startW - (e.clientX - startX)));
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        localStorage.setItem('eng-briefing-tools-width', this.toolsPaneWidth);
         this.fitZoom();
       };
       document.addEventListener('mousemove', onMove);
@@ -1225,6 +1562,23 @@ function engBriefing() {
       };
       r.readAsDataURL(f);
       e.target.value = '';
+    },
+
+    async openReleaseNotes() {
+      this.showReleaseNotes = true;
+      if (this.releaseNotesHtml) return;
+      this.releaseNotesLoading = true;
+      try {
+        const res = await fetch('README.md');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const md = await res.text();
+        this.releaseNotesHtml = renderWikiMarkdown(md);
+      } catch (e) {
+        // file:// blocks fetch — fall back to the inline release-notes copy.
+        this.releaseNotesHtml = renderWikiMarkdown(RELEASE_NOTES_MD);
+      } finally {
+        this.releaseNotesLoading = false;
+      }
     },
 
     refreshMarkdown() {
@@ -1443,6 +1797,55 @@ function fallbackCopy(text) {
  *   ```toc
  * and inline `!status:color:text!` badges.
  */
+// Inline release notes — used when fetch('README.md') is blocked (file:// protocol).
+// Update this alongside README.md on every release.
+const RELEASE_NOTES_MD = `# What's new in v1.2.0
+
+## Reorganized chrome (top bar)
+The top bar now uses a **3-column layout** so logical groups have a fixed home:
+
+- **Left** — identity (logo + version badge), current mode pill, Switch dropdown, save status.
+- **Center** — document-tied actions (Project I/O · Output config · Print / PDF), positioned visually above the document so it's clear they act on it.
+- **Right** — app preferences (Template, Dark / Light).
+
+Other chrome touches:
+- **Hover tooltip on the mode pill** — explains what each mode (Executive / Engineering) is built for, in all four languages.
+- **Pulsing version badge** — click any time to reopen these release notes (renders \`README.md\`, falls back to an inline copy on \`file://\`).
+- **Visual dividers** between groups so related controls visibly belong together.
+- Dark / Light toggle now updates instantly when the language changes (was lagging by one click).
+
+## Document properties (right tools pane)
+A new resizable right-side toolbar holds all formatting controls.
+
+- **Sheet text size** — global ± slider that scales every text element on the printed sheet (70–150%, anchored at a tighter 0.9× baseline so 100% is the new neutral).
+- **Typography** — granular per-level pt control: Title (H1), Headline (H2), Subhead (H3), Body / paragraph. Adjust each in 1pt steps to emphasize specific content. Defaults: **22 / 20 / 16 / 10pt**. Multiplies on top of Sheet text size.
+- The toolbox itself is **draggable** — grab its inner edge to resize, persisted per browser.
+
+## App settings (collapsible, anchored bottom)
+A bottom-anchored, collapsible group inside the tools pane (open by default, with a cog icon). Holds the user-prefs that aren't tied to the document:
+
+- **UI Text size** — form-pane density.
+- **Language** picker — moved here from the chrome (it's a per-user preference, not a per-document one).
+
+## Output controls (centered)
+The action cluster sits directly above the document preview:
+
+- **Print / Markdown** mode toggle.
+- **A4 / A3** paper toggle — **A4 is the new default** (was A3).
+- **Refresh preview** button with icon + label and a gentle resting pulse — re-applies every layout knob and re-fits the zoom.
+- **Print / PDF** (or **Export .md** in markdown mode).
+
+## Polish
+- About modal reframed as a permanent **Mission** statement — no version-specific notes any more (those live in the version badge).
+- About modal is **scrollable** on smaller screens.
+- Template name simplified to **"Bento"** in both apps (was "Apple Bento" / "Eng Bento").
+- Default audience / author updated to neutral **"Operations Team"** / **"The Leadership Team"** so users replace them deliberately rather than ship a placeholder identity.
+- All new strings translated in English, German, Italian, Croatian.
+
+## Compatibility
+Existing project \`.json\` files load unchanged. UI preferences (text sizes, paper size, theme, pane widths, language) stay browser-local and don't travel with the project file.
+`;
+
 function renderWikiMarkdown(src) {
   const escHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const lines = src.split(/\r?\n/);
@@ -1578,9 +1981,9 @@ function sampleData() {
     meta: {
       title: 'Cookie depositor controller',
       subtitle: 'Replace',
-      authorName: 'Anna Schmidt · Plant engineering',
+      authorName: 'Operations Team',
       date: '2026-04-25',
-      audience: 'Plant manager, Ops lead, QA',
+      audience: 'The Leadership Team',
       decisionBy: '2026-05-23',
       stage: 'hypothesis',
       companyName: 'Cookie Co.',

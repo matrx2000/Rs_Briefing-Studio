@@ -36,7 +36,10 @@
 
   .about-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
   .about-backdrop.show { display: flex; }
-  .about-card { background: var(--card); border: 1px solid var(--hair); color: var(--ink); border-radius: 18px; max-width: 560px; width: 100%; padding: 28px 30px; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.5); }
+  .about-card { background: var(--card); border: 1px solid var(--hair); color: var(--ink); border-radius: 18px; max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 28px 30px; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.5); }
+  .about-card::-webkit-scrollbar { width: 8px; }
+  .about-card::-webkit-scrollbar-thumb { background: var(--hair); border-radius: 4px; }
+  .about-card::-webkit-scrollbar-thumb:hover { background: #3a3a40; }
   .about-card h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 14px; }
   .about-card h3 { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; margin: 18px 0 8px; }
   .about-card p { font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 10px; }
@@ -82,6 +85,32 @@
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #3d2113; color: #f0d6c2; border: 1px solid #6b3e1d; padding: 10px 16px; border-radius: 10px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .toast.show { opacity: 1; }
+
+  /* Pulsing version badge — opens release notes */
+  @keyframes version-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(77,143,255,0.25); }
+    50%      { box-shadow: 0 0 0 5px rgba(77,143,255,0.25), 0 0 8px 0 var(--accent-blue); }
+  }
+  .version-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--accent-blue); background: rgba(77,143,255,0.12); color: var(--accent-blue); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; font-family: inherit; transition: transform .15s, box-shadow .15s; animation: version-pulse 2.2s ease-in-out infinite; }
+  .version-badge:hover, .version-badge:focus { transform: scale(1.05); animation: none; box-shadow: 0 0 0 4px rgba(77,143,255,0.25); outline: none; }
+  @media (prefers-reduced-motion: reduce) { .version-badge { animation: none !important; } }
+
+  /* Release-notes modal — wide, scrollable, renders embedded markdown */
+  .relnotes-card { background: var(--card); border: 1px solid var(--hair); color: var(--ink); border-radius: 18px; max-width: 720px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; padding: 0; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.5); }
+  .relnotes-card .relnotes-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--hair); }
+  .relnotes-card .relnotes-head h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .relnotes-card .relnotes-head .v-tag { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--hair); font-size: 11px; font-weight: 500; color: var(--ink-soft); }
+  .relnotes-card .relnotes-body { padding: 18px 24px 24px; overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: var(--ink); }
+  .relnotes-card .relnotes-body h1 { font-size: 22px; font-weight: 600; margin: 0 0 10px; }
+  .relnotes-card .relnotes-body h2 { font-size: 16px; font-weight: 600; margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--hair); }
+  .relnotes-card .relnotes-body h3 { font-size: 13px; font-weight: 600; margin: 14px 0 4px; }
+  .relnotes-card .relnotes-body p { margin: 0 0 8px; color: var(--ink-soft); }
+  .relnotes-card .relnotes-body ul { margin: 0 0 10px; padding-left: 20px; color: var(--ink-soft); }
+  .relnotes-card .relnotes-body li { margin: 3px 0; }
+  .relnotes-card .relnotes-body strong { color: var(--ink); }
+  .relnotes-card .relnotes-body code { background: rgba(245,245,247,0.08); padding: 1px 5px; border-radius: 4px; font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 12px; }
+  .relnotes-card .relnotes-close { background: transparent; border: 1px solid var(--hair); color: var(--ink-soft); width: 28px; height: 28px; border-radius: 999px; font-size: 16px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .relnotes-card .relnotes-close:hover { color: var(--ink); border-color: var(--ink); }
 </style>
 </head>
 <body>
@@ -96,7 +125,7 @@
       <option value="hr">HR</option>
     </select>
     <button class="nav-btn" onclick="document.getElementById('aboutModal').classList.add('show')" data-i18n="ui.about">About</button>
-    <span class="eyebrow">v1</span>
+    <button type="button" id="versionBadge" class="version-badge" onclick="openReleaseNotes()" title="Release notes">v1.2.0</button>
   </div>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
@@ -111,11 +140,8 @@
 <div id="aboutModal" class="about-backdrop" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="about-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <button class="about-close" onclick="document.getElementById('aboutModal').classList.remove('show')" aria-label="Close">×</button>
-    <h2 id="aboutTitle">About R's Briefing Studio <span style="font-size: 12px; font-weight: 500; color: var(--ink-soft); letter-spacing: 0.04em; padding: 2px 8px; border: 1px solid var(--hair); border-radius: 999px; vertical-align: middle; margin-left: 6px;">v1.1.0</span></h2>
+    <h2 id="aboutTitle">Mission</h2>
     <p>R's Briefing Studio turns proposals into beautifully designed, two-page briefings. The output is built to be read in 90 seconds (page 1) with full context available on demand (page 2).</p>
-
-    <h3>What's new in v1.1.0</h3>
-    <p><strong>Markdown export mode.</strong> Both editors now have a <em>Print / Markdown</em> toggle in the chrome. In Markdown mode, the preview pane swaps from the A4 sheets to a rendered wiki-style view, and the primary button becomes <strong>Export .md</strong>. The output is a single <code>.md</code> file using the standard wiki macro set: info / note / warning panels, expand/collapse blocks, table of contents, status badges, and tables for two-column layouts (pros vs. cons, metric vs. visual, cost &amp; value, trade-offs, risks). Drop it into any wiki page that supports those macros.</p>
 
     <h3>Why it exists</h3>
     <p><strong>This app is not here to add another document to your pile.</strong> It exists to make the way you communicate ideas, issues, and opportunities <em>clearer</em> — by formalizing a format that breaks each one into small, digestible chunks. The result is a single shared artefact you and your teammates can sync on in minutes, without ambiguity, instead of trading long Word docs or sitting through forty-slide decks.</p>
@@ -137,7 +163,7 @@
       <div class="meta">
         <div class="name">Rene Radojčić</div>
         <div class="role">Designer &amp; developer · <a href="mailto:rene.radojcic@hotmail.com">rene.radojcic@hotmail.com</a></div>
-        <div class="role" style="margin-top:6px;">Built end-to-end with HTML, Tailwind CSS, and Alpine.js — works offline, no server, no tracking.</div>
+        <div class="role" style="margin-top:6px;">Built end-to-end with HTML, Tailwind CSS, and Alpine.js — runs from a static file, no server, no tracking. Tailwind, Alpine and the Geist font load from public CDNs on first visit; once cached the app works offline. To make it fully offline (zero CDN dependency), see the README.</div>
       </div>
     </div>
   </div>
@@ -176,14 +202,25 @@
 
     </div>
 
-    <p class="footnote" data-i18n="index.tip">Tip: every briefing is two A3-portrait pages — page 1 is the dashboard you read in 90 seconds, page 2 is the depth that backs it up.</p>
+    <p class="footnote" data-i18n="index.tip">Tip: every briefing is two portrait pages (A4 by default, A3 optional) — page 1 is the dashboard you read in 90 seconds, page 2 is the depth that backs it up.</p>
     <p class="footnote" style="margin-top: 12px;" data-i18n="index.overflowTip">If your text spills past the page edge, that&rsquo;s not a bug — it&rsquo;s the format pushing you to be more precise so everything fits on two pages.</p>
   </main>
 
   <footer class="bottom">
     <span>R's Briefing Studio · by <a href="mailto:rene.radojcic@hotmail.com" style="color: var(--ink); text-decoration: underline; text-underline-offset: 2px;">Rene Radojčić</a></span>
-    <span>Saved automatically · works offline · ink-friendly print</span>
+    <span>Saved automatically · works offline after first load · ink-friendly print</span>
   </footer>
+</div>
+
+<!-- Release-notes modal -->
+<div id="releaseNotesModal" class="about-backdrop" onclick="if(event.target===this) closeReleaseNotes()">
+  <div class="relnotes-card" role="dialog" aria-modal="true" aria-labelledby="relnotesTitle">
+    <div class="relnotes-head">
+      <h2 id="relnotesTitle"><span data-i18n="ui.releaseNotes">Release notes</span> <span class="v-tag">v1.2.0</span></h2>
+      <button class="relnotes-close" onclick="closeReleaseNotes()" aria-label="Close">×</button>
+    </div>
+    <div class="relnotes-body" id="relnotesBody"></div>
+  </div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -191,6 +228,80 @@
 <script>
   const fileInput = document.getElementById('openProject');
   const toast = document.getElementById('toast');
+
+  // Release-notes modal — content kept inline so it works on file:// (no fetch).
+  // Update this alongside README.md on every release.
+  const RELEASE_NOTES_MD = `# What's new in v1.2.0
+
+## Reorganized chrome (top bar)
+The top bar now uses a **3-column layout**: identity left, document-tied actions centered above the document, app preferences right. Plus a hover tooltip on the mode pill, a pulsing version badge for these notes, visual dividers between groups, and an instant-updating Dark / Light toggle on language change.
+
+## Document properties (right tools pane)
+A new resizable right-side toolbar holds all formatting controls.
+
+- **Sheet text size** — global ± slider that scales every text element on the printed sheet.
+- **Typography** — granular per-level pt control: Title (H1), Headline (H2), Subhead (H3), Body / paragraph. Defaults 22 / 20 / 16 / 10pt.
+- The toolbox itself is **draggable** — grab its inner edge to resize.
+
+## App settings (collapsible, anchored bottom)
+Cog-iconed, collapsible group at the bottom of the tools pane. Holds **UI Text size** (form-pane density) and the **Language** picker (moved here from the chrome).
+
+## Output controls
+Centered above the document: Print / Markdown · A4 / A3 (A4 is the new default) · **Refresh preview** (with icon + label and a gentle resting pulse) · Print / PDF.
+
+## Polish
+- About modal reframed as a permanent **Mission** statement (no version notes — those live on the badge).
+- About modal is scrollable on small screens.
+- Template name simplified to **"Bento"** in both apps.
+- Default audience / author set to neutral **"Operations Team"** / **"The Leadership Team"**.
+- All new strings translated in English, German, Italian, Croatian.
+
+## Compatibility
+Existing project \`.json\` files load unchanged. UI preferences stay browser-local.
+`;
+
+  // Tiny markdown renderer — handles h1/h2/h3, bullet lists, **bold**, *italic*, \`code\`.
+  // Sufficient for release-notes content; not a full markdown spec.
+  function renderReleaseNotes(md) {
+    const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const inline = s => esc(s)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|\W)\*([^*]+)\*/g, '$1<em>$2</em>');
+    const lines = md.split('\n');
+    let out = '';
+    let inList = false;
+    for (const ln of lines) {
+      const m1 = /^# (.+)$/.exec(ln);
+      const m2 = /^## (.+)$/.exec(ln);
+      const m3 = /^### (.+)$/.exec(ln);
+      const ml = /^- (.+)$/.exec(ln);
+      if (m1) { if (inList) { out += '</ul>'; inList = false; } out += '<h1>' + inline(m1[1]) + '</h1>'; }
+      else if (m2) { if (inList) { out += '</ul>'; inList = false; } out += '<h2>' + inline(m2[1]) + '</h2>'; }
+      else if (m3) { if (inList) { out += '</ul>'; inList = false; } out += '<h3>' + inline(m3[1]) + '</h3>'; }
+      else if (ml) { if (!inList) { out += '<ul>'; inList = true; } out += '<li>' + inline(ml[1]) + '</li>'; }
+      else if (ln.trim() === '') { if (inList) { out += '</ul>'; inList = false; } }
+      else { if (inList) { out += '</ul>'; inList = false; } out += '<p>' + inline(ln) + '</p>'; }
+    }
+    if (inList) out += '</ul>';
+    return out;
+  }
+
+  let _relnotesRendered = false;
+  function openReleaseNotes() {
+    if (!_relnotesRendered) {
+      // Try fetch first (works on http://); fall back to inline copy on file://.
+      const setHtml = (html) => { document.getElementById('relnotesBody').innerHTML = html; _relnotesRendered = true; };
+      fetch('README.md').then(r => r.ok ? r.text() : Promise.reject()).then(md => setHtml(renderReleaseNotes(md))).catch(() => setHtml(renderReleaseNotes(RELEASE_NOTES_MD)));
+    }
+    document.getElementById('releaseNotesModal').classList.add('show');
+  }
+  function closeReleaseNotes() {
+    document.getElementById('releaseNotesModal').classList.remove('show');
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeReleaseNotes();
+  });
 
   function showToast(msg) {
     toast.textContent = msg;

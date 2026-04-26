@@ -1,16 +1,51 @@
 # R's Briefing Studio
 
-A small offline web app that turns proposals into beautifully designed, two-page briefings — one for executive readers, one for engineering reviewers. The output is built to be **read in 90 seconds (page 1)** with **full context available on demand (page 2)**.
+![R's Briefing Studio UI](doc/imgs/ui_look.png)
+
+A small static web app that turns proposals into beautifully designed, two-page briefings — one for executive readers, one for engineering reviewers. The output is built to be **read in 90 seconds (page 1)** with **full context available on demand (page 2)**.
+
+Runs from plain HTML files — no server, no installer, no tracking. Tailwind, Alpine.js, and the Geist font load from public CDNs on first visit; after that the browser cache makes the app work offline. If you need a *truly* offline build (e.g. for an air-gapped environment), see [Going fully offline](#going-fully-offline) below.
 
 > One page. One decision. Ninety seconds.
 
 ---
 
-## What's new — v1.1.0
+## What's new — v1.2.0
 
-**Markdown export mode.** Both editors now ship with a *Print / Markdown* toggle in the chrome.
+A focused release on **layout control, formatting, and chrome IA**. Highlights:
 
-- **Print mode** (default) — unchanged. The right pane shows the two A4/A3 pages and the primary button prints to PDF.
+**Reorganized chrome (top bar).** A 3-column layout: identity (logo, version badge, mode pill, switch) on the left, **document-tied actions centered** directly above the document preview (project I/O, output config, Refresh, Print / PDF), and app preferences (Template, Dark / Light) on the right. Hover the mode pill to see exactly what each mode (Executive / Engineering) is built for, in all four UI languages. Visual dividers separate logical groups.
+
+**Document properties (right tools pane).** A new resizable right-side toolbox:
+
+- **Sheet text size** — global ± slider that scales every text element on the printed sheet.
+- **Typography** — per-level pt control for Title (H1), Headline (H2), Subhead (H3), Body / paragraph in 1pt steps. Defaults: 22 / 20 / 16 / 10pt.
+- The toolbox itself is **draggable** — grab its inner edge to resize.
+
+**App settings (collapsible, anchored at the bottom).** Cog-iconed, open-by-default group inside the same tools pane. Holds **UI Text size** (form-pane density) and the **Language** picker (moved here from the chrome — it's a per-user preference, not a per-document one).
+
+**Output controls.** Centered above the document: Print / Markdown · A4 / A3 (**A4 is the new default**) · **Refresh preview** (icon + label, gentle resting pulse) · Print / PDF.
+
+**Vertical-mode image with adjustable height.** When the headline image is placed *below* the metric/proposal/effort tile (vertical orientation), it now renders as a full-width tile with a per-document height slider (40–160 mm, 5 mm steps). Horizontal orientation is unchanged.
+
+**Pulsing version badge.** Click any time to open the in-app release notes, which render `README.md` (with an inline fallback for `file://`).
+
+**Polish.**
+- About modal reframed as a permanent **Mission** statement (no version-specific notes any more — those now live on the badge). The modal is also scrollable on small screens.
+- Template name simplified to **"Bento"** in both apps.
+- Default audience / author set to neutral **"Operations Team"** / **"The Leadership Team"** (this is the empty-project default; *Sample text* still loads the placeholder cookie-factory case study).
+- Dark / Light editor toggle now updates instantly when the language changes (was lagging by one click).
+- In Markdown export mode the *Image position* and *Image fit* dropdowns are disabled (they're PDF-layout only) with an inline note explaining why.
+
+**Compatibility.** Existing project `.json` files load unchanged. UI preferences (text sizes, paper size, theme, pane widths, language) stay browser-local and don't travel with the project file.
+
+---
+
+## What's shipped — v1.1.0
+
+**Markdown export mode.** Both editors ship with a *Print / Markdown* toggle in the chrome.
+
+- **Print mode** — the right pane shows the two A4/A3 pages and the primary button prints to PDF.
 - **Markdown mode** — the right pane swaps to a rendered wiki-style preview, and the primary button becomes **Export .md**.
 
 The exported `.md` file is wiki-flavoured Markdown built around the standard macro set most company wikis support:
@@ -19,7 +54,7 @@ The exported `.md` file is wiki-flavoured Markdown built around the standard mac
 - **Expand / collapse** wraps the page-2 context section
 - **Table of contents** macro at the top
 - **Inline status badges** for confidentiality, decision deadlines, evidence (M / E / G), risk severity, cost-vs-value
-- **Tables** for every two-column layout — pros vs. cons, metric vs. visual, cost &amp; value, trade-offs, dependencies, alternatives, stakeholders, timeline (with `[████░░░░░░] 40%` ASCII progress bars)
+- **Tables** for every two-column layout — pros vs. cons, metric vs. visual, cost & value, trade-offs, dependencies, alternatives, stakeholders, timeline (with `[████░░░░░░] 40%` ASCII progress bars)
 - **Task-list checkboxes** for engineering open questions
 
 Markdown mode also offers a *Strip embedded images* toggle for when base64 image data would exceed your wiki's paste limits, and a *Copy* button alongside *Export .md*.
@@ -90,7 +125,8 @@ The chrome of each app shows the mode in a colored pill at the top so you always
 
 **Requirements:**
 - A relatively modern desktop browser on your PC — Chrome, Edge, Firefox, or Safari from the last ~3 years.
-- Nothing else. No installer, no Node.js, no Python, no server. Everything runs locally in the browser, fully offline.
+- Nothing else. No installer, no Node.js, no Python, no server. Everything runs locally in the browser.
+- An internet connection is required on first visit so the browser can fetch Tailwind, Alpine.js and the Geist font from their CDNs. After that the browser cache keeps the app working offline. To eliminate the CDN dependency entirely, see [Going fully offline](#going-fully-offline).
 
 **Step by step:**
 
@@ -128,15 +164,20 @@ Per-app settings (template, dark/light editor mode, paper size, UI scale, splitt
 The codebase is intentionally small and unbundled:
 
 ```
-Brief App/
-├── index.html              # Landing page (new project / open existing)
-├── app-exec.html           # Executive Level Reporting editor
-├── app-eng.html            # Engineering Reporting editor
-├── i18n.xml                # Translation table (EN / DE / IT / HR)
-├── i18n.js                 # Translation loader (parses i18n.xml at runtime)
-├── product-spec.md         # Living technical spec (data model, layouts, design system)
-├── README.md               # This file
-└── LICENSE                 # MIT
+Rs_Briefing-Studio/
+├── index.html                  # Landing page (new project / open existing)
+├── app-exec.html               # Executive Level Reporting editor
+├── app-eng.html                # Engineering Reporting editor
+├── i18n.xml                    # Translation table (EN / DE / IT / HR)
+├── i18n.js                     # Translation loader (parses i18n.xml at runtime)
+├── product-spec.md             # Living technical spec (data model, layouts, design system)
+├── README.md                   # This file
+├── LICENSE                     # MIT
+├── doc/
+│   └── imgs/                   # Screenshots used by README.md
+└── Example Briefings/          # Reference PDFs of finished output
+    ├── ExampleExecutiveBriefing.pdf
+    └── ExampleEngineeringBriefing.pdf
 ```
 
 No build step. No npm install. No node_modules. Dependencies:
@@ -214,6 +255,73 @@ Both fields are part of `data.meta` and round-trip through Save Project / Load P
 
 ---
 
+## Going fully offline
+
+By default the app loads three things from public CDNs on first visit, then relies on the browser cache:
+
+| Asset | Source | What it does | License |
+|---|---|---|---|
+| **Tailwind CSS (Play CDN)** | `https://cdn.tailwindcss.com` | Generates utility classes at runtime by scanning the HTML | MIT |
+| **Alpine.js v3.13.5** | `https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js` | Reactivity (`x-data`, `x-show`, `x-text`, …) | MIT |
+| **Geist font (400/500/600/700)** | `https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700` | Body & UI typeface | OFL-1.1 |
+
+Once those have loaded once, the browser cache keeps the app working without internet. If you need to run on an **air-gapped machine** or guarantee no first-visit network access (e.g. shipping the project on a USB stick), follow these steps. **The repo intentionally does not ship these vendor files** so we don't have to manage their licenses on every release — each project below has its own license terms; please honour them in your distribution.
+
+### 1. Download the three assets
+
+Pick a `vendor/` folder at the project root and put files there:
+
+```
+vendor/
+├── tailwind.min.js          # https://cdn.tailwindcss.com (save as)
+├── alpine.min.js            # https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js
+└── fonts/
+    ├── geist.css            # the @font-face stylesheet from fonts.googleapis.com (see step 3)
+    └── geist-*.woff2        # the four .woff2 files referenced inside that CSS
+```
+
+### 2. Replace the CDN tags in each HTML file
+
+Edit `index.html`, `app-exec.html`, and `app-eng.html` — change the four lines at the top of each `<head>` from CDN URLs to local relative paths:
+
+```diff
+- <script src="https://cdn.tailwindcss.com"></script>
++ <script src="vendor/tailwind.min.js"></script>
+
+- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
++ <script defer src="vendor/alpine.min.js"></script>
+
+- <link rel="preconnect" href="https://fonts.googleapis.com" />
+- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+- <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
++ <link href="vendor/fonts/geist.css" rel="stylesheet" />
+```
+
+(`index.html` doesn't load Alpine — only the `app-*.html` files do.)
+
+### 3. Bundle the Geist webfont locally
+
+The Google Fonts URL returns a stylesheet that points to remote `.woff2` files. To self-host:
+
+1. Open `https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap` in a browser, copy the CSS, and save as `vendor/fonts/geist.css`.
+2. That CSS contains four `src: url(https://fonts.gstatic.com/...woff2)` references. Download each `.woff2` into `vendor/fonts/` and rewrite the URLs in `geist.css` to relative paths (e.g. `url("./geist-400.woff2")`).
+3. Done — the font now loads from disk.
+
+### 4. (Optional) Pre-build Tailwind instead of using the runtime
+
+The Play CDN script is convenient but ~400KB and JIT-runs on every page load. For long-term offline use you can swap it for a pre-built static stylesheet using the Tailwind CLI:
+
+```bash
+npx tailwindcss -i ./input.css -o ./vendor/tailwind.css --minify
+# (one-time build — needs Node.js once, then no Node at runtime)
+```
+
+…then change the script tag to `<link rel="stylesheet" href="vendor/tailwind.css">`. This is heavier upfront but produces a much smaller, deterministic CSS bundle.
+
+After step 2 the app works on a freshly-imaged, fully-offline machine. Don't forget to include the licenses for Tailwind (MIT), Alpine.js (MIT), and Geist (OFL-1.1) in your `vendor/` folder if you redistribute.
+
+---
+
 ## License
 
 Released under the [MIT License](./LICENSE) — do whatever you want with it, no warranty.
@@ -224,4 +332,4 @@ Released under the [MIT License](./LICENSE) — do whatever you want with it, no
 
 **Rene Radojčić** · [rene.radojcic@hotmail.com](mailto:rene.radojcic@hotmail.com)
 
-Built end-to-end with HTML, Tailwind CSS, and Alpine.js. Works offline. No server. No tracking.
+Built end-to-end with HTML, Tailwind CSS, and Alpine.js. No server. No tracking. CDN-bootstrapped, then works offline once cached — or fully offline if you vendor the dependencies (see below).
