@@ -270,14 +270,21 @@
   /* Effort stack — image position can be vertical (below) or horizontal (next to) */
   .effort-stack { grid-column: span 4; display: flex; flex-direction: column; gap: 2.2mm; min-width: 0; }
   .effort-stack .tile.effort { grid-column: auto; flex: 0 0 auto; }
-  .effort-stack .tile.effort-image { flex: 1 1 auto; min-height: 50mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
+  /* min-width:0 overrides the default min-width:auto (=min-content), so a wide
+     image inside can't expand the tile's flex box beyond its 50% allotment.
+     Combined with overflow:hidden, the image overflows INSIDE the tile and is
+     clipped at the tile boundary — adjacent tiles stay put. */
+  .effort-stack .tile.effort-image { flex: 1 1 auto; min-width: 0; min-height: 50mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
   .effort-stack .tile.effort-image img { display: block; max-width: 100%; max-height: 100%; }
+  /* min-width:0 on the parent tile means a wide/tall image can overflow INSIDE
+     the tile (clipped by overflow:hidden) without expanding the flex box and
+     breaking the bento layout. So fit-width / fit-height behave like effort-
+     image-full: fill the chosen axis, follow natural aspect on the other,
+     center via margin:auto, lift the opposing max-* so the auto axis isn't
+     clamped. */
   .effort-stack .tile.effort-image.fit-cover img  { width: 100%; height: 100%; object-fit: cover; }
-  /* fit-width / fit-height: drive one axis, let the other follow naturally. The
-     opposing max-* must be lifted, otherwise the parent rule's max-width/max-height:100%
-     clamps the auto axis and the image renders stretched. */
-  .effort-stack .tile.effort-image.fit-width img  { width: 100%; height: auto; max-height: none; }
-  .effort-stack .tile.effort-image.fit-height img { width: auto; height: 100%; max-width: none; }
+  .effort-stack .tile.effort-image.fit-width img  { width: 100%; height: auto; max-width: 100%; max-height: none; margin-top: auto; margin-bottom: auto; }
+  .effort-stack .tile.effort-image.fit-height img { width: auto; height: 100%; max-width: none; max-height: 100%; margin-left: auto; margin-right: auto; }
   .effort-stack:not(.has-image) .tile.effort { flex: 1 1 auto; }
   .effort-stack.horizontal { grid-column: span 6; flex-direction: row; }
   .effort-stack.horizontal .tile.effort { flex: 0 0 50%; }
@@ -288,9 +295,19 @@
      Height is driven by --img-h (set inline from data.effort.imageScale, in mm) so the user can shrink big images. */
   .tile.effort-image-full { grid-column: span 12; height: var(--img-h, 95mm); min-height: 0; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
   .tile.effort-image-full img { display: block; max-width: 100%; max-height: 100%; }
+  /* Cover: image fills both axes, crops to fit. */
   .tile.effort-image-full.fit-cover  img { width: 100%; height: 100%; object-fit: cover; }
-  .tile.effort-image-full.fit-width  img { width: 100%; height: auto; max-height: none; }
-  .tile.effort-image-full.fit-height img { width: auto; height: 100%; max-width: none; }
+  /* Width: image fills the full container width; height follows natural aspect.
+     If the resulting height exceeds the tile, the parent's overflow:hidden clips
+     it equally top and bottom (vertically centered). max-height:none lifts the
+     parent rule so the auto axis isn't clamped (which would silently stretch
+     the image). margin-block:auto explicitly centers the image on the main
+     axis whether it fits (whitespace above and below) or overflows. */
+  .tile.effort-image-full.fit-width  img { width: 100%; height: auto;  max-width: 100%; max-height: none; margin-top: auto; margin-bottom: auto; }
+  /* Height: image fills the full container height; width follows natural aspect.
+     If the resulting width exceeds the tile, the parent's overflow:hidden clips
+     the sides. max-width:none lifts the parent rule for the same reason. */
+  .tile.effort-image-full.fit-height img { width: auto;  height: 100%; max-width: none;  max-height: 100%; }
   .tile.changes { grid-column: span 7; }
   .tile.costvalue { grid-column: span 5; border-left: 3mm solid var(--accent-green); }
   .tile.tradeoffs { grid-column: span 6; }

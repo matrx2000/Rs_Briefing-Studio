@@ -212,17 +212,40 @@
   body.editor-dark .qr-thumb { background: #fff; border-color: #34343a; }
 
   /* Crop-image modal — single instance, indexed by cropModal.photoIndex (-1 = single image like data.metric.image). */
-  .crop-modal-card { background: #fff; color: var(--ink); border-radius: 14px; max-width: 800px; width: 100%; padding: 0; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.4); display: flex; flex-direction: column; }
+  .crop-modal-card { background: #fff; color: var(--ink); border-radius: 14px; max-width: 960px; width: 100%; padding: 0; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.4); display: flex; flex-direction: column; }
   body.editor-dark .crop-modal-card { background: #1c1c20; color: #f5f5f7; border: 1px solid #2a2a2e; }
-  .crop-modal-card .modal-head { padding: 14px 18px 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--hair); }
+  .crop-modal-card .modal-head { padding: 16px 22px 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--hair); }
   body.editor-dark .crop-modal-card .modal-head { border-bottom-color: #2a2a2e; }
-  .crop-modal-card .modal-head h3 { font-size: 15px; font-weight: 600; margin: 0; }
-  .crop-modal-card .modal-hint { font-size: 11px; color: var(--ink-soft); }
-  .crop-modal-card .modal-body { padding: 16px; display: flex; align-items: center; justify-content: center; background: var(--paper-tint); }
+  .crop-modal-card .modal-head h3 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .crop-modal-card .modal-hint { font-size: 11.5px; color: var(--ink-soft); }
+  .crop-modal-card .modal-body { padding: 18px; display: flex; align-items: center; justify-content: center; background: var(--paper-tint); }
   body.editor-dark .crop-modal-card .modal-body { background: #141417; }
-  #cropCanvas { max-width: 100%; max-height: 70vh; cursor: crosshair; user-select: none; }
-  .crop-modal-card .modal-foot { padding: 12px 18px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; border-top: 1px solid var(--hair); }
+  #cropCanvas { max-width: 100%; max-height: 70vh; cursor: crosshair; user-select: none; box-shadow: 0 6px 18px -8px rgba(0,0,0,0.25); }
+  /* Top toolbar — non-destructive controls (Lock ratio, Square, Revert) sit
+     directly above the canvas. */
+  .crop-modal-card .modal-tools { padding: 10px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-bottom: 1px solid var(--hair); background: var(--paper-tint); }
+  body.editor-dark .crop-modal-card .modal-tools { border-bottom-color: #2a2a2e; background: #18181c; }
+  .crop-modal-card .modal-foot { padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; border-top: 1px solid var(--hair); }
   body.editor-dark .crop-modal-card .modal-foot { border-top-color: #2a2a2e; }
+  /* Buttons inside the crop modal: prevent label wrapping inside the pill, and
+     use --mode-accent for the active state of the lock / square toggles
+     (default .btn-ghost.active uses --ink which is invisible against the
+     dark editor's modal background). */
+  .crop-modal-card .modal-tools .btn,
+  .crop-modal-card .modal-foot  .btn { white-space: nowrap; padding: 7px 14px; }
+  .crop-modal-card .modal-tools .btn-ghost.active,
+  .crop-modal-card .modal-tools .btn-ghost.active:hover,
+  .crop-modal-card .modal-foot  .btn-ghost.active,
+  .crop-modal-card .modal-foot  .btn-ghost.active:hover,
+  body.editor-dark .crop-modal-card .modal-tools .btn-ghost.active,
+  body.editor-dark .crop-modal-card .modal-tools .btn-ghost.active:hover,
+  body.editor-dark .crop-modal-card .modal-foot  .btn-ghost.active,
+  body.editor-dark .crop-modal-card .modal-foot  .btn-ghost.active:hover {
+    background: var(--mode-accent);
+    color: #fff;
+    border-color: var(--mode-accent);
+    box-shadow: 0 0 0 3px var(--mode-accent-soft);
+  }
   .form-section { padding: 14px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 12px; }
   .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 
@@ -291,14 +314,20 @@
   /* Metric stack — image position can be vertical (below metric) or horizontal (next to metric) */
   .metric-stack { grid-column: span 4; display: flex; flex-direction: column; gap: 3mm; min-width: 0; }
   .metric-stack .tile.metric { grid-column: auto; flex: 0 0 auto; }
-  .metric-stack .tile.metric-image { flex: 1 1 auto; min-height: 65mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
+  /* min-width:0 overrides the default min-width:auto (=min-content), so a wide
+     image inside can't expand the tile's flex box beyond its 50% allotment.
+     Combined with overflow:hidden, the image overflows INSIDE the tile and is
+     clipped at the tile boundary — adjacent tiles stay put. */
+  .metric-stack .tile.metric-image { flex: 1 1 auto; min-width: 0; min-height: 65mm; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
   .metric-stack .tile.metric-image img { display: block; max-width: 100%; max-height: 100%; }
+  /* min-width:0 on the parent tile means a wide/tall image can overflow INSIDE
+     the tile (clipped by overflow:hidden) without expanding the flex box and
+     breaking the bento layout. So fit-width / fit-height behave like vertical-
+     full: fill the chosen axis, follow natural aspect on the other, center via
+     margin:auto, lift the opposing max-* so the auto axis isn't clamped. */
   .metric-stack .tile.metric-image.fit-cover img  { width: 100%; height: 100%; object-fit: cover; }
-  /* fit-width / fit-height: drive one axis, let the other follow naturally. The
-     opposing max-* must be lifted, otherwise the parent rule's max-width/max-height:100%
-     clamps the auto axis and the image renders stretched. */
-  .metric-stack .tile.metric-image.fit-width img  { width: 100%; height: auto; max-height: none; }
-  .metric-stack .tile.metric-image.fit-height img { width: auto; height: 100%; max-width: none; }
+  .metric-stack .tile.metric-image.fit-width img  { width: 100%; height: auto; max-width: 100%; max-height: none; margin-top: auto; margin-bottom: auto; }
+  .metric-stack .tile.metric-image.fit-height img { width: auto; height: 100%; max-width: none; max-height: 100%; margin-left: auto; margin-right: auto; }
   .metric-stack:not(.has-image) .tile.metric { flex: 1 1 auto; }
   /* Horizontal orientation: image sits next to metric — wider stack, bottom-line tile narrows */
   .metric-stack.horizontal { grid-column: span 6; flex-direction: row; }
@@ -310,9 +339,19 @@
      Height is driven by --img-h (set inline from data.metric.imageScale, in mm) so the user can shrink big images. */
   .tile.metric-image-full { grid-column: span 12; height: var(--img-h, 95mm); min-height: 0; padding: 0; overflow: hidden; border-color: var(--hair); display: flex; align-items: center; justify-content: center; }
   .tile.metric-image-full img { display: block; max-width: 100%; max-height: 100%; }
+  /* Cover: image fills both axes, crops to fit. */
   .tile.metric-image-full.fit-cover  img { width: 100%; height: 100%; object-fit: cover; }
-  .tile.metric-image-full.fit-width  img { width: 100%; height: auto; max-height: none; }
-  .tile.metric-image-full.fit-height img { width: auto; height: 100%; max-width: none; }
+  /* Width: image fills the full container width; height follows natural aspect.
+     If the resulting height exceeds the tile, the parent's overflow:hidden clips
+     it equally top and bottom (vertically centered). max-height:none lifts the
+     parent rule so the auto axis isn't clamped (which would silently stretch
+     the image). margin-block:auto explicitly centers the image on the main
+     axis whether it fits (whitespace above and below) or overflows. */
+  .tile.metric-image-full.fit-width  img { width: 100%; height: auto;  max-width: 100%; max-height: none; margin-top: auto; margin-bottom: auto; }
+  /* Height: image fills the full container height; width follows natural aspect.
+     If the resulting width exceeds the tile, the parent's overflow:hidden clips
+     the sides. max-width:none lifts the parent rule for the same reason. */
+  .tile.metric-image-full.fit-height img { width: auto;  height: 100%; max-width: none;  max-height: 100%; }
   .tile.commentary { grid-column: 1 / -1; }
   .tile.commentary .commentary-body { display: flex; flex-direction: column; gap: 2mm; }
   .tile.fivew { grid-column: 1 / -1; }
@@ -1478,14 +1517,10 @@
       <h3 data-i18n="ui.cropImage">Crop image</h3>
       <span class="modal-hint" data-i18n="ui.cropHint">Drag corners to resize, drag inside to move</span>
     </div>
-    <div class="modal-body">
-      <canvas id="cropCanvas"
-              @mousedown="cropMouseDown($event)"
-              @mousemove="cropMouseMove($event)"
-              @mouseup.window="cropMouseUp()"
-              @mouseleave="cropMouseUp()"></canvas>
-    </div>
-    <div class="modal-foot">
+    <!-- Control toolbar — non-destructive crop controls live above the canvas
+         so they're closer to the editing surface. The destructive Cancel /
+         Apply pair stays at the bottom where modal "primary actions" belong. -->
+    <div class="modal-tools">
       <button type="button" class="btn btn-ghost" :class="{ active: cropModal.lockRatio && cropModal.lockedAspect !== 1 }" @click="toggleCropLock()"
               :title="cropModal.lockRatio && cropModal.lockedAspect !== 1 ? 'Locked at ' + cropModal.lockedAspect.toFixed(2) + ':1 — click to unlock' : 'Lock the current width:height ratio'">
         <span aria-hidden="true" x-text="cropModal.lockRatio && cropModal.lockedAspect !== 1 ? '🔒' : '⛓'"></span>
@@ -1498,6 +1533,15 @@
       </button>
       <span style="flex: 1;"></span>
       <button type="button" class="btn btn-ghost" x-show="data.metric && data.metric.originalSrc" @click="revertCrop()" data-i18n="ui.cropRevert">Revert to original</button>
+    </div>
+    <div class="modal-body">
+      <canvas id="cropCanvas"
+              @mousedown="cropMouseDown($event)"
+              @mousemove="cropMouseMove($event)"
+              @mouseup.window="cropMouseUp()"
+              @mouseleave="cropMouseUp()"></canvas>
+    </div>
+    <div class="modal-foot">
       <button type="button" class="btn btn-ghost" @click="closeCrop()" data-i18n="modal.cancel">Cancel</button>
       <button type="button" class="btn btn-primary" @click="applyCropToPhoto()" data-i18n="ui.cropApply">Apply crop</button>
     </div>
@@ -1989,8 +2033,13 @@ function briefingApp() {
     openCrop() {
       const m = this.data.metric;
       if (!m || !m.image) return;
-      const original = m.originalSrc || m.image;
-      Object.assign(this.cropModal, { photoIndex: -1, src: original, open: true });
+      // Only treat originalSrc as the source if a matching crop rect exists.
+      // Without this, a stale originalSrc from a previous photo (left over
+      // because Alpine's Proxy didn't propagate a delete) would override the
+      // newly-uploaded m.image.
+      const hasActiveCrop = m.crop && m.crop.w > 0 && m.crop.h > 0;
+      const original = (hasActiveCrop && m.originalSrc) ? m.originalSrc : m.image;
+      Object.assign(this.cropModal, { photoIndex: -1, src: original, open: true, img: null });
       const existing = m.crop;
       const img = new Image();
       img.onload = () => {
@@ -2203,7 +2252,14 @@ function briefingApp() {
       if (!f) return;
       const r = new FileReader();
       r.onload = () => {
-        if (key === 'metric') this.data.metric.image = r.result;
+        if (key === 'metric') {
+          // Reset crop state BEFORE setting the new image. Use explicit
+          // = undefined (not delete) because Alpine's Proxy does not always
+          // propagate property deletions reliably.
+          this.data.metric.originalSrc = undefined;
+          this.data.metric.crop = undefined;
+          this.data.metric.image = r.result;
+        }
       };
       r.readAsDataURL(f);
       e.target.value = '';
