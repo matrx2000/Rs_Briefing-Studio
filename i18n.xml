@@ -88,6 +88,9 @@
   <string key="ui.cropLockRatio">
     <en>Lock ratio</en><de>Verhältnis sperren</de><it>Blocca proporzioni</it><hr>Zaključaj omjer</hr>
   </string>
+  <string key="ui.cropSquare">
+    <en>Square</en><de>Quadrat</de><it>Quadrato</it><hr>Kvadrat</hr>
+  </string>
   <string key="field.supportingData">
     <en>Supporting data</en><de>Belege</de><it>Dati di supporto</it><hr>Podaci za potporu</hr>
   </string>

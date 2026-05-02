@@ -28,6 +28,7 @@
   <string key="ui.cropApply"><en>Apply crop</en><de>Zuschnitt anwenden</de><it>Applica ritaglio</it><hr>Primijeni izrez</hr></string>
   <string key="ui.cropRevert"><en>Revert to original</en><de>Auf Original zurücksetzen</de><it>Ripristina originale</it><hr>Vrati na izvornik</hr></string>
   <string key="ui.cropLockRatio"><en>Lock ratio</en><de>Verhältnis sperren</de><it>Blocca proporzioni</it><hr>Zaključaj omjer</hr></string>
+  <string key="ui.cropSquare"><en>Square</en><de>Quadrat</de><it>Quadrato</it><hr>Kvadrat</hr></string>
   <string key="field.supportingData"><en>Supporting data</en><de>Belege</de><it>Dati di supporto</it><hr>Podaci za potporu</hr></string>
   <string key="field.references"><en>References / links</en><de>Referenzen / Links</de><it>Riferimenti / link</it><hr>Reference / poveznice</hr></string>
   <string key="field.supportingDataType"><en>Show as</en><de>Anzeigen als</de><it>Mostra come</it><hr>Prikaži kao</hr></string>
