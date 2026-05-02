@@ -10,6 +10,57 @@ Runs from plain HTML files — no server, no installer, no tracking. Tailwind, A
 
 ---
 
+## What's new — v1.4.0
+
+A meaningful feature release: **QR-code links on page 2**.
+
+**QR-code links on page 2.** The page-2 *Supporting data* field (Executive briefing) and *References / links* field (Engineering briefing) now have a **Text / QR links** toggle. Switch to *QR links* and you can build a list of clickable references that render as QR codes in the PDF. Each entry is a URL plus a caption that prints below the QR.
+
+- **Three layouts** — *Horizontal* (row, wraps to a second line as needed), *Vertical* (one per row, caption beside the QR for compact use of width), *Bento* (auto-fill grid that adapts to the page).
+- **Block size slider** — collectively scales every QR card on the page (18–60 mm). Caption font scales proportionally.
+- **Clickable in the printed PDF.** Each QR is wrapped in an `<a href>` so PDF readers (Acrobat, Preview, browsers, etc.) treat it as a clickable region. Readers on a phone can scan the QR; readers on a laptop can click through directly.
+- **Reorder by drag.** Same ⋮⋮ handle as every other list — the PDF order updates immediately.
+- **Toggle is non-destructive.** The previous text content stays in the project file; flip the toggle back any time and your text is intact. QR list and text live side by side in the JSON.
+
+QR rendering is offline-first once cached: the encoder runs in your browser ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), MIT, ~7 KB) and emits a scalable SVG so the QR stays sharp at any zoom or print resolution.
+
+**Compatibility.** Project `.json` files saved in v1.3.x load unchanged — `qrLinks` and `supportingDataType` / `referencesType` default to empty / `'text'` so older projects open exactly as before.
+
+---
+
+## What's new — v1.3.1
+
+A small follow-on to v1.3.0.
+
+**Lock aspect ratio while cropping.** The crop-image editor in the Executive briefing has a new **Lock ratio** toggle (bottom-left of the modal). Click it to lock the rectangle's current width-to-height ratio; subsequent corner-resizes preserve that ratio. Click again to unlock. The lock is captured *at the moment you click* — frame the rectangle first, then lock. The "move" interaction is never constrained, only corner-resize.
+
+The lock state lives only inside the open modal — closing Crop clears it, so the next session starts unlocked.
+
+---
+
+## What's new — v1.3.0
+
+A feature release: **drag-to-reorder lists**, **non-destructive image cropping**, and a **Clear all fields** button.
+
+**Drag-and-drop reorder for every list.** Every repeating list in the form pane now has a small **⋮⋮ handle** on the left of each row. Grab a row by anywhere on its background and drop it above or below another row — a coloured rule on the top edge means *insert above*, on the bottom edge means *insert below*. The PDF preview reorders in the same animation frame; no separate "save" step.
+
+- Engineering: *what changes*, *cost & value*, *trade-offs*, *risks*, *open questions*, *dependencies*.
+- Executive: *pros*, *cons*, *timeline phases*, *stakeholders*, *considerations*, *alternatives*, *risks & mitigations*.
+- Inputs inside the row stay normally interactive — text selection still works; only the row container is the drag source.
+- Order is part of the project JSON, so it round-trips through Save Project / Load Project unchanged.
+
+**Image cropping (Executive briefing).** The headline-metric image now has a **Crop** button next to *Remove*. Click to open a canvas editor; drag the corners of the rectangle to resize, drag inside to move, or drag outside the rectangle to start a fresh selection. Apply writes the cropped pixels back to the image; the original is preserved in the project file forever.
+
+- **Revert to original** restores the pre-crop pixels (and removes the saved crop rectangle).
+- The crop rectangle is stored in *source-image* coordinates, so re-opening the editor at a different window size restores the same selection.
+- Round-trips through Save Project / Load Project: cropped image, original, and crop rect all persist.
+
+**Clear all fields.** A new button next to *Sample text* in the chrome's Tools menu wipes the entire briefing back to a blank project — same shape as a fresh `?new=1`, but without leaving the editor or losing your UI preferences (theme, language, pane widths, text sizes). A confirm prompt protects against accidental clicks. The blank shape is built from a shared `emptyData()` factory that mirrors `sampleData()`, so any future field added to the schema is cleared too.
+
+**Compatibility.** Project `.json` files saved in v1.2.x load unchanged. Cropped images add two new keys (`originalSrc`, `crop`) under `metric` — older versions ignore them.
+
+---
+
 ## What's new — v1.2.1
 
 A polish-and-comfort release.

@@ -6,6 +6,7 @@
 <title>Engineering Reporting — R's Briefing Studio</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script src="i18n.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -176,9 +177,38 @@
   .app-textarea { resize: vertical; min-height: 64px; line-height: 1.5; padding-top: 9px; padding-bottom: 9px; }
   .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 4px; display: block; }
   .field-row { margin-bottom: 9px; }
-  /* Repeating list items inside form sections — subtle background tint, accent left border, and breathing room */
-  .list-item { background: var(--paper-tint); border-left: 2px solid var(--mode-accent-soft); border-radius: 8px; padding: 10px 11px; margin-bottom: 10px; }
+  /* Repeating list items inside form sections — subtle background tint, accent left border, and breathing room.
+     Each row is also a drag-and-drop reorder source/target; padding-left leaves room for the handle. */
+  .list-item { background: var(--paper-tint); border-left: 2px solid var(--mode-accent-soft); border-radius: 8px; padding: 10px 11px 10px 24px; margin-bottom: 10px; position: relative; transition: opacity .15s, box-shadow .15s; }
   body.editor-dark .list-item { background: #26262b; }
+  .list-item .drag-handle { position: absolute; top: 50%; left: 6px; transform: translateY(-50%); cursor: grab; user-select: none; opacity: 0.4; font-size: 12px; line-height: 1; color: var(--ink-soft); letter-spacing: -2px; }
+  .list-item .drag-handle:hover { opacity: 0.85; color: var(--mode-accent); }
+  .list-item .drag-handle:active { cursor: grabbing; }
+  body.editor-dark .list-item .drag-handle { color: #a0a0a6; }
+  .list-item.dragging   { opacity: 0.35; }
+  .list-item.drop-above { box-shadow: 0 -2px 0 0 var(--mode-accent) inset, 0 0 0 1px var(--mode-accent); }
+  .list-item.drop-below { box-shadow:  0 2px 0 0 var(--mode-accent) inset, 0 0 0 1px var(--mode-accent); }
+  /* Inner inputs/buttons must not initiate row drags or react to user-drag */
+  .list-item input, .list-item textarea, .list-item select, .list-item button { -webkit-user-drag: none; user-drag: none; }
+
+  /* QR-link block on page 2 — three layouts (horizontal row / vertical stack / bento grid),
+     edge length driven by --qr-mm so the slider controls every card uniformly. */
+  .qr-block { margin-top: 2mm; gap: 4mm; }
+  .qr-block.qr-horizontal { display: flex; flex-wrap: wrap; align-items: flex-start; }
+  .qr-block.qr-vertical   { display: flex; flex-direction: column; }
+  .qr-block.qr-bento      { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--qr-mm, 28mm), 1fr)); }
+  .qr-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5mm; text-decoration: none; color: var(--ink); page-break-inside: avoid; break-inside: avoid; }
+  .qr-card .qr-img { width: var(--qr-mm, 28mm); height: var(--qr-mm, 28mm); flex-shrink: 0; background: #fff; padding: 0.8mm; border: 0.4mm solid var(--hair); border-radius: 1.5mm; box-sizing: border-box; }
+  .qr-card .qr-img svg { display: block; width: 100%; height: 100%; }
+  .qr-card .qr-caption { font-size: calc(8pt * var(--sheet-scale, 1) * var(--fs-body, 1)); line-height: 1.25; max-width: var(--qr-mm, 28mm); word-wrap: break-word; color: var(--ink); }
+  /* Vertical layout: each card is a row (QR left, caption right) so width is used well */
+  .qr-block.qr-vertical .qr-card { flex-direction: row; align-items: center; gap: 3mm; max-width: 100%; text-align: left; }
+  .qr-block.qr-vertical .qr-card .qr-caption { max-width: none; flex: 1; font-size: calc(9.5pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  /* Form-pane thumbnail (small QR preview next to each row's inputs) */
+  .qr-thumb { width: 56px; height: 56px; flex-shrink: 0; background: #fff; padding: 3px; border: 1px solid var(--hair); border-radius: 4px; }
+  .qr-thumb svg { display: block; width: 100%; height: 100%; }
+  .qr-thumb-empty { display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-soft); opacity: 0.4; }
+  body.editor-dark .qr-thumb { background: #fff; border-color: #34343a; }
   .form-section { padding: 14px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 12px; }
   .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
@@ -615,6 +645,7 @@
             <input type="file" accept="application/json" class="hidden" @change="importJson($event); open = false">
           </label>
           <button class="btn btn-danger" @click="showSampleModal = true; open = false" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
+          <button class="btn btn-danger" @click="clearAllFields(); open = false" title="Wipe every field back to a blank project" data-i18n="ui.clearAll">Clear all fields</button>
 
           <span class="chrome-divider"></span>
 
@@ -763,7 +794,15 @@
       <h3><span data-i18n="section.changes">What changes</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.changes">Before / after pairs the reader can verify in production. Use real metrics, not vibes.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.changes.eyebrow"></div>
       <template x-for="(c, i) in data.changes.items" :key="i">
-        <div class="list-item">
+        <div class="list-item"
+             draggable="true"
+             @dragstart="dragStart($event, 'changes.items', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('changes.items', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('changes.items', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <input class="app-input mb-2" placeholder="Component" x-model="data.changes.items[i].component">
           <div class="grid grid-cols-2 gap-2">
             <input class="app-input" placeholder="Before" x-model="data.changes.items[i].before">
@@ -782,7 +821,15 @@
       <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured (we have data) · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated (sized &amp; broken down) · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.costValue.eyebrow"></div>
       <template x-for="(r, i) in data.costValue.rows" :key="i">
-        <div class="list-item">
+        <div class="list-item"
+             draggable="true"
+             @dragstart="dragStart($event, 'costValue.rows', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('costValue.rows', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('costValue.rows', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <div class="flex gap-1.5 mb-2">
             <select class="app-input" style="flex: 0 0 90px;" x-model="data.costValue.rows[i].kind">
               <option value="cost">Cost</option>
@@ -809,7 +856,15 @@
       <h3><span data-i18n="section.tradeoffs">Trade-offs</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.tradeoffs">List the 2–3 paths actually considered. Mark the chosen one.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.tradeoffs.eyebrow"></div>
       <template x-for="(t, i) in data.tradeoffs.items" :key="i">
-        <div class="list-item">
+        <div class="list-item"
+             draggable="true"
+             @dragstart="dragStart($event, 'tradeoffs.items', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('tradeoffs.items', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('tradeoffs.items', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <div class="flex gap-1.5 mb-2">
             <input class="app-input" placeholder="Option" x-model="data.tradeoffs.items[i].option">
             <label class="flex items-center gap-1 text-xs whitespace-nowrap">
@@ -829,7 +884,15 @@
       <p class="text-[10.5px] text-[var(--ink-soft)] mb-2 leading-snug normal-case">Evidence: <span class="font-semibold text-[var(--accent-green)]">M</span> measured · <span class="font-semibold text-[var(--accent-blue)]">E</span> estimated · <span class="font-semibold text-[var(--accent-amber)]">G</span> gut-feeling</p>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.risks.eyebrow"></div>
       <template x-for="(r, i) in data.risks.items" :key="i">
-        <div class="list-item">
+        <div class="list-item"
+             draggable="true"
+             @dragstart="dragStart($event, 'risks.items', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('risks.items', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('risks.items', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <div class="flex gap-1.5 mb-2 items-center">
             <select class="app-input flex-1 min-w-0" x-model="data.risks.items[i].category">
               <option>Security</option>
@@ -860,7 +923,15 @@
       <h3><span data-i18n="section.questions">Open questions</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.questions">Things you genuinely need the reviewer to decide. Each should block the decision until answered.</span></span></h3>
       <div class="field-row"><label class="app-label"><span data-i18n="field.sectionlabel">Section label</span> <span class="text-[var(--ink-soft)] font-normal" data-i18n="field.sectionlabelNote">· small uppercase tag above the title</span></label><input class="app-input" x-model="data.questions.eyebrow"></div>
       <template x-for="(_, i) in data.questions.items" :key="i">
-        <div class="list-item flex gap-1.5 items-center">
+        <div class="list-item flex gap-1.5 items-center"
+             draggable="true"
+             @dragstart="dragStart($event, 'questions.items', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('questions.items', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('questions.items', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <input class="app-input" :value="data.questions.items[i]" @input="data.questions.items[i] = $event.target.value">
           <button class="icon-btn" @click="data.questions.items.splice(i,1)">&times;</button>
         </div>
@@ -884,7 +955,15 @@
       <div class="field-row">
         <label class="app-label">Dependencies</label>
         <template x-for="(d, i) in data.context.dependencies" :key="i">
-          <div class="list-item grid grid-cols-2 gap-1.5">
+          <div class="list-item grid grid-cols-2 gap-1.5"
+               draggable="true"
+               @dragstart="dragStart($event, 'context.dependencies', i)"
+               @dragover.prevent="dragOver($event, i)"
+               @dragleave="dragLeave(i)"
+               @drop.prevent="dropOn('context.dependencies', i)"
+               @dragend="dragEnd()"
+               :class="dragClass('context.dependencies', i)">
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
             <input class="app-input" placeholder="Name" x-model="data.context.dependencies[i].name">
             <div class="flex gap-2">
               <input class="app-input" placeholder="Status / owner" x-model="data.context.dependencies[i].status">
@@ -898,7 +977,59 @@
       <div class="field-row"><label class="app-label">Rollout plan</label><textarea class="app-textarea" rows="3" x-model="data.context.rolloutPlan"></textarea></div>
       <div class="field-row"><label class="app-label">Rollback</label><textarea class="app-textarea" rows="3" x-model="data.context.rollback"></textarea></div>
       <div class="field-row"><label class="app-label">Monitoring &amp; metrics</label><textarea class="app-textarea" rows="3" x-model="data.context.monitoring"></textarea></div>
-      <div class="field-row"><label class="app-label">References / links</label><textarea class="app-textarea" rows="3" x-model="data.context.references"></textarea></div>
+      <div class="field-row">
+        <label class="app-label flex justify-between items-center">
+          <span data-i18n="field.references">References / links</span>
+          <span class="toggle-pill" :title="window.I18N ? window.I18N.t('field.supportingDataType') : 'Show as'">
+            <button type="button" class="toggle-btn" :class="data.context.referencesType === 'text' ? 'active' : ''" @click="data.context.referencesType = 'text'" data-i18n="field.supportingType.text">Text</button>
+            <button type="button" class="toggle-btn" :class="data.context.referencesType === 'qrlinks' ? 'active' : ''" @click="data.context.referencesType = 'qrlinks'" data-i18n="field.supportingType.qr">QR links</button>
+          </span>
+        </label>
+        <textarea class="app-textarea" rows="3" x-model="data.context.references" x-show="data.context.referencesType !== 'qrlinks'"></textarea>
+
+        <!-- QR-links manager — same component as the executive briefing. -->
+        <div x-show="data.context.referencesType === 'qrlinks'">
+          <div class="grid grid-cols-2 gap-x-2 mt-1">
+            <div class="field-row">
+              <label class="app-label" data-i18n="field.qrLayout">Layout</label>
+              <select class="app-input" x-model="data.context.qrLinks.layout">
+                <option value="horizontal" data-i18n="field.qrLayout.horizontal">Horizontal — row, wraps</option>
+                <option value="vertical"   data-i18n="field.qrLayout.vertical">Vertical — stacked</option>
+                <option value="bento"      data-i18n="field.qrLayout.bento">Bento — grid</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label class="app-label flex justify-between items-center">
+                <span data-i18n="field.qrSize">Block size</span>
+                <span class="text-[var(--ink-soft)] font-normal tnum"><span x-text="data.context.qrLinks.blockSize || 28"></span> mm</span>
+              </label>
+              <input type="range" min="18" max="60" step="2" class="app-input !p-0" x-model.number="data.context.qrLinks.blockSize">
+            </div>
+          </div>
+          <template x-for="(l, i) in data.context.qrLinks.items" :key="i">
+            <div class="list-item"
+                 draggable="true"
+                 @dragstart="dragStart($event, 'context.qrLinks.items', i)"
+                 @dragover.prevent="dragOver($event, i)"
+                 @dragleave="dragLeave(i)"
+                 @drop.prevent="dropOn('context.qrLinks.items', i)"
+                 @dragend="dragEnd()"
+                 :class="dragClass('context.qrLinks.items', i)">
+              <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+              <div class="flex gap-2 items-center">
+                <div class="qr-thumb" :class="!data.context.qrLinks.items[i].url ? 'qr-thumb-empty' : ''" x-html="data.context.qrLinks.items[i].url ? qrSvg(data.context.qrLinks.items[i].url) : '◰'"></div>
+                <div class="flex-1 min-w-0 space-y-1.5">
+                  <input class="app-input" placeholder="https://..." x-model="data.context.qrLinks.items[i].url">
+                  <input class="app-input" placeholder="Caption (e.g. ADR #017)" x-model="data.context.qrLinks.items[i].caption">
+                </div>
+                <button class="icon-btn flex-shrink-0" @click="data.context.qrLinks.items.splice(i,1)">&times;</button>
+              </div>
+            </div>
+          </template>
+          <button class="btn btn-ghost" @click="data.context.qrLinks.items.push({url:'',caption:''})" data-i18n="field.qrAdd">+ Add link</button>
+          <p class="text-[10.5px] text-[var(--ink-soft)] mt-2 leading-snug" data-i18n="field.qrHint">QR codes are clickable in the printed PDF — readers can tap them on a phone or click in a PDF viewer.</p>
+        </div>
+      </div>
     </section>
 
     <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-3">Saved automatically to this browser. Ink-friendly print is built in.</p>
@@ -1140,8 +1271,19 @@
               <h3>Monitoring &amp; metrics</h3>
               <p x-text="data.context.monitoring"></p>
 
-              <h3>References</h3>
-              <p x-text="data.context.references"></p>
+              <h3 data-i18n="field.references">References / links</h3>
+              <p x-show="data.context.referencesType !== 'qrlinks'" x-text="data.context.references"></p>
+              <!-- QR-code links — clickable in any PDF reader thanks to the wrapping <a href>. -->
+              <div x-show="data.context.referencesType === 'qrlinks' && data.context.qrLinks?.items?.length"
+                   :class="`qr-block qr-${data.context.qrLinks?.layout || 'horizontal'}`"
+                   :style="`--qr-mm: ${data.context.qrLinks?.blockSize || 28}mm`">
+                <template x-for="(l, i) in data.context.qrLinks.items" :key="i">
+                  <a class="qr-card" :href="l.url" target="_blank" rel="noopener">
+                    <div class="qr-img" x-html="qrSvg(l.url)"></div>
+                    <div class="qr-caption" x-text="l.caption"></div>
+                  </a>
+                </template>
+              </div>
             </div>
 
             <footer class="mt-2 pt-2 border-t border-[var(--hair)] flex items-center justify-between text-[8.5pt]">
@@ -1378,7 +1520,7 @@ function engBriefing() {
     showReleaseNotes: false,
     releaseNotesHtml: '',
     releaseNotesLoading: false,
-    appVersion: '1.2.1',
+    appVersion: '1.4.0',
     expandOpen: false,
     expandValue: '',
     expandLabel: '',
@@ -1390,6 +1532,7 @@ function engBriefing() {
       { id: 'print-classic', name: 'Print Classic' }
     ],
     data: sampleData(),
+    dragState: { list: null, from: -1, over: -1, position: 'above' },
 
     init() {
       const params = new URLSearchParams(window.location.search);
@@ -1410,6 +1553,11 @@ function engBriefing() {
       if (this.data.meta && this.data.meta.confidential === undefined) this.data.meta.confidential = true;
       if (this.data.effort && !this.data.effort.orientation) this.data.effort.orientation = 'vertical';
       if (this.data.effort && !this.data.effort.imageFit) this.data.effort.imageFit = 'cover';
+      if (!this.data.context.qrLinks) this.data.context.qrLinks = { items: [], layout: 'horizontal', blockSize: 28 };
+      if (!this.data.context.qrLinks.items) this.data.context.qrLinks.items = [];
+      if (!this.data.context.qrLinks.layout) this.data.context.qrLinks.layout = 'horizontal';
+      if (!this.data.context.qrLinks.blockSize) this.data.context.qrLinks.blockSize = 28;
+      if (!this.data.context.referencesType) this.data.context.referencesType = 'text';
       if (tpl && tpl !== 'eng-dark') this.templateId = tpl;
       const em = localStorage.getItem('eng-briefing-editor-mode');
       if (em === 'light' || em === 'dark') this.editorMode = em;
@@ -1736,6 +1884,70 @@ function engBriefing() {
       this.showSampleModal = false;
     },
 
+    clearAllFields() {
+      const msg = (window.I18N && window.I18N.t('ui.clearAllConfirm'))
+        || 'Clear all fields? This cannot be undone.';
+      if (!window.confirm(msg)) return;
+      this.data = emptyData();
+    },
+
+    // Drag-and-drop reorder shared by every list-of-rows. Pass a path string
+    // ('changes.items', 'context.dependencies', etc.) — _resolveList walks it.
+    dragStart(ev, list, i) {
+      this.dragState = { list, from: i, over: -1, position: 'above' };
+      try {
+        ev.dataTransfer.effectAllowed = 'move';
+        ev.dataTransfer.setData('text/plain', String(i));
+      } catch (e) {}
+    },
+    dragOver(ev, i) {
+      if (this.dragState.from < 0) return;
+      const rect = ev.currentTarget.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      this.dragState.over = i;
+      this.dragState.position = ev.clientY < mid ? 'above' : 'below';
+    },
+    dragLeave(i) {
+      if (this.dragState.over === i) this.dragState.over = -1;
+    },
+    _resolveList(path) {
+      if (!path) return null;
+      if (path.indexOf('.') < 0 && Array.isArray(this[path])) return this[path];
+      let cur = this.data;
+      for (const seg of path.split('.')) {
+        if (cur == null) return null;
+        cur = cur[seg];
+      }
+      return Array.isArray(cur) ? cur : null;
+    },
+    dropOn(list, toIdx) {
+      const s = this.dragState;
+      if (s.list !== list || s.from < 0) { this.dragEnd(); return; }
+      const arr = this._resolveList(list);
+      if (!Array.isArray(arr)) { this.dragEnd(); return; }
+      let target = toIdx + (s.position === 'below' ? 1 : 0);
+      if (target > s.from) target -= 1;
+      if (target === s.from) { this.dragEnd(); return; }
+      const [moved] = arr.splice(s.from, 1);
+      arr.splice(target, 0, moved);
+      this.dragEnd();
+    },
+    dragEnd() {
+      this.dragState = { list: null, from: -1, over: -1, position: 'above' };
+    },
+    dragClass(list, i) {
+      const s = this.dragState;
+      const out = {};
+      if (s.list === list && s.from === i) out.dragging = true;
+      if (s.list === list && s.over === i && s.from !== i) out['drop-' + s.position] = true;
+      return out;
+    },
+
+    // QR rendering for both the form thumbnail and the page-2 preview block.
+    // Delegates to a non-reactive cache so typing in a URL doesn't re-encode
+    // every other QR on the page.
+    qrSvg(url) { return makeQrSvg(url); },
+
     exportJson() {
       const blob = new Blob([JSON.stringify(this.data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -1923,7 +2135,17 @@ function engBriefing() {
       lines.push(esc(c.monitoring || ''));
       lines.push('');
       lines.push('### References / links');
-      lines.push(esc(c.references || ''));
+      if (c.referencesType === 'qrlinks' && c.qrLinks && c.qrLinks.items && c.qrLinks.items.length) {
+        lines.push('');
+        lines.push('| Caption | Link |');
+        lines.push('|---|---|');
+        c.qrLinks.items.forEach(l => {
+          if (!l.url && !l.caption) return;
+          lines.push('| ' + esc(l.caption || l.url || '') + ' | ' + (l.url ? '[' + esc(l.url) + '](' + l.url + ')' : '') + ' |');
+        });
+      } else {
+        lines.push(esc(c.references || ''));
+      }
       lines.push('```');
       lines.push('');
       lines.push('---');
@@ -1956,6 +2178,26 @@ function engBriefing() {
       } else { fallbackCopy(md); done(); }
     }
   };
+}
+
+// QR-code SVG rendering — uses the global `qrcode()` from qrcode-generator (CDN).
+// Cached by URL so editing other fields doesn't re-encode every QR on each Alpine
+// reactivity tick. Returns a scalable SVG string sized via CSS.
+const _qrCache = new Map();
+function makeQrSvg(url) {
+  if (!url) return '';
+  if (typeof qrcode !== 'function') return '';
+  if (_qrCache.has(url)) return _qrCache.get(url);
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(String(url));
+    qr.make();
+    const svg = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+    _qrCache.set(url, svg);
+    return svg;
+  } catch (e) {
+    return '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:9px;color:#8a1414;background:#fdecec;text-align:center;padding:4px;border-radius:3px;">QR error</div>';
+  }
 }
 
 function mdEscape(s) {
@@ -2000,7 +2242,42 @@ function fallbackCopy(text) {
  */
 // Inline release notes — used when fetch('README.md') is blocked (file:// protocol).
 // Update this alongside README.md on every release.
-const RELEASE_NOTES_MD = `# What's new in v1.2.1
+const RELEASE_NOTES_MD = `# What's new in v1.4.0
+
+## QR-code links on page 2
+The **References / links** field on page 2 now has a Text / **QR links** toggle. Switch to *QR links* and you can build a list of clickable references that render as QR codes in the PDF. Each entry is a URL plus a caption that prints below the QR.
+
+- **Three layouts** — *Horizontal* (row, wraps), *Vertical* (one per row, caption beside the QR), *Bento* (auto-fill grid).
+- **Block size slider** — collectively scales every QR card (18–60 mm).
+- **Clickable in the printed PDF** — each QR is wrapped in an \`<a href>\` so PDF readers make it a clickable region; phones can also scan it.
+- **Reorder by drag** — same ⋮⋮ handle as every other list.
+- **Toggle is non-destructive** — your existing References text stays in the project file; flip back any time.
+
+QR rendering is offline-first: the encoder runs in your browser (qrcode-generator, MIT) and emits a scalable SVG so the QR stays sharp at any zoom or print resolution.
+
+# What's new in v1.3.1
+
+## Lock aspect ratio while cropping (Executive briefing)
+The crop-image editor in the Executive briefing has a new **Lock ratio** toggle. Lock the rectangle's current width-to-height ratio so corner-resizes preserve it. Engineering briefings don't expose the crop editor and are unaffected.
+
+# What's new in v1.3.0
+
+## Drag-and-drop reorder for every list
+Every repeating list in the form pane — *what changes*, *cost & value*, *trade-offs*, *risks*, *open questions*, *dependencies* — now has a small **⋮⋮ handle** on the left of each row. Grab a row by its handle (or anywhere on its background) and drop it above or below another row. The PDF preview reorders in the same animation frame; no separate "save" or "apply" step.
+
+- Drop-target highlighting: a coloured rule on the top edge means *insert above*, on the bottom edge means *insert below*.
+- Inputs inside the row stay normally interactive — text selection still works; only the row container is the drag source.
+- Order is part of the project JSON, so it round-trips through Save Project / Load Project unchanged.
+
+## Clear all fields
+A new **Clear all fields** button sits next to *Sample text* in the chrome's Tools menu. One click (with a confirm prompt) wipes the entire briefing back to a blank project — same shape as a fresh \`?new=1\`, but without leaving the editor or losing your UI preferences (theme, language, pane widths, text sizes).
+
+The blank shape is built from a shared \`emptyData()\` factory that mirrors \`sampleData()\`, so any future field added to the schema will be cleared too.
+
+## Compatibility
+Project JSON files saved in v1.2.x load unchanged. Drag order and the new "blank" projects round-trip cleanly.
+
+# What's new in v1.2.1
 
 ## Pop-out editor for multi-line fields
 Every textarea (headlines, supporting copy, page-2 prose, etc.) now has a small **pencil button** in its top-right corner. Click it to open a fullscreen overlay editor with a much larger writing area — easier on long-form content than fighting a 3-row textarea.
@@ -2198,6 +2475,35 @@ function renderWikiMarkdown(src) {
   return parseBlock();
 }
 
+// Blank-project factory — same shape as sampleData() but with every field empty.
+// Used by clearAllFields(); kept next to sampleData so any new field added there
+// is mirrored here.
+function emptyData() {
+  return {
+    meta: {
+      title: '', subtitle: '', authorName: '', date: '', audience: '',
+      decisionBy: '', stage: 'discovery', companyName: '', confidential: false
+    },
+    proposal: { eyebrow: '', headline: '', headlineEmphasis: '', supporting: '' },
+    effort: {
+      value: '', unit: '', caption: '', evidence: 'gut',
+      image: null, orientation: 'vertical', imageFit: 'cover', imageScale: 75
+    },
+    changes:    { eyebrow: '', items: [] },
+    costValue:  { eyebrow: '', rows:  [] },
+    tradeoffs:  { eyebrow: '', items: [] },
+    risks:      { eyebrow: '', items: [] },
+    questions:  { eyebrow: '', items: [] },
+    decision:   { eyebrow: '', headline: '', headlineEmphasis: '', reviewers: '', buttonText: '' },
+    context: {
+      motivation: '', designApproach: '', dependencies: [],
+      testingPlan: '', rolloutPlan: '', rollback: '', monitoring: '', references: '',
+      referencesType: 'text',
+      qrLinks: { items: [], layout: 'horizontal', blockSize: 28 }
+    }
+  };
+}
+
 function sampleData() {
   return {
     meta: {
@@ -2287,7 +2593,16 @@ function sampleData() {
       rolloutPlan: 'Saturday cutover with vendor on-site. Line 2 starts Monday on new controller for one SKU only (chocolate-chip), all others wait until QA signs off — typically 5 days. Old PLC stays in cabinet for 30 days as physical fallback before being decommissioned.',
       rollback: 'Pre-built switchover kit lets us revert to the old PLC in under 90 minutes by swapping cabinet wiring. Recipe data on the old PLC is preserved untouched until decommissioning.',
       monitoring: 'Dashboards: depositor weight p50/p95/p99 per SKU, auto-reject rate, recipe changeover time, controller uptime. Alarm on weight p99 outside ±2 g for >10 cycles, or auto-reject rate >2%.',
-      references: 'Line 4 commissioning report (Q3 2024) · vendor reference visit Wuppertal · ADR #017 (controller standardisation) · QA acceptance criteria doc rev 4.'
+      references: 'Line 4 commissioning report (Q3 2024) · vendor reference visit Wuppertal · ADR #017 (controller standardisation) · QA acceptance criteria doc rev 4.',
+      referencesType: 'qrlinks',
+      qrLinks: {
+        layout: 'horizontal', blockSize: 28,
+        items: [
+          { url: 'https://example.com/eng/adr-017-controller-standardisation', caption: 'ADR #017' },
+          { url: 'https://example.com/eng/line4-commissioning-report.pdf',     caption: 'Line 4 commissioning report' },
+          { url: 'https://example.com/eng/qa-acceptance-criteria-rev4.pdf',    caption: 'QA acceptance · rev 4' }
+        ]
+      }
     }
   };
 }

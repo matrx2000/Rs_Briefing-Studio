@@ -67,6 +67,63 @@
   <string key="ui.sampletext">
     <en>Sample text</en><de>Beispieltext</de><it>Testo di esempio</it><hr>Primjer teksta</hr>
   </string>
+  <string key="ui.clearAll">
+    <en>Clear all fields</en><de>Alle Felder leeren</de><it>Svuota tutti i campi</it><hr>Očisti sva polja</hr>
+  </string>
+  <string key="ui.clearAllConfirm">
+    <en>Clear all fields? This cannot be undone.</en><de>Alle Felder leeren? Dies kann nicht rückgängig gemacht werden.</de><it>Svuotare tutti i campi? Questa operazione è irreversibile.</it><hr>Očistiti sva polja? Ovu radnju nije moguće poništiti.</hr>
+  </string>
+  <string key="ui.cropImage">
+    <en>Crop image</en><de>Bild zuschneiden</de><it>Ritaglia immagine</it><hr>Izreži sliku</hr>
+  </string>
+  <string key="ui.cropHint">
+    <en>Drag corners to resize, drag inside to move</en><de>Ecken ziehen zum Skalieren, innen ziehen zum Verschieben</de><it>Trascina gli angoli per ridimensionare, trascina dentro per spostare</it><hr>Povuci kutove za promjenu veličine, povuci unutra za pomicanje</hr>
+  </string>
+  <string key="ui.cropApply">
+    <en>Apply crop</en><de>Zuschnitt anwenden</de><it>Applica ritaglio</it><hr>Primijeni izrez</hr>
+  </string>
+  <string key="ui.cropRevert">
+    <en>Revert to original</en><de>Auf Original zurücksetzen</de><it>Ripristina originale</it><hr>Vrati na izvornik</hr>
+  </string>
+  <string key="ui.cropLockRatio">
+    <en>Lock ratio</en><de>Verhältnis sperren</de><it>Blocca proporzioni</it><hr>Zaključaj omjer</hr>
+  </string>
+  <string key="field.supportingData">
+    <en>Supporting data</en><de>Belege</de><it>Dati di supporto</it><hr>Podaci za potporu</hr>
+  </string>
+  <string key="field.references">
+    <en>References / links</en><de>Referenzen / Links</de><it>Riferimenti / link</it><hr>Reference / poveznice</hr>
+  </string>
+  <string key="field.supportingDataType">
+    <en>Show as</en><de>Anzeigen als</de><it>Mostra come</it><hr>Prikaži kao</hr>
+  </string>
+  <string key="field.supportingType.text">
+    <en>Text</en><de>Text</de><it>Testo</it><hr>Tekst</hr>
+  </string>
+  <string key="field.supportingType.qr">
+    <en>QR links</en><de>QR-Links</de><it>Link QR</it><hr>QR poveznice</hr>
+  </string>
+  <string key="field.qrLayout">
+    <en>Layout</en><de>Layout</de><it>Layout</it><hr>Raspored</hr>
+  </string>
+  <string key="field.qrLayout.horizontal">
+    <en>Horizontal — row, wraps</en><de>Horizontal — Zeile, Umbruch</de><it>Orizzontale — riga, va a capo</it><hr>Vodoravno — red, prelama se</hr>
+  </string>
+  <string key="field.qrLayout.vertical">
+    <en>Vertical — stacked</en><de>Vertikal — gestapelt</de><it>Verticale — impilato</it><hr>Okomito — naslagano</hr>
+  </string>
+  <string key="field.qrLayout.bento">
+    <en>Bento — grid</en><de>Bento — Raster</de><it>Bento — griglia</it><hr>Bento — mreža</hr>
+  </string>
+  <string key="field.qrSize">
+    <en>Block size</en><de>Blockgröße</de><it>Dimensione blocco</it><hr>Veličina bloka</hr>
+  </string>
+  <string key="field.qrAdd">
+    <en>+ Add link</en><de>+ Link hinzufügen</de><it>+ Aggiungi link</it><hr>+ Dodaj poveznicu</hr>
+  </string>
+  <string key="field.qrHint">
+    <en>QR codes are clickable in the printed PDF — readers can tap them on a phone or click in a PDF viewer.</en><de>QR-Codes sind im gedruckten PDF klickbar — am Handy antippen oder im PDF-Reader anklicken.</de><it>I codici QR sono cliccabili nel PDF stampato — toccali sul telefono o clicca in un visualizzatore PDF.</it><hr>QR kodovi su klikabilni u ispisanom PDF-u — dodirnite ih na telefonu ili kliknite u PDF pregledniku.</hr>
+  </string>
   <string key="ui.saveproject">
     <en>Save Project</en><de>Projekt speichern</de><it>Salva progetto</it><hr>Spremi projekt</hr>
   </string>

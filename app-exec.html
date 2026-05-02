@@ -6,6 +6,7 @@
 <title>Executive Reporting — R's Briefing Studio</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script src="i18n.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -177,9 +178,51 @@
   .app-textarea { resize: vertical; min-height: 64px; line-height: 1.5; padding-top: 9px; padding-bottom: 9px; }
   .app-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 500; margin-bottom: 4px; display: block; }
   .field-row { margin-bottom: 9px; }
-  /* Repeating list items inside form sections — subtle background tint, accent left border, and breathing room */
-  .list-item { background: var(--paper-tint); border-left: 2px solid var(--mode-accent-soft); border-radius: 8px; padding: 10px 11px; margin-bottom: 10px; }
+  /* Repeating list items inside form sections — subtle background tint, accent left border, and breathing room.
+     Each row is also a drag-and-drop reorder source/target; padding-left leaves room for the handle. */
+  .list-item { background: var(--paper-tint); border-left: 2px solid var(--mode-accent-soft); border-radius: 8px; padding: 10px 11px 10px 24px; margin-bottom: 10px; position: relative; transition: opacity .15s, box-shadow .15s; }
   body.editor-dark .list-item { background: #26262b; }
+  .list-item .drag-handle { position: absolute; top: 50%; left: 6px; transform: translateY(-50%); cursor: grab; user-select: none; opacity: 0.4; font-size: 12px; line-height: 1; color: var(--ink-soft); letter-spacing: -2px; }
+  .list-item .drag-handle:hover { opacity: 0.85; color: var(--mode-accent); }
+  .list-item .drag-handle:active { cursor: grabbing; }
+  body.editor-dark .list-item .drag-handle { color: #a0a0a6; }
+  .list-item.dragging   { opacity: 0.35; }
+  .list-item.drop-above { box-shadow: 0 -2px 0 0 var(--mode-accent) inset, 0 0 0 1px var(--mode-accent); }
+  .list-item.drop-below { box-shadow:  0 2px 0 0 var(--mode-accent) inset, 0 0 0 1px var(--mode-accent); }
+  /* Inner inputs/buttons must not initiate row drags or react to user-drag */
+  .list-item input, .list-item textarea, .list-item select, .list-item button { -webkit-user-drag: none; user-drag: none; }
+
+  /* QR-link block on page 2 — three layouts (horizontal row / vertical stack / bento grid),
+     edge length driven by --qr-mm so the slider controls every card uniformly. */
+  .qr-block { margin-top: 2mm; gap: 4mm; }
+  .qr-block.qr-horizontal { display: flex; flex-wrap: wrap; align-items: flex-start; }
+  .qr-block.qr-vertical   { display: flex; flex-direction: column; }
+  .qr-block.qr-bento      { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--qr-mm, 28mm), 1fr)); }
+  .qr-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5mm; text-decoration: none; color: var(--ink); page-break-inside: avoid; break-inside: avoid; }
+  .qr-card .qr-img { width: var(--qr-mm, 28mm); height: var(--qr-mm, 28mm); flex-shrink: 0; background: #fff; padding: 0.8mm; border: 0.4mm solid var(--hair); border-radius: 1.5mm; box-sizing: border-box; }
+  .qr-card .qr-img svg { display: block; width: 100%; height: 100%; }
+  .qr-card .qr-caption { font-size: calc(8pt * var(--sheet-scale, 1) * var(--fs-body, 1)); line-height: 1.25; max-width: var(--qr-mm, 28mm); word-wrap: break-word; color: var(--ink); }
+  /* Vertical layout: each card is a row (QR left, caption right) so width is used well */
+  .qr-block.qr-vertical .qr-card { flex-direction: row; align-items: center; gap: 3mm; max-width: 100%; text-align: left; }
+  .qr-block.qr-vertical .qr-card .qr-caption { max-width: none; flex: 1; font-size: calc(9.5pt * var(--sheet-scale, 1) * var(--fs-body, 1)); }
+  /* Form-pane thumbnail (small QR preview next to each row's inputs) */
+  .qr-thumb { width: 56px; height: 56px; flex-shrink: 0; background: #fff; padding: 3px; border: 1px solid var(--hair); border-radius: 4px; }
+  .qr-thumb svg { display: block; width: 100%; height: 100%; }
+  .qr-thumb-empty { display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-soft); opacity: 0.4; }
+  body.editor-dark .qr-thumb { background: #fff; border-color: #34343a; }
+
+  /* Crop-image modal — single instance, indexed by cropModal.photoIndex (-1 = single image like data.metric.image). */
+  .crop-modal-card { background: #fff; color: var(--ink); border-radius: 14px; max-width: 800px; width: 100%; padding: 0; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.4); display: flex; flex-direction: column; }
+  body.editor-dark .crop-modal-card { background: #1c1c20; color: #f5f5f7; border: 1px solid #2a2a2e; }
+  .crop-modal-card .modal-head { padding: 14px 18px 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--hair); }
+  body.editor-dark .crop-modal-card .modal-head { border-bottom-color: #2a2a2e; }
+  .crop-modal-card .modal-head h3 { font-size: 15px; font-weight: 600; margin: 0; }
+  .crop-modal-card .modal-hint { font-size: 11px; color: var(--ink-soft); }
+  .crop-modal-card .modal-body { padding: 16px; display: flex; align-items: center; justify-content: center; background: var(--paper-tint); }
+  body.editor-dark .crop-modal-card .modal-body { background: #141417; }
+  #cropCanvas { max-width: 100%; max-height: 70vh; cursor: crosshair; user-select: none; }
+  .crop-modal-card .modal-foot { padding: 12px 18px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; border-top: 1px solid var(--hair); }
+  body.editor-dark .crop-modal-card .modal-foot { border-top-color: #2a2a2e; }
   .form-section { padding: 14px 12px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; margin-bottom: 12px; }
   .form-section h3 { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 
@@ -628,6 +671,7 @@
             <input type="file" accept="application/json" class="hidden" @change="importJson($event); open = false">
           </label>
           <button class="btn btn-danger" @click="showSampleModal = true; open = false" title="Load placeholder lorem-ipsum content into every field" data-i18n="ui.sampletext">Sample text</button>
+          <button class="btn btn-danger" @click="clearAllFields(); open = false" title="Wipe every field back to a blank project" data-i18n="ui.clearAll">Clear all fields</button>
 
           <span class="chrome-divider"></span>
 
@@ -738,7 +782,10 @@
         <div class="field-row col-span-2">
           <label class="app-label flex justify-between items-center">
             <span>Image <span class="text-[var(--ink-soft)] font-normal">· optional, shown next to metric</span></span>
-            <button type="button" x-show="data.metric.image" @click="data.metric.image=null" class="text-[10px] text-[var(--accent-amber)] hover:underline">Remove</button>
+            <span class="flex gap-2.5 items-center">
+              <button type="button" x-show="data.metric.image" @click="openCrop()" class="text-[10px] text-[var(--mode-accent)] hover:underline" data-i18n="ui.cropImage">Crop</button>
+              <button type="button" x-show="data.metric.image" @click="data.metric.image=null; delete data.metric.originalSrc; delete data.metric.crop" class="text-[10px] text-[var(--accent-amber)] hover:underline">Remove</button>
+            </span>
           </label>
           <input type="file" accept="image/*" @change="readImage($event, 'metric')" class="app-input !p-1.5">
           <img x-show="data.metric.image" :src="data.metric.image" class="mt-1.5 max-h-28 w-full object-cover rounded border border-[var(--hair)]">
@@ -793,7 +840,15 @@
     <section class="form-section">
       <h3><span data-i18n="section.pros">Pros (2–4)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.pros">Rank by importance and stop at 4. Write each as an outcome the reader can verify ("Saves €40k/yr"), not a feature ("modern infrastructure").</span></span></h3>
       <template x-for="(_, i) in data.pros" :key="i">
-        <div class="list-item flex gap-1.5 items-center">
+        <div class="list-item flex gap-1.5 items-center"
+             draggable="true"
+             @dragstart="dragStart($event, 'pros', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('pros', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('pros', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <input class="app-input" :value="data.pros[i]" @input="data.pros[i] = $event.target.value">
           <button class="icon-btn" @click="data.pros.splice(i,1)" :disabled="data.pros.length<=1">&times;</button>
         </div>
@@ -804,7 +859,15 @@
     <section class="form-section">
       <h3><span data-i18n="section.cons">Cons (2–4)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.cons">Name the real risks, not strawmen. The reader trusts your pros only as much as they trust your cons. Mitigations belong on page 2.</span></span></h3>
       <template x-for="(_, i) in data.cons" :key="i">
-        <div class="list-item flex gap-1.5 items-center">
+        <div class="list-item flex gap-1.5 items-center"
+             draggable="true"
+             @dragstart="dragStart($event, 'cons', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('cons', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('cons', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <input class="app-input" :value="data.cons[i]" @input="data.cons[i] = $event.target.value">
           <button class="icon-btn" @click="data.cons.splice(i,1)" :disabled="data.cons.length<=1">&times;</button>
         </div>
@@ -815,7 +878,15 @@
     <section class="form-section">
       <h3><span data-i18n="section.timeline">Timeline (4 phases)</span> <span class="hint" x-data="{ open: false }" @click.outside="open = false"><button type="button" class="hint-btn" @click="open = !open" aria-label="Tip">i</button><span x-show="open" x-cloak class="hint-bubble" data-i18n="hint.timeline">4 phases, one line each. Use real months or sprint names. The progress bar shows where you are right now — not where you plan to be.</span></span></h3>
       <template x-for="(phase, i) in data.timeline.phases" :key="i">
-        <div class="list-item">
+        <div class="list-item"
+             draggable="true"
+             @dragstart="dragStart($event, 'timeline.phases', i)"
+             @dragover.prevent="dragOver($event, i)"
+             @dragleave="dragLeave(i)"
+             @drop.prevent="dropOn('timeline.phases', i)"
+             @dragend="dragEnd()"
+             :class="dragClass('timeline.phases', i)">
+          <span class="drag-handle" aria-hidden="true">⋮⋮</span>
           <div class="grid grid-cols-2 gap-2">
             <input class="app-input" placeholder="Label" x-model="data.timeline.phases[i].label">
             <input class="app-input" placeholder="Title" x-model="data.timeline.phases[i].title">
@@ -845,7 +916,15 @@
       <div class="field-row">
         <label class="app-label">Stakeholders</label>
         <template x-for="(s, i) in data.context.stakeholders" :key="i">
-          <div class="list-item flex gap-1.5 items-center">
+          <div class="list-item flex gap-1.5 items-center"
+               draggable="true"
+               @dragstart="dragStart($event, 'context.stakeholders', i)"
+               @dragover.prevent="dragOver($event, i)"
+               @dragleave="dragLeave(i)"
+               @drop.prevent="dropOn('context.stakeholders', i)"
+               @dragend="dragEnd()"
+               :class="dragClass('context.stakeholders', i)">
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
             <input class="app-input" placeholder="Name" x-model="data.context.stakeholders[i].name">
             <input class="app-input" placeholder="Role" x-model="data.context.stakeholders[i].role">
             <button class="icon-btn" @click="data.context.stakeholders.splice(i,1)">&times;</button>
@@ -856,7 +935,15 @@
       <div class="field-row">
         <label class="app-label">Considerations</label>
         <template x-for="(_, i) in data.context.considerations" :key="i">
-          <div class="list-item flex gap-1.5 items-center">
+          <div class="list-item flex gap-1.5 items-center"
+               draggable="true"
+               @dragstart="dragStart($event, 'context.considerations', i)"
+               @dragover.prevent="dragOver($event, i)"
+               @dragleave="dragLeave(i)"
+               @drop.prevent="dropOn('context.considerations', i)"
+               @dragend="dragEnd()"
+               :class="dragClass('context.considerations', i)">
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
             <input class="app-input" :value="data.context.considerations[i]" @input="data.context.considerations[i] = $event.target.value">
             <button class="icon-btn" @click="data.context.considerations.splice(i,1)">&times;</button>
           </div>
@@ -866,7 +953,15 @@
       <div class="field-row">
         <label class="app-label">Alternatives considered</label>
         <template x-for="(a, i) in data.context.alternatives" :key="i">
-          <div class="list-item grid grid-cols-2 gap-1.5">
+          <div class="list-item grid grid-cols-2 gap-1.5"
+               draggable="true"
+               @dragstart="dragStart($event, 'context.alternatives', i)"
+               @dragover.prevent="dragOver($event, i)"
+               @dragleave="dragLeave(i)"
+               @drop.prevent="dropOn('context.alternatives', i)"
+               @dragend="dragEnd()"
+               :class="dragClass('context.alternatives', i)">
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
             <input class="app-input" placeholder="Option" x-model="data.context.alternatives[i].option">
             <div class="flex gap-2">
               <input class="app-input" placeholder="Reason set aside" x-model="data.context.alternatives[i].reason">
@@ -879,7 +974,15 @@
       <div class="field-row">
         <label class="app-label">Risks &amp; mitigations</label>
         <template x-for="(r, i) in data.context.risks" :key="i">
-          <div class="list-item grid grid-cols-2 gap-1.5">
+          <div class="list-item grid grid-cols-2 gap-1.5"
+               draggable="true"
+               @dragstart="dragStart($event, 'context.risks', i)"
+               @dragover.prevent="dragOver($event, i)"
+               @dragleave="dragLeave(i)"
+               @drop.prevent="dropOn('context.risks', i)"
+               @dragend="dragEnd()"
+               :class="dragClass('context.risks', i)">
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
             <input class="app-input" placeholder="Risk" x-model="data.context.risks[i].risk">
             <div class="flex gap-2">
               <input class="app-input" placeholder="Mitigation" x-model="data.context.risks[i].mitigation">
@@ -889,7 +992,60 @@
         </template>
         <button class="btn btn-ghost" @click="data.context.risks.push({risk:'',mitigation:''})">+ Add</button>
       </div>
-      <div class="field-row"><label class="app-label">Supporting data</label><textarea class="app-textarea" rows="4" x-model="data.context.supportingData"></textarea></div>
+      <div class="field-row">
+        <label class="app-label flex justify-between items-center">
+          <span data-i18n="field.supportingData">Supporting data</span>
+          <span class="toggle-pill" :title="window.I18N ? window.I18N.t('field.supportingDataType') : 'Show as'">
+            <button type="button" class="toggle-btn" :class="data.context.supportingDataType === 'text' ? 'active' : ''" @click="data.context.supportingDataType = 'text'" data-i18n="field.supportingType.text">Text</button>
+            <button type="button" class="toggle-btn" :class="data.context.supportingDataType === 'qrlinks' ? 'active' : ''" @click="data.context.supportingDataType = 'qrlinks'" data-i18n="field.supportingType.qr">QR links</button>
+          </span>
+        </label>
+        <textarea class="app-textarea" rows="4" x-model="data.context.supportingData" x-show="data.context.supportingDataType !== 'qrlinks'"></textarea>
+
+        <!-- QR-links manager: collective layout + size controls, then draggable rows
+             (URL + caption + live thumbnail). Reuses the v1.3.0 drag/drop helper. -->
+        <div x-show="data.context.supportingDataType === 'qrlinks'">
+          <div class="grid grid-cols-2 gap-x-2 mt-1">
+            <div class="field-row">
+              <label class="app-label" data-i18n="field.qrLayout">Layout</label>
+              <select class="app-input" x-model="data.context.qrLinks.layout">
+                <option value="horizontal" data-i18n="field.qrLayout.horizontal">Horizontal — row, wraps</option>
+                <option value="vertical"   data-i18n="field.qrLayout.vertical">Vertical — stacked</option>
+                <option value="bento"      data-i18n="field.qrLayout.bento">Bento — grid</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label class="app-label flex justify-between items-center">
+                <span data-i18n="field.qrSize">Block size</span>
+                <span class="text-[var(--ink-soft)] font-normal tnum"><span x-text="data.context.qrLinks.blockSize || 28"></span> mm</span>
+              </label>
+              <input type="range" min="18" max="60" step="2" class="app-input !p-0" x-model.number="data.context.qrLinks.blockSize">
+            </div>
+          </div>
+          <template x-for="(l, i) in data.context.qrLinks.items" :key="i">
+            <div class="list-item"
+                 draggable="true"
+                 @dragstart="dragStart($event, 'context.qrLinks.items', i)"
+                 @dragover.prevent="dragOver($event, i)"
+                 @dragleave="dragLeave(i)"
+                 @drop.prevent="dropOn('context.qrLinks.items', i)"
+                 @dragend="dragEnd()"
+                 :class="dragClass('context.qrLinks.items', i)">
+              <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+              <div class="flex gap-2 items-center">
+                <div class="qr-thumb" :class="!data.context.qrLinks.items[i].url ? 'qr-thumb-empty' : ''" x-html="data.context.qrLinks.items[i].url ? qrSvg(data.context.qrLinks.items[i].url) : '◰'"></div>
+                <div class="flex-1 min-w-0 space-y-1.5">
+                  <input class="app-input" placeholder="https://..." x-model="data.context.qrLinks.items[i].url">
+                  <input class="app-input" placeholder="Caption (e.g. Read the full report)" x-model="data.context.qrLinks.items[i].caption">
+                </div>
+                <button class="icon-btn flex-shrink-0" @click="data.context.qrLinks.items.splice(i,1)">&times;</button>
+              </div>
+            </div>
+          </template>
+          <button class="btn btn-ghost" @click="data.context.qrLinks.items.push({url:'',caption:''})" data-i18n="field.qrAdd">+ Add link</button>
+          <p class="text-[10.5px] text-[var(--ink-soft)] mt-2 leading-snug" data-i18n="field.qrHint">QR codes are clickable in the printed PDF — readers can tap them on a phone or click in a PDF viewer.</p>
+        </div>
+      </div>
     </section>
 
     <p class="text-[11px] text-[var(--ink-soft)] text-center mt-1 mb-3">Saved automatically to this browser. Ink-friendly print is built in.</p>
@@ -1110,8 +1266,19 @@
                 </template>
               </div>
 
-              <h3>Supporting data</h3>
-              <p x-text="data.context.supportingData"></p>
+              <h3 data-i18n="field.supportingData">Supporting data</h3>
+              <p x-show="data.context.supportingDataType !== 'qrlinks'" x-text="data.context.supportingData"></p>
+              <!-- QR-code links — clickable in any PDF reader thanks to the wrapping <a href>. -->
+              <div x-show="data.context.supportingDataType === 'qrlinks' && data.context.qrLinks?.items?.length"
+                   :class="`qr-block qr-${data.context.qrLinks?.layout || 'horizontal'}`"
+                   :style="`--qr-mm: ${data.context.qrLinks?.blockSize || 28}mm`">
+                <template x-for="(l, i) in data.context.qrLinks.items" :key="i">
+                  <a class="qr-card" :href="l.url" target="_blank" rel="noopener">
+                    <div class="qr-img" x-html="qrSvg(l.url)"></div>
+                    <div class="qr-caption" x-text="l.caption"></div>
+                  </a>
+                </template>
+              </div>
             </div>
 
             <footer class="mt-1 pt-1 border-t border-[var(--hair)] text-[7.5pt] text-[var(--ink-soft)] flex items-center justify-center gap-1.5 leading-none">
@@ -1296,6 +1463,39 @@
   </div>
 </div>
 
+<!-- Crop-image modal — non-destructive editor for data.metric.image. Apply writes the
+     cropped pixels to data.metric.image and stashes the pre-crop original to
+     data.metric.originalSrc; Revert restores it. The crop rect is stored in
+     SOURCE-pixel coords (data.metric.crop) so re-opening at a different window
+     size still restores the same selection. -->
+<div class="modal-backdrop" x-show="cropModal.open" x-cloak
+     @click.self="closeCrop()" @keydown.escape.window="if (cropModal.open) closeCrop()">
+  <div class="modal-card crop-modal-card" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h3 data-i18n="ui.cropImage">Crop image</h3>
+      <span class="modal-hint" data-i18n="ui.cropHint">Drag corners to resize, drag inside to move</span>
+    </div>
+    <div class="modal-body">
+      <canvas id="cropCanvas"
+              @mousedown="cropMouseDown($event)"
+              @mousemove="cropMouseMove($event)"
+              @mouseup.window="cropMouseUp()"
+              @mouseleave="cropMouseUp()"></canvas>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" :class="{ active: cropModal.lockRatio }" @click="toggleCropLock()"
+              :title="cropModal.lockRatio ? 'Locked at ' + cropModal.lockedAspect.toFixed(2) + ':1 — click to unlock' : 'Lock the current width:height ratio'">
+        <span aria-hidden="true" x-text="cropModal.lockRatio ? '🔒' : '⛓'"></span>
+        <span data-i18n="ui.cropLockRatio">Lock ratio</span>
+      </button>
+      <span style="flex: 1;"></span>
+      <button type="button" class="btn btn-ghost" x-show="data.metric && data.metric.originalSrc" @click="revertCrop()" data-i18n="ui.cropRevert">Revert to original</button>
+      <button type="button" class="btn btn-ghost" @click="closeCrop()" data-i18n="modal.cancel">Cancel</button>
+      <button type="button" class="btn btn-primary" @click="applyCropToPhoto()" data-i18n="ui.cropApply">Apply crop</button>
+    </div>
+  </div>
+</div>
+
 <!-- Expand-textarea overlay editor — opens via 'expand-open' window event from .expand-btn -->
 <div class="modal-backdrop" x-show="expandOpen" x-cloak
      @expand-open.window="openExpand($event.detail.el, $event.detail.label)"
@@ -1341,7 +1541,7 @@ function briefingApp() {
     showReleaseNotes: false,
     releaseNotesHtml: '',
     releaseNotesLoading: false,
-    appVersion: '1.2.1',
+    appVersion: '1.4.0',
     expandOpen: false,
     expandValue: '',
     expandLabel: '',
@@ -1353,6 +1553,10 @@ function briefingApp() {
       { id: 'print-classic', name: 'Print Classic' }
     ],
     data: sampleData(),
+    dragState: { list: null, from: -1, over: -1, position: 'above' },
+    cropModal: { open: false, photoIndex: -1, src: '', img: null,
+                 rect: { x: 50, y: 50, w: 200, h: 150 }, drag: null, scale: 1,
+                 lockRatio: false, lockedAspect: 0 },
 
     init() {
       // Handoff from main.html: ?new=1 starts fresh with sample data; sessionStorage 'briefing-import' overrides
@@ -1375,6 +1579,11 @@ function briefingApp() {
       if (this.data.meta && this.data.meta.confidential === undefined) this.data.meta.confidential = true;
       if (this.data.metric && !this.data.metric.orientation) this.data.metric.orientation = 'vertical';
       if (this.data.metric && !this.data.metric.imageFit) this.data.metric.imageFit = 'cover';
+      if (!this.data.context.qrLinks) this.data.context.qrLinks = { items: [], layout: 'horizontal', blockSize: 28 };
+      if (!this.data.context.qrLinks.items) this.data.context.qrLinks.items = [];
+      if (!this.data.context.qrLinks.layout) this.data.context.qrLinks.layout = 'horizontal';
+      if (!this.data.context.qrLinks.blockSize) this.data.context.qrLinks.blockSize = 28;
+      if (!this.data.context.supportingDataType) this.data.context.supportingDataType = 'text';
       if (tpl && tpl !== 'bento-dark') this.templateId = tpl;
       const em = localStorage.getItem('briefing-editor-mode');
       if (em === 'light' || em === 'dark') this.editorMode = em;
@@ -1706,6 +1915,242 @@ function briefingApp() {
       this.showSampleModal = false;
     },
 
+    clearAllFields() {
+      const msg = (window.I18N && window.I18N.t('ui.clearAllConfirm'))
+        || 'Clear all fields? This cannot be undone.';
+      if (!window.confirm(msg)) return;
+      this.data = emptyData();
+    },
+
+    // Drag-and-drop reorder shared by every list-of-rows. Pass a path string
+    // ('pros', 'timeline.phases', 'context.stakeholders', etc.) — _resolveList walks it.
+    dragStart(ev, list, i) {
+      this.dragState = { list, from: i, over: -1, position: 'above' };
+      try {
+        ev.dataTransfer.effectAllowed = 'move';
+        ev.dataTransfer.setData('text/plain', String(i));
+      } catch (e) {}
+    },
+    dragOver(ev, i) {
+      if (this.dragState.from < 0) return;
+      const rect = ev.currentTarget.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      this.dragState.over = i;
+      this.dragState.position = ev.clientY < mid ? 'above' : 'below';
+    },
+    dragLeave(i) {
+      if (this.dragState.over === i) this.dragState.over = -1;
+    },
+    _resolveList(path) {
+      if (!path) return null;
+      if (path.indexOf('.') < 0 && Array.isArray(this[path])) return this[path];
+      let cur = this.data;
+      for (const seg of path.split('.')) {
+        if (cur == null) return null;
+        cur = cur[seg];
+      }
+      return Array.isArray(cur) ? cur : null;
+    },
+    dropOn(list, toIdx) {
+      const s = this.dragState;
+      if (s.list !== list || s.from < 0) { this.dragEnd(); return; }
+      const arr = this._resolveList(list);
+      if (!Array.isArray(arr)) { this.dragEnd(); return; }
+      let target = toIdx + (s.position === 'below' ? 1 : 0);
+      if (target > s.from) target -= 1;
+      if (target === s.from) { this.dragEnd(); return; }
+      const [moved] = arr.splice(s.from, 1);
+      arr.splice(target, 0, moved);
+      this.dragEnd();
+    },
+    dragEnd() {
+      this.dragState = { list: null, from: -1, over: -1, position: 'above' };
+    },
+    dragClass(list, i) {
+      const s = this.dragState;
+      const out = {};
+      if (s.list === list && s.from === i) out.dragging = true;
+      if (s.list === list && s.over === i && s.from !== i) out['drop-' + s.position] = true;
+      return out;
+    },
+
+    // Crop modal — adapted to the single data.metric.image (no array of photos
+    // in this app). photoIndex stays at -1 so the modal addresses data.metric.
+    // Non-destructive: data.metric.originalSrc holds the pre-crop pixels and
+    // survives every Apply; Revert restores it and erases originalSrc + crop.
+    openCrop() {
+      const m = this.data.metric;
+      if (!m || !m.image) return;
+      const original = m.originalSrc || m.image;
+      Object.assign(this.cropModal, { photoIndex: -1, src: original, open: true });
+      const existing = m.crop;
+      const img = new Image();
+      img.onload = () => {
+        this.cropModal.img = img;
+        const cnv = document.querySelector('#cropCanvas');
+        if (!cnv) return;
+        // Fit canvas to a max viewport while keeping aspect ratio. scale converts
+        // canvas pixels back to source-image pixels on apply.
+        const maxW = 720, maxH = 480;
+        const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+        cnv.width  = Math.round(img.naturalWidth  * scale);
+        cnv.height = Math.round(img.naturalHeight * scale);
+        this.cropModal.scale = scale;
+        if (existing && existing.w > 0 && existing.h > 0) {
+          this.cropModal.rect = {
+            x: existing.x * scale, y: existing.y * scale,
+            w: existing.w * scale, h: existing.h * scale,
+          };
+        } else {
+          const w = cnv.width * 0.6, h = cnv.height * 0.5;
+          this.cropModal.rect = { x: (cnv.width - w) / 2, y: (cnv.height - h) / 2, w, h };
+        }
+        this._drawCrop();
+      };
+      img.src = original;
+    },
+    _drawCrop() {
+      const cnv = document.querySelector('#cropCanvas');
+      const img = this.cropModal.img;
+      if (!cnv || !img) return;
+      const ctx = cnv.getContext('2d');
+      ctx.clearRect(0, 0, cnv.width, cnv.height);
+      ctx.drawImage(img, 0, 0, cnv.width, cnv.height);
+      const r = this.cropModal.rect;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, 0, cnv.width, r.y);
+      ctx.fillRect(0, r.y, r.x, r.h);
+      ctx.fillRect(r.x + r.w, r.y, cnv.width - r.x - r.w, r.h);
+      ctx.fillRect(0, r.y + r.h, cnv.width, cnv.height - r.y - r.h);
+      ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 1.5;
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = '#3b82f6';
+      const hs = 6;
+      [[r.x, r.y], [r.x+r.w, r.y], [r.x, r.y+r.h], [r.x+r.w, r.y+r.h]]
+        .forEach(p => ctx.fillRect(p[0]-hs/2, p[1]-hs/2, hs, hs));
+    },
+    cropMouseDown(ev) {
+      const cnv = document.querySelector('#cropCanvas');
+      const b = cnv.getBoundingClientRect();
+      // The canvas may render at a different pixel size than its bitmap (CSS scaling),
+      // so map mouse coords back into bitmap space.
+      const sx = cnv.width / b.width, sy = cnv.height / b.height;
+      const px = (ev.clientX - b.left) * sx, py = (ev.clientY - b.top) * sy;
+      const r = this.cropModal.rect;
+      const near = (a, b, t = 10) => Math.abs(a - b) < t;
+      let mode = 'move';
+      if      (near(px, r.x)         && near(py, r.y))         mode = 'nw';
+      else if (near(px, r.x + r.w)   && near(py, r.y))         mode = 'ne';
+      else if (near(px, r.x)         && near(py, r.y + r.h))   mode = 'sw';
+      else if (near(px, r.x + r.w)   && near(py, r.y + r.h))   mode = 'se';
+      else if (px < r.x || px > r.x + r.w || py < r.y || py > r.y + r.h) {
+        this.cropModal.rect = { x: px, y: py, w: 0, h: 0 };
+        mode = 'se';
+      }
+      this.cropModal.drag = { mode, startX: px, startY: py, origRect: { ...r }, sx, sy };
+    },
+    cropMouseMove(ev) {
+      const drag = this.cropModal.drag;
+      if (!drag) return;
+      const cnv = document.querySelector('#cropCanvas');
+      const b = cnv.getBoundingClientRect();
+      const sx = drag.sx, sy = drag.sy;
+      const px = Math.max(0, Math.min(cnv.width,  (ev.clientX - b.left) * sx));
+      const py = Math.max(0, Math.min(cnv.height, (ev.clientY - b.top)  * sy));
+      const dx = px - drag.startX, dy = py - drag.startY;
+      const o = drag.origRect;
+      let r = { ...o };
+      switch (drag.mode) {
+        case 'move': r.x = Math.max(0, Math.min(cnv.width  - o.w, o.x + dx));
+                     r.y = Math.max(0, Math.min(cnv.height - o.h, o.y + dy)); break;
+        case 'se':   r.w = Math.max(8, o.w + dx); r.h = Math.max(8, o.h + dy); break;
+        case 'sw':   r.x = Math.min(o.x + o.w - 8, o.x + dx); r.w = o.w - dx;
+                     r.h = Math.max(8, o.h + dy); break;
+        case 'ne':   r.y = Math.min(o.y + o.h - 8, o.y + dy); r.w = Math.max(8, o.w + dx);
+                     r.h = o.h - dy; break;
+        case 'nw':   r.x = Math.min(o.x + o.w - 8, o.x + dx);
+                     r.y = Math.min(o.y + o.h - 8, o.y + dy);
+                     r.w = o.w - dx; r.h = o.h - dy; break;
+      }
+      // Aspect-ratio lock: corner resizes only; pick the dominant axis to drive,
+      // derive the other from the locked ratio, then re-anchor at the opposite
+      // corner (the one the user is NOT dragging). Falls back to free resize on
+      // the canvas edges by shrinking proportionally.
+      if (this.cropModal.lockRatio && this.cropModal.lockedAspect > 0 && drag.mode !== 'move') {
+        const aspect = this.cropModal.lockedAspect;
+        let w = Math.max(8, r.w);
+        let h = Math.max(8, r.h);
+        if (Math.abs(w - o.w) >= Math.abs(h - o.h)) h = w / aspect;
+        else                                         w = h * aspect;
+        const dirX = (drag.mode === 'sw' || drag.mode === 'nw') ? -1 : 1;
+        const dirY = (drag.mode === 'ne' || drag.mode === 'nw') ? -1 : 1;
+        const ax = (drag.mode === 'se' || drag.mode === 'ne') ? o.x : o.x + o.w;
+        const ay = (drag.mode === 'se' || drag.mode === 'sw') ? o.y : o.y + o.h;
+        let nx = dirX === 1 ? ax : ax - w;
+        let ny = dirY === 1 ? ay : ay - h;
+        if (nx < 0)              { w += nx;       h = w / aspect; nx = 0; ny = dirY === 1 ? ay : ay - h; }
+        if (ny < 0)              { h += ny;       w = h * aspect; ny = 0; nx = dirX === 1 ? ax : ax - w; }
+        if (nx + w > cnv.width)  { w = cnv.width  - nx; h = w / aspect; if (dirY === -1) ny = ay - h; }
+        if (ny + h > cnv.height) { h = cnv.height - ny; w = h * aspect; if (dirX === -1) nx = ax - w; }
+        r = { x: Math.max(0, nx), y: Math.max(0, ny), w: Math.max(8, w), h: Math.max(8, h) };
+      } else {
+        r.x = Math.max(0, r.x); r.y = Math.max(0, r.y);
+        if (r.x + r.w > cnv.width)  r.w = cnv.width  - r.x;
+        if (r.y + r.h > cnv.height) r.h = cnv.height - r.y;
+      }
+      this.cropModal.rect = r;
+      this._drawCrop();
+    },
+    cropMouseUp() { this.cropModal.drag = null; },
+
+    // Toggle the aspect-ratio lock. On enable, capture the current rect's w:h
+    // so subsequent corner-resizes preserve that ratio. Move is never constrained.
+    toggleCropLock() {
+      if (this.cropModal.lockRatio) {
+        this.cropModal.lockRatio = false;
+      } else {
+        const r = this.cropModal.rect;
+        if (r.w > 0 && r.h > 0) {
+          this.cropModal.lockedAspect = r.w / r.h;
+          this.cropModal.lockRatio = true;
+        }
+      }
+    },
+    applyCropToPhoto() {
+      const m = this.data.metric;
+      if (!m) return;
+      const img = this.cropModal.img;
+      const r = this.cropModal.rect;
+      const scale = this.cropModal.scale || 1;
+      const sx = r.x / scale, sy = r.y / scale, sw = r.w / scale, sh = r.h / scale;
+      if (sw < 1 || sh < 1) { this.closeCrop(); return; }
+      const out = document.createElement('canvas');
+      out.width  = Math.max(1, Math.round(sw));
+      out.height = Math.max(1, Math.round(sh));
+      out.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
+      if (!m.originalSrc) m.originalSrc = m.image;     // first crop only
+      m.image = out.toDataURL('image/jpeg', 0.92);
+      m.crop  = { x: sx, y: sy, w: sw, h: sh };        // for re-opening
+      this.closeCrop();
+    },
+    revertCrop() {
+      const m = this.data.metric;
+      if (!m) return;
+      if (m.originalSrc) m.image = m.originalSrc;
+      delete m.crop;
+      delete m.originalSrc;
+      this.closeCrop();
+    },
+    closeCrop() {
+      Object.assign(this.cropModal, { open: false, photoIndex: -1, img: null, drag: null,
+                                      lockRatio: false, lockedAspect: 0 });
+    },
+
+    // QR rendering for both the form thumbnail and the page-2 preview block.
+    // Delegates to a non-reactive cache so typing in a URL doesn't re-encode
+    // every other QR on the page.
+    qrSvg(url) { return makeQrSvg(url); },
+
     exportJson() {
       const blob = new Blob([JSON.stringify(this.data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -1884,7 +2329,17 @@ function briefingApp() {
       });
       lines.push('');
       lines.push('### Supporting data');
-      lines.push(esc(c.supportingData || ''));
+      if (c.supportingDataType === 'qrlinks' && c.qrLinks && c.qrLinks.items && c.qrLinks.items.length) {
+        lines.push('');
+        lines.push('| Caption | Link |');
+        lines.push('|---|---|');
+        c.qrLinks.items.forEach(l => {
+          if (!l.url && !l.caption) return;
+          lines.push('| ' + esc(l.caption || l.url || '') + ' | ' + (l.url ? '[' + esc(l.url) + '](' + l.url + ')' : '') + ' |');
+        });
+      } else {
+        lines.push(esc(c.supportingData || ''));
+      }
       lines.push('```');
       lines.push('');
       lines.push('---');
@@ -1917,6 +2372,28 @@ function briefingApp() {
       } else { fallbackCopy(md); done(); }
     }
   };
+}
+
+// QR-code SVG rendering — uses the global `qrcode()` from qrcode-generator (CDN).
+// Cached by URL so editing other fields doesn't re-encode every QR on each Alpine
+// reactivity tick. Returns a scalable SVG string sized via CSS.
+const _qrCache = new Map();
+function makeQrSvg(url) {
+  if (!url) return '';
+  if (typeof qrcode !== 'function') return '';
+  if (_qrCache.has(url)) return _qrCache.get(url);
+  try {
+    // Auto type-number (0 = let library pick smallest fitting), error correction M
+    // (~15% damage tolerance — good balance between size and resilience).
+    const qr = qrcode(0, 'M');
+    qr.addData(String(url));
+    qr.make();
+    const svg = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+    _qrCache.set(url, svg);
+    return svg;
+  } catch (e) {
+    return '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:9px;color:#8a1414;background:#fdecec;text-align:center;padding:4px;border-radius:3px;">QR error</div>';
+  }
 }
 
 function mdEscape(s) {
@@ -1953,7 +2430,53 @@ function fallbackCopy(text) {
  */
 // Inline release notes — used when fetch('README.md') is blocked (file:// protocol).
 // Update this alongside README.md on every release.
-const RELEASE_NOTES_MD = `# What's new in v1.2.1
+const RELEASE_NOTES_MD = `# What's new in v1.4.0
+
+## QR-code links on page 2
+The **Supporting data** field on page 2 now has a Text / **QR links** toggle. Switch to *QR links* and you can build a list of clickable links that render as QR codes in the PDF. Each entry is a URL plus a caption that prints below the QR.
+
+- **Three layouts** — *Horizontal* (row, wraps to a second line if needed), *Vertical* (one per row, caption beside the QR), *Bento* (auto-fill grid).
+- **Block size slider** — collectively scales every QR card on the page (18–60 mm). Caption font scales with it.
+- **Clickable in the printed PDF** — each QR is wrapped in an \`<a href>\` so PDF readers (Acrobat, Preview, browsers) make the QR a clickable region. Phones can scan it; laptops can click through.
+- **Reorder by drag** — same ⋮⋮ handle as every other list. The PDF order updates immediately.
+- **Toggle is non-destructive** — the previous *Supporting data* text stays in the project file; flip the toggle back any time and your text is intact.
+
+QR rendering is offline-first: the encoder runs in your browser (qrcode-generator, MIT, ~7 KB) and emits a scalable SVG so the QR stays sharp at any zoom or print resolution.
+
+# What's new in v1.3.1
+
+## Lock aspect ratio while cropping
+The crop-image editor has a new **Lock ratio** toggle (bottom-left of the modal). Click it to lock the rectangle's current width-to-height ratio; subsequent corner-resizes will preserve that ratio. Click again to unlock and resize freely.
+
+- The lock is captured *at the moment you click the toggle* — so frame the rectangle the way you want first, then lock.
+- The "move" interaction (dragging inside the rectangle) is never constrained by the lock; only the four corner handles are.
+- Closing the modal clears the lock — the next time you open Crop you start unlocked.
+
+# What's new in v1.3.0
+
+## Drag-and-drop reorder for every list
+Every repeating list in the form pane — *pros*, *cons*, *timeline phases*, *stakeholders*, *considerations*, *alternatives*, *risks & mitigations* — now has a small **⋮⋮ handle** on the left of each row. Grab a row and drop it above or below another row. The PDF preview reorders in the same animation frame; no separate "save" or "apply" step.
+
+- Drop-target highlighting: a coloured rule on the top edge means *insert above*, on the bottom edge means *insert below*.
+- Inputs inside the row stay normally interactive — text selection still works; only the row container is the drag source.
+- Order is part of the project JSON, so it round-trips through Save Project / Load Project unchanged.
+
+## Image cropping (non-destructive)
+The headline-metric image now has a **Crop** button next to *Remove*. Click it to open a canvas editor — drag the corners of the rectangle to resize, drag inside to move, drag outside to start a fresh selection. Apply writes the cropped pixels back to the image; the original is preserved in the project file forever.
+
+- **Revert to original** restores the pre-crop pixels.
+- The crop rectangle is stored in source-image coordinates, so re-opening the editor (even at a different window size) restores the same selection.
+- Round-trips through Save Project / Load Project: cropped image, original, and crop rect all persist.
+
+## Clear all fields
+A new **Clear all fields** button sits next to *Sample text* in the chrome's Tools menu. One click (with a confirm prompt) wipes the entire briefing back to a blank project — same shape as a fresh \`?new=1\`, but without leaving the editor or losing your UI preferences (theme, language, pane widths, text sizes).
+
+The blank shape is built from a shared \`emptyData()\` factory that mirrors \`sampleData()\`, so any future field added to the schema will be cleared too.
+
+## Compatibility
+Project JSON files saved in v1.2.x load unchanged. Cropped images add two new keys (\`originalSrc\`, \`crop\`) to the metric block — older versions ignore them.
+
+# What's new in v1.2.1
 
 ## Pop-out editor for multi-line fields
 Every textarea (headlines, supporting copy, page-2 prose, etc.) now has a small **pencil button** in its top-right corner. Click it to open a fullscreen overlay editor with a much larger writing area — easier on long-form content than fighting a 3-row textarea.
@@ -2173,6 +2696,36 @@ function renderWikiMarkdown(src) {
   return parseBlock(null);
 }
 
+// Blank-project factory — same shape as sampleData() but with every field empty.
+// Used by clearAllFields(); kept next to sampleData so any new field added there
+// is mirrored here.
+function emptyData() {
+  return {
+    meta: {
+      title: '', subtitle: '', authorName: '', date: '', audience: '',
+      decisionBy: '', readTimeSeconds: 90, companyName: '', confidential: false
+    },
+    bluf:    { eyebrow: '', headline: '', headlineEmphasis: '', supporting: '' },
+    metric:  {
+      label: '', value: '', unit: '', caption: '',
+      image: null, orientation: 'vertical', imageFit: 'cover', imageScale: 95
+    },
+    commentary: { heading: '', p1: '', p2: '' },
+    fiveWsH: { what: '', why: '', who: '', when: '', where: '', how: '' },
+    pros: [],
+    cons: [],
+    timeline: { phases: [] },
+    cta:     { eyebrow: '', headline: '', headlineEmphasis: '', buttonText: '' },
+    context: {
+      background: '', problem: '',
+      stakeholders: [], considerations: [], alternatives: [], risks: [],
+      supportingData: '',
+      supportingDataType: 'text',
+      qrLinks: { items: [], layout: 'horizontal', blockSize: 28 }
+    }
+  };
+}
+
 function sampleData() {
   return {
     meta: {
@@ -2252,7 +2805,16 @@ function sampleData() {
         { risk: 'New oven needs recipe re-tuning beyond expected', mitigation: 'Two-week soft-launch with limited SKUs before retail orders ramp; food technologist embedded for first 30 days.' },
         { risk: 'Q3 cash flow tightens', mitigation: 'Vendor accepts 30% deposit / 50% on commissioning / 20% on acceptance — spreads the hit across two quarters.' }
       ],
-      supportingData: 'Production logs Q1 2026: Line 3 averaged 1,420 kg/h, target 1,920 kg/h. Breakdown register: 9 unplanned stops in March alone, mean 2.4h each = 21.6 lost production hours = ~31,000 kg of cookies. Vendor reference visit (DE): identical oven running 4,200h/year with two scheduled service windows; no unplanned stops in Y1 or Y2.'
+      supportingData: 'Production logs Q1 2026: Line 3 averaged 1,420 kg/h, target 1,920 kg/h. Breakdown register: 9 unplanned stops in March alone, mean 2.4h each = 21.6 lost production hours = ~31,000 kg of cookies. Vendor reference visit (DE): identical oven running 4,200h/year with two scheduled service windows; no unplanned stops in Y1 or Y2.',
+      supportingDataType: 'qrlinks',
+      qrLinks: {
+        layout: 'horizontal', blockSize: 30,
+        items: [
+          { url: 'https://example.com/oven-line3-vendor-quote.pdf', caption: 'Vendor quote (PDF)' },
+          { url: 'https://example.com/oven-line3-thermal-audit.pdf', caption: 'Thermal audit 2025' },
+          { url: 'https://example.com/oven-line3-reference-site',     caption: 'Reference site (Wuppertal)' }
+        ]
+      }
     }
   };
 }
